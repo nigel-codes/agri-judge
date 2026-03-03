@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2026-02-24 14:13:10.380305",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-02-24 14:13:10.380305",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "judge-review",
+ "owner": "Administrator",
+ "page_name": "judge-review",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Judge"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Review Application"
+}

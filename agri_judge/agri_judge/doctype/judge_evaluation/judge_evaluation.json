@@ -1,0 +1,196 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "EVAL-{application}-{judge}-.###",
+ "creation": "2026-02-24 12:49:40.538659",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "application",
+  "applicant_name",
+  "column_break_unfv",
+  "judge",
+  "judge_name",
+  "scores_section",
+  "criteria",
+  "totals_section",
+  "total_weighted_score",
+  "final_score",
+  "column_break_fypq",
+  "female_led_bonus",
+  "shortlisted",
+  "overall_notes_section",
+  "overall_notes",
+  "status",
+  "section_break_etlg",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_etlg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Judge Evaluation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "application",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Application",
+   "options": "Agri Waste Innovation",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "application.full_name",
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Applicant Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_unfv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "__user",
+   "fieldname": "judge",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Judge",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "judge.full_name",
+   "fieldname": "judge_name",
+   "fieldtype": "Data",
+   "label": "Judge Name"
+  },
+  {
+   "fieldname": "scores_section",
+   "fieldtype": "Section Break",
+   "label": "Scores"
+  },
+  {
+   "fieldname": "criteria",
+   "fieldtype": "Table",
+   "label": "Criteria Scores",
+   "options": "Judge Evaluation Criterion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_weighted_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Weighted Score",
+   "non_negative": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "female_led_bonus",
+   "fieldtype": "Check",
+   "label": "Female-Led Bonus Applied"
+  },
+  {
+   "fieldname": "column_break_fypq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "shortlisted",
+   "fieldtype": "Check",
+   "label": "Shortlisted (\u22657)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "overall_notes_section",
+   "fieldtype": "Section Break",
+   "label": "Overall Notes"
+  },
+  {
+   "fieldname": "overall_notes",
+   "fieldtype": "Small Text",
+   "label": "Overall Recommendation Notes"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nSubmitted"
+  },
+  {
+   "bold": 1,
+   "fieldname": "final_score",
+   "fieldtype": "Float",
+   "label": "Final Score (with bonus)",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-02-24 13:16:52.675974",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Judge Evaluation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Judge",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "application",
+ "track_changes": 1
+}

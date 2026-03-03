@@ -1,0 +1,159 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "AWARD-BATCH-.####",
+ "creation": "2026-03-01 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "batch_title",
+  "status",
+  "column_break_top",
+  "winners_sent_on",
+  "regret_sent_on",
+  "section_winners",
+  "winners",
+  "section_winner_email",
+  "winner_email_subject",
+  "winner_email_body",
+  "section_regret_email",
+  "regret_email_subject",
+  "regret_email_body",
+  "section_stats",
+  "total_winners",
+  "column_break_stats",
+  "total_regrets_sent"
+ ],
+ "fields": [
+  {
+   "fieldname": "batch_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Batch Title",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nWinners Notified\nAll Notified"
+  },
+  {
+   "fieldname": "column_break_top",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "winners_sent_on",
+   "fieldtype": "Datetime",
+   "label": "Winners Emails Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "regret_sent_on",
+   "fieldtype": "Datetime",
+   "label": "Regret Emails Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_winners",
+   "fieldtype": "Section Break",
+   "label": "Winners List"
+  },
+  {
+   "fieldname": "winners",
+   "fieldtype": "Table",
+   "label": "Winners",
+   "options": "Award Winner"
+  },
+  {
+   "fieldname": "section_winner_email",
+   "fieldtype": "Section Break",
+   "label": "Congratulations Email Template"
+  },
+  {
+   "default": "Congratulations! You have been selected as a winner of the Agri Waste Innovation Challenge",
+   "fieldname": "winner_email_subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "reqd": 1
+  },
+  {
+   "default": "<p>Dear {applicant_name},</p>\n\n<p>We are thrilled to inform you that you have been selected as a <strong>winner</strong> of the <strong>Agri Waste Innovation Challenge</strong>!</p>\n\n<p>Your project, submitted from <strong>{county}</strong>, stood out for its innovation, impact, and viability. The judging panel was impressed by your dedication to transforming agricultural waste into opportunity.</p>\n\n<p>You have been awarded a <strong>€1,000 micro-grant</strong> to help grow your project. Our team will be in touch shortly with next steps regarding the grant disbursement and any onboarding requirements.</p>\n\n<p>Congratulations once again. We look forward to supporting your journey!</p>\n\n<p>Warm regards,<br/>\n<strong>The Agri Waste Innovation Challenge Team</strong><br/>\nRedCross · IOMe · Airbus</p>",
+   "fieldname": "winner_email_body",
+   "fieldtype": "Text Editor",
+   "label": "Email Body",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_regret_email",
+   "fieldtype": "Section Break",
+   "label": "Regret Email Template"
+  },
+  {
+   "default": "Thank you for your application to the Agri Waste Innovation Challenge",
+   "fieldname": "regret_email_subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "reqd": 1
+  },
+  {
+   "default": "<p>Dear {applicant_name},</p>\n\n<p>Thank you sincerely for taking the time to apply to the <strong>Agri Waste Innovation Challenge</strong>.</p>\n\n<p>After a thorough review by our judging panel, we regret to inform you that your application was not selected for a micro-grant in this cycle.</p>\n\n<p>This was an incredibly competitive process, and the quality of applications — including yours — was genuinely impressive. We encourage you to keep building your project and to apply again in future cycles.</p>\n\n<p>We wish you every success in your entrepreneurial journey and hope to see your work continue to grow.</p>\n\n<p>With appreciation,<br/>\n<strong>The Agri Waste Innovation Challenge Team</strong><br/>\nRedCross · IOMe · Airbus</p>",
+   "fieldname": "regret_email_body",
+   "fieldtype": "Text Editor",
+   "label": "Email Body",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_stats",
+   "fieldtype": "Section Break",
+   "label": "Send Statistics"
+  },
+  {
+   "fieldname": "total_winners",
+   "fieldtype": "Int",
+   "label": "Total Winners Emailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_stats",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_regrets_sent",
+   "fieldtype": "Int",
+   "label": "Total Regret Emails Sent",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-01 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Award Email Batch",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "batch_title"
+}

@@ -1,0 +1,91 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "COUNTY-ASSIGN-{judge}",
+ "creation": "2026-03-01 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "judge",
+  "judge_name",
+  "column_break_1",
+  "assigned_county",
+  "section_break_info",
+  "assignment_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "judge",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Judge (User)",
+   "options": "User",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "judge.full_name",
+   "fieldname": "judge_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Judge Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assigned_county",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assigned County",
+   "options": "\nKakamega\nHomabay\nKericho\nMeru\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_info",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "assignment_notes",
+   "fieldtype": "Small Text",
+   "label": "Assignment Notes"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-01 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Judge County Assignment",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Judge"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "judge_name"
+}
