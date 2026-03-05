@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In Memory of Samuel Wangila | KRCS Tribute</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+        :root {
+            --maroon: #8B1538;
+            --maroon-dark: #6B0F2A;
+            --maroon-deeper: #4A0A1C;
+            --cream: #FAF7F2;
+            --gold: #D4AF37;
+            --gold-light: #E5C158;
+            --muted: #F5F5F5;
+            --border: #E0E0E0;
+            --green: #1a7a4a;
+            --green-light: #d4edda;
+            --red: #842029;
+            --red-light: #f8d7da;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+        }
+
+        .font-display { font-family: 'Playfair Display', Georgia, serif; }
+
+        /* ── Layout ── */
+        .gradient-maroon {
+            background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+            color: var(--cream);
+            position: relative;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+        .section { padding: 4rem 0; }
+        .section-muted { background: var(--muted); }
+
+        .section-header { text-align: center; margin-bottom: 2.5rem; }
+        .section-header h2 {
+            font-size: 1.875rem; font-weight: 700;
+            color: var(--maroon); margin-bottom: 0.75rem;
+        }
+        @media (min-width: 768px) { .section-header h2 { font-size: 2.25rem; } }
+        .small-divider { height: 2px; width: 4rem; background: var(--gold); margin: 0.75rem auto; }
+        .section-header p { font-size: 0.875rem; color: #666; margin-top: 0.75rem; }
+
+        /* ── Hero ── */
+        .hero-section { padding: 3rem 0 4rem; position: relative; overflow: hidden; }
+
+        .dove-icon {
+            position: absolute; pointer-events: none; opacity: 0.6;
+            animation: float-dove 6s ease-in-out infinite;
+        }
+        .dove-1 { right: 2.5rem; top: 2rem; font-size: 2.5rem; }
+        .dove-2 { left: 2rem; top: 4rem; font-size: 1.5rem; opacity: 0.4; animation-delay: 1.5s; }
+        @keyframes float-dove {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .krcs-badge { text-align: center; margin-bottom: 2rem; }
+        .krcs-badge span { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+        .krcs-badge p {
+            font-size: 0.875rem; letter-spacing: 0.1em;
+            text-transform: uppercase; color: rgba(250,247,242,.8);
+        }
+
+        .hero-content {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .hero-content { flex-direction: row; justify-content: center; gap: 4rem; }
+        }
+
+        .gold-frame {
+            border: 8px solid var(--gold);
+            box-shadow: 0 0 0 2px var(--maroon-dark), 0 20px 40px rgba(0,0,0,.3);
+            overflow: hidden; flex-shrink: 0;
+        }
+        .portrait-frame { width: 16rem; height: 20rem; }
+        @media (min-width: 768px) { .portrait-frame { width: 20rem; height: 26.25rem; } }
+        .gold-frame img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+
+        .hero-text { text-align: center; max-width: 32rem; }
+        @media (min-width: 768px) { .hero-text { text-align: left; } }
+        .hero-text .subtitle {
+            font-size: 1.125rem; font-style: italic;
+            color: var(--gold-light); margin-bottom: 0.5rem;
+        }
+        .hero-text h1 {
+            font-size: 2.25rem; font-weight: 700;
+            line-height: 1.2; color: var(--cream); margin-bottom: 1rem;
+        }
+        @media (min-width: 768px) { .hero-text h1 { font-size: 3.75rem; } }
+
+        .divider { height: 2px; width: 6rem; background: var(--gold); margin: 1rem auto; }
+        @media (min-width: 768px) { .divider { margin: 1rem 0; } }
+
+        .hero-text .role { font-size: 0.875rem; color: rgba(250,247,242,.8); letter-spacing: .05em; }
+        .hero-text .date { font-size: 0.875rem; color: var(--gold-light); margin-top: 0.5rem; }
+
+        .hero-description { max-width: 42rem; margin: 3rem auto 0; text-align: center; }
+        .hero-description p { font-size: 0.875rem; line-height: 1.7; color: rgba(250,247,242,.9); }
+        @media (min-width: 768px) { .hero-description p { font-size: 1rem; } }
+        .hero-description strong { color: var(--gold); }
+
+        /* ── Official Tribute Section ── */
+        .tribute-section {
+            background: var(--cream);
+            padding: 4rem 0;
+            border-top: 3px solid var(--gold);
+        }
+
+        .tribute-text { max-width: 52rem; margin: 0 auto; }
+
+        .tribute-title { margin-bottom: 2rem; }
+
+        .tribute-prefix {
+            display: block; font-size: 1.125rem;
+            font-style: italic; color: var(--maroon); margin-bottom: 0.5rem;
+        }
+
+        .tribute-name {
+            display: block; font-size: 2rem; font-weight: 400;
+            color: var(--maroon-dark); line-height: 1.2;
+        }
+        @media (min-width: 768px) { .tribute-name { font-size: 2.5rem; } }
+        .tribute-name strong { color: var(--maroon); font-weight: 700; }
+
+        .tribute-body p {
+            font-size: 0.9375rem; line-height: 1.85; color: #444;
+            margin-bottom: 1.25rem;
+        }
+
+        .tribute-closing {
+            font-weight: 600; color: var(--maroon-dark);
+            font-size: 1rem !important; margin-top: 2rem !important;
+        }
+
+        .tribute-signature {
+            margin-top: 2.5rem; padding-top: 1.5rem;
+            border-top: 2px solid var(--gold);
+        }
+        .signature-name { font-size: 1rem; color: var(--maroon); margin-bottom: 0.25rem; }
+        .signature-title { font-size: 0.875rem; color: #666; font-style: italic; }
+
+        /* ── Echoes section ── */
+        .echoes-section {
+            background: var(--maroon-deeper);
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .echoes-section::before {
+            content: '\201C';
+            position: absolute;
+            top: -1rem; left: 2rem;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 18rem;
+            color: rgba(212,175,55,.07);
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+        .echoes-eyebrow {
+            display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+            margin-bottom: 2.5rem;
+        }
+        .echoes-eyebrow span {
+            font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--gold); font-weight: 600;
+        }
+        .echoes-eyebrow i { color: var(--gold); font-size: 0.6rem; }
+
+        .echoes-stage {
+            max-width: 52rem; margin: 0 auto; text-align: center;
+            min-height: 12rem; display: flex; align-items: center; justify-content: center;
+        }
+        .echoes-inner { transition: opacity 0.7s ease; width: 100%; }
+        .echoes-inner.fading { opacity: 0; }
+
+        .echoes-quote {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.4rem; font-style: italic; font-weight: 400;
+            color: var(--cream); line-height: 1.75;
+            margin-bottom: 1.5rem;
+        }
+        @media (min-width: 768px) { .echoes-quote { font-size: 1.75rem; } }
+
+        .echoes-attribution {
+            font-size: 0.9rem; color: var(--gold); font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+        .echoes-attribution .echo-rel {
+            color: rgba(212,175,55,.65); font-weight: 400; margin-left: 0.4rem;
+        }
+        .echoes-attribution .echo-cat {
+            display: inline-block; margin-left: 0.75rem;
+            font-size: 0.7rem; padding: 0.15rem 0.6rem;
+            border: 1px solid rgba(212,175,55,.4); border-radius: 2rem;
+            color: rgba(212,175,55,.8); vertical-align: middle;
+            text-transform: uppercase; letter-spacing: 0.1em;
+        }
+
+        .echoes-nav {
+            display: flex; align-items: center; justify-content: center;
+            gap: 1.25rem; margin-top: 2.5rem;
+        }
+        .echoes-nav-btn {
+            background: transparent; border: 1px solid rgba(212,175,55,.4);
+            color: rgba(212,175,55,.9); padding: 0.375rem 1.1rem;
+            border-radius: 2rem; font-size: 0.8125rem; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .echoes-nav-btn:hover { background: rgba(212,175,55,.15); border-color: var(--gold); }
+        .echoes-dots {
+            display: flex; gap: 0.35rem; align-items: center;
+        }
+        .echoes-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: rgba(212,175,55,.3); border: none; cursor: pointer; padding: 0;
+            transition: background 0.25s, transform 0.25s;
+        }
+        .echoes-dot.active { background: var(--gold); transform: scale(1.3); }
+
+        /* ── Memory Wall ── */
+        .memory-wall-section { padding: 4rem 0; background: var(--muted); }
+
+        .wall-header { text-align: center; margin-bottom: 1.5rem; }
+        .wall-header h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.875rem; color: var(--maroon); margin-bottom: 0.5rem;
+        }
+        .wall-header p { font-size: 0.875rem; color: #666; }
+
+        /* Category filters */
+        .category-filters {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 0.5rem; margin-bottom: 2rem;
+        }
+        .cat-chip {
+            padding: 0.35rem 1rem; border-radius: 2rem; font-size: 0.8125rem;
+            font-weight: 500; cursor: pointer; border: 1.5px solid var(--border);
+            background: #fff; color: #555; transition: all 0.18s; font-family: inherit;
+        }
+        .cat-chip:hover { border-color: var(--maroon); color: var(--maroon); }
+        .cat-chip.active { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+
+        /* Wall nav */
+        .wall-nav {
+            display: flex; align-items: center; justify-content: center;
+            gap: 1rem; margin-top: 1.25rem;
+        }
+        .wall-page-info { font-size: 0.8125rem; color: #999; min-width: 3rem; text-align: center; }
+
+        /* Wall grid — always renders 6 slots; fixed row height keeps layout stable */
+        .wall-grid {
+            display: grid; grid-template-columns: 1fr;
+            grid-auto-rows: 220px;
+            gap: 1rem; transition: opacity 0.25s ease;
+        }
+        @media (min-width: 600px) { .wall-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .wall-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .wall-card {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: 0.75rem; padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
+            display: flex; flex-direction: column;
+            height: 100%; overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .wall-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(139,21,56,.1); }
+
+        /* Invisible filler — grid row height handles sizing */
+        .wall-card-placeholder {
+            visibility: hidden; pointer-events: none;
+            background: transparent; border: none; box-shadow: none;
+        }
+
+        .wall-card-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        .wall-card-author { font-weight: 700; color: var(--maroon); font-size: 0.9375rem; }
+        .wall-card-rel { font-size: 0.75rem; color: #888; margin-top: 0.1rem; }
+        .wall-card-cat {
+            font-size: 0.65rem; padding: 0.15rem 0.55rem; border-radius: 2rem;
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .cat-family    { background: #fde8ef; color: #9b2047; }
+        .cat-friendship { background: #e8f4fd; color: #1a5c8a; }
+        .cat-redcross  { background: #fde8e8; color: #9b2020; }
+        .cat-community { background: #e8fdf0; color: #1a7a4a; }
+
+        .wall-card-message {
+            color: #444; font-size: 0.875rem; line-height: 1.7;
+            font-style: italic;
+            /* Clamp to 4 lines — no flex:1 so line-clamp works correctly */
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .wall-card-message::before { content: '\201C'; color: var(--gold); font-size: 1.25rem; vertical-align: -0.1em; margin-right: 0.1rem; }
+        .wall-card-message::after  { content: '\201D'; color: var(--gold); font-size: 1.25rem; vertical-align: -0.1em; margin-left: 0.1rem; }
+
+        .wall-card-more {
+            display: inline-block; margin-top: 0.4rem;
+            font-size: 0.75rem; color: var(--maroon); font-weight: 600;
+            background: none; border: none; cursor: pointer; padding: 0;
+            font-family: inherit; text-decoration: underline; text-underline-offset: 2px;
+        }
+        .wall-card-more:hover { color: var(--maroon-dark); }
+
+        .wall-card-date { font-size: 0.7rem; color: #ccc; margin-top: 0.5rem; }
+
+        .wall-empty {
+            grid-column: 1 / -1; text-align: center;
+            padding: 3rem 1rem; color: #999; font-size: 0.9rem;
+        }
+        .wall-empty i { display: block; font-size: 2rem; margin-bottom: 0.75rem; color: #ddd; }
+
+        /* ── Tribute modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(74,10,28,.6); backdrop-filter: blur(3px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-card {
+            background: #fff; border-radius: 1rem; padding: 2rem;
+            max-width: 36rem; width: 100%; position: relative;
+            box-shadow: 0 24px 64px rgba(0,0,0,.25);
+            animation: slideUp 0.25s ease;
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: var(--muted); border: none; border-radius: 50%;
+            width: 2rem; height: 2rem; font-size: 1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #666; transition: background 0.15s;
+        }
+        .modal-close:hover { background: var(--border); }
+
+        .modal-cat {
+            font-size: 0.7rem; padding: 0.2rem 0.65rem; border-radius: 2rem;
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+            display: inline-block; margin-bottom: 1rem;
+        }
+        .modal-author {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.25rem; font-weight: 700; color: var(--maroon);
+            margin-bottom: 0.2rem;
+        }
+        .modal-rel { font-size: 0.8125rem; color: #888; margin-bottom: 1.25rem; }
+        .modal-message {
+            font-size: 1rem; line-height: 1.8; color: #333; font-style: italic;
+            border-left: 3px solid var(--gold); padding-left: 1rem;
+        }
+        .modal-message::before { content: '\201C'; color: var(--gold); font-size: 1.5rem; vertical-align: -0.1em; margin-right: 0.1rem; }
+        .modal-message::after  { content: '\201D'; color: var(--gold); font-size: 1.5rem; vertical-align: -0.1em; margin-left: 0.1rem; }
+        .modal-date { font-size: 0.75rem; color: #bbb; margin-top: 1.25rem; }
+
+        /* ── Guestbook ── */
+        .guestbook-section { padding: 4rem 0; }
+
+        .guestbook-wrap { max-width: 36rem; margin: 0 auto; }
+
+        .guestbook-header { text-align: center; margin-bottom: 2rem; }
+        .guestbook-header h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.75rem; color: var(--maroon); margin-bottom: 0.5rem;
+        }
+        .guestbook-header p { font-size: 0.875rem; color: #666; }
+
+        .guestbook-form {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: 0.75rem; padding: 1.75rem;
+            box-shadow: 0 4px 16px rgba(139,21,56,.06);
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block; font-size: 0.8125rem; font-weight: 600;
+            margin-bottom: 0.3rem; color: #444;
+        }
+        .form-control {
+            width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem;
+            border: 1.5px solid var(--border); border-radius: 0.375rem;
+            font-family: inherit; transition: border-color 0.2s; background: #fff;
+        }
+        .form-control:focus {
+            outline: none; border-color: var(--maroon);
+            box-shadow: 0 0 0 3px rgba(139,21,56,.1);
+        }
+        select.form-control { cursor: pointer; }
+        textarea.form-control { resize: none; }
+
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        @media (max-width: 480px) { .form-row-2 { grid-template-columns: 1fr; } }
+
+        .btn-submit {
+            width: 100%; padding: 0.75rem 1rem;
+            background: var(--maroon); color: #fff; border: none;
+            border-radius: 0.375rem; font-size: 0.9375rem; font-weight: 700;
+            cursor: pointer; transition: opacity 0.2s; font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Alert */
+        .alert {
+            padding: 0.75rem 1rem; border-radius: 0.375rem;
+            margin-bottom: 1rem; display: none; font-size: 0.875rem;
+        }
+        .alert.show { display: block; }
+        .alert-success { background: var(--green-light); border: 1px solid #c3e6cb; color: #155724; }
+        .alert-error   { background: var(--red-light);   border: 1px solid #f5c6cb; color: var(--red); }
+
+        /* ── Paybill card ── */
+        .donation-card {
+            max-width: 28rem; margin: 0 auto; background: #fff;
+            border: 2px solid rgba(212,175,55,.35); border-radius: 1rem;
+            padding: 2rem 2rem 1.5rem; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,.12);
+        }
+        .donation-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .donation-card h3 { font-size: 1.2rem; font-weight: 700; color: #333; margin-bottom: 0.15rem; }
+        .donation-card .subtitle { font-size: 0.85rem; color: #666; margin-bottom: 1.5rem; }
+
+        .paybill-steps {
+            background: #f9f9f9; border-radius: 0.5rem; padding: 1rem 1.25rem;
+            text-align: left; margin-bottom: 1.25rem; font-size: 0.82rem; color: #444;
+        }
+        .paybill-steps p { font-weight: 700; color: #222; margin-bottom: 0.5rem; font-size: 0.85rem; }
+        .paybill-steps ol { padding-left: 1.2rem; line-height: 2; }
+
+        .paybill-detail-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #fff; border: 1.5px solid var(--border); border-radius: 0.5rem;
+            padding: 0.75rem 1rem; margin-bottom: 0.6rem; gap: 0.5rem;
+        }
+        .paybill-detail-row .label {
+            font-size: 0.75rem; color: #888; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+        }
+        .paybill-detail-row .value {
+            font-size: 1.35rem; font-weight: 800; color: var(--maroon);
+            letter-spacing: 0.05em; font-family: 'Inter', monospace;
+        }
+        .copy-btn {
+            background: none; border: 1px solid var(--border); border-radius: 0.35rem;
+            padding: 0.2rem 0.55rem; font-size: 0.7rem; color: #555; cursor: pointer;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .copy-btn:hover { background: var(--maroon); color: #fff; border-color: var(--maroon); }
+        .copy-btn.copied { background: var(--green); color: #fff; border-color: var(--green); }
+
+        .mpesa-logo-row {
+            display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+        .mpesa-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: #00a651; color: #fff; border-radius: 2rem;
+            padding: 0.25rem 0.85rem; font-size: 0.8rem; font-weight: 700;
+        }
+
+        .support-note { font-size: 0.75rem; color: #666; line-height: 1.6; margin-top: 1.25rem; }
+
+        /* ── Footer ── */
+        .footer { padding: 2.5rem 0; text-align: center; }
+        .footer-icon {
+            font-size: 1.5rem; margin-bottom: 0.75rem; display: inline-block;
+            animation: float-dove 6s ease-in-out infinite;
+        }
+        .footer-title { font-size: 1.125rem; font-weight: 700; color: var(--cream); margin-bottom: 0.25rem; }
+        .footer-subtitle { font-size: 0.875rem; color: rgba(250,247,242,.7); }
+        .footer-divider { height: 2px; width: 3rem; background: rgba(212,175,55,.5); margin: 1rem auto; }
+        .footer-copyright { font-size: 0.75rem; color: rgba(250,247,242,.5); margin-top: 1rem; }
+
+        /* Utility */
+        .loading-state, .empty-state {
+            text-align: center; padding: 2rem 0; color: #999; font-size: 0.875rem;
+        }
+
+        /* ── Photo Gallery Slideshow ── */
+        .gallery-section {
+            padding: 5rem 0; background: var(--maroon-deeper);
+            position: relative; overflow: hidden;
+        }
+        .gallery-section::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .gallery-header {
+            text-align: center; margin-bottom: 2.5rem; position: relative; z-index: 1;
+        }
+        .gallery-header h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem); color: var(--cream); margin-bottom: 0.5rem;
+        }
+        .gallery-header .gallery-sub {
+            font-size: 0.875rem; color: rgba(250,247,242,.55); letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .gallery-header .small-divider {
+            background: var(--gold); margin: 0.75rem auto;
+        }
+
+        /* filmstrip track */
+        .gallery-track-wrap {
+            position: relative; width: 100%; overflow: hidden;
+        }
+        .gallery-track {
+            display: flex; align-items: center;
+            transition: transform 0.6s cubic-bezier(.4,0,.2,1);
+            will-change: transform;
+        }
+
+        /* Each slide */
+        .gallery-slide {
+            flex: 0 0 100%; position: relative;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .gallery-slide img {
+            max-height: 520px; width: 100%; object-fit: contain;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,.6);
+            transition: transform 0.4s ease;
+        }
+        .gallery-slide.active img { transform: scale(1); }
+
+        /* caption ribbon */
+        .slide-caption {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 4rem); max-width: 700px;
+            background: linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 100%);
+            border-radius: 0 0 0.5rem 0.5rem;
+            padding: 2rem 1.5rem 1rem;
+            text-align: center; color: #fff;
+            font-size: 0.85rem; opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .gallery-slide.active .slide-caption { opacity: 1; }
+
+        /* nav arrows */
+        .gallery-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            z-index: 10; background: rgba(255,255,255,.1);
+            border: 1.5px solid rgba(255,255,255,.25); color: #fff;
+            width: 3rem; height: 3rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1rem;
+            transition: background 0.2s, border-color 0.2s;
+            backdrop-filter: blur(6px);
+        }
+        .gallery-arrow:hover {
+            background: rgba(212,175,55,.35); border-color: var(--gold);
+        }
+        .gallery-arrow.prev { left: 1rem; }
+        .gallery-arrow.next { right: 1rem; }
+        @media (min-width: 768px) {
+            .gallery-arrow.prev { left: 2rem; }
+            .gallery-arrow.next { right: 2rem; }
+        }
+
+        /* dots */
+        .gallery-dots {
+            display: flex; justify-content: center; gap: 0.5rem;
+            margin-top: 1.5rem; position: relative; z-index: 1;
+        }
+        .gallery-dot {
+            width: 0.45rem; height: 0.45rem; border-radius: 50%;
+            background: rgba(255,255,255,.3); border: none; cursor: pointer;
+            padding: 0; transition: background 0.25s, transform 0.25s;
+        }
+        .gallery-dot.active {
+            background: var(--gold); transform: scale(1.5);
+        }
+
+        /* counter badge */
+        .gallery-counter {
+            position: absolute; top: 1rem; right: 1rem; z-index: 10;
+            background: rgba(0,0,0,.45); backdrop-filter: blur(6px);
+            color: rgba(255,255,255,.8); font-size: 0.75rem; font-weight: 600;
+            padding: 0.25rem 0.65rem; border-radius: 2rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* empty state */
+        .gallery-empty {
+            text-align: center; padding: 4rem 1rem; color: rgba(250,247,242,.35);
+        }
+        .gallery-empty i { font-size: 3rem; display: block; margin-bottom: 1rem; }
+        .gallery-empty p { font-size: 0.875rem; }
+
+        /* thumbnail strip */
+        .gallery-thumbs {
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem;
+            margin-top: 1.25rem; padding: 0 1rem; position: relative; z-index: 1;
+        }
+        .gallery-thumb {
+            width: 3.5rem; height: 3.5rem; object-fit: cover; border-radius: 0.35rem;
+            border: 2px solid transparent; cursor: pointer; opacity: 0.5;
+            transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
+        }
+        .gallery-thumb.active {
+            border-color: var(--gold); opacity: 1; transform: translateY(-3px);
+        }
+        .gallery-thumb:hover { opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<section class="gradient-maroon hero-section">
+    <div class="dove-icon dove-1">🕊️</div>
+    <div class="dove-icon dove-2">🕊️</div>
+
+    <div class="container">
+        <div class="krcs-badge">
+            <span>✚</span>
+            <p>Kenya Red Cross Society</p>
+        </div>
+
+        <div class="hero-content">
+            <div class="gold-frame portrait-frame">
+                <img src="/images/1001149769.jpg" alt="Samuel Wangila — Kenya Red Cross Volunteer">
+            </div>
+
+            <div class="hero-text">
+                <p class="font-display subtitle">Celebrating the Life of</p>
+                <h1 class="font-display">Samuel Wangila</h1>
+                <div class="divider"></div>
+                <p class="role">Dedicated Volunteer · KRCS · Forever in Our Hearts</p>
+                <p class="date">3rd March 2026</p>
+            </div>
+        </div>
+
+        <div class="hero-description">
+            <p>
+                We are saddened to share the sudden demise of <strong>Samuel Wangila</strong>.
+                He was a dedicated volunteer and a proud member of KRCS Kiambu Branch, who touched
+                many lives through his kindness, selflessness, and humanitarian gestures. Samuel was
+                always ready to spring into action when called upon — whether it was disaster response,
+                community outreach, or simply lending a helping hand to those in need. His legacy of
+                service and compassion will forever live in our hearts.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ── Official Tribute ── -->
+<section class="tribute-section">
+    <div class="container">
+        <div class="tribute-text">
+            <h2 class="tribute-title font-display">
+                <span class="tribute-prefix">In Loving Memory of</span>
+                <span class="tribute-name">Samuel Wanyonyi <strong>Wangila</strong></span>
+            </h2>
+
+            <div class="tribute-body">
+                <p>The Kenya Red Cross Society is deeply saddened by the passing of our dedicated Aqua Rescue volunteer, Samuel Wanyonyi Wangila, who lost his life in the line of duty on 3 March 2026.</p>
+
+                <p>Samuel was responding to an ongoing aqua rescue operation following a distress call at Highrise along the Mbagathi River, where a young boy had tragically drowned.</p>
+
+                <p>For over 15 years, Samuel served across the country with courage, professionalism and an extraordinary commitment to saving lives. He was among our most experienced and dependable aqua rescue volunteers. In 2025, he received the Special Recognition Award at the Volunteer Awards for his work in aqua rescue nationwide.</p>
+
+                <p>Beyond emergency response, he was deeply committed to strengthening the capacity of the Society. He trained and mentored fellow volunteers in aqua rescue, equipping them with practical skills and confidence to respond effectively. We will remember him for building skilled rescue teams, mentoring others with patience and always answering the call to serve.</p>
+
+                <p>Today, we honour his bravery and service. Samuel gave his life while attempting to help others, a true embodiment of humanity and selflessness.</p>
+
+                <p>Our thoughts, prayers and deepest condolences are with his wife, family, friends and fellow volunteers during this profoundly difficult time. We stand with them in mourning a life lived in service to others.</p>
+
+                <p class="tribute-closing">Rest in peace, Samuel. Your legacy lives on in every life you saved.</p>
+
+                <div class="tribute-signature">
+                    <p class="signature-name"><strong>Dr. Ahmed Idris</strong></p>
+                    <p class="signature-title">Secretary General, Kenya Red Cross Society</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Echoes ── -->
+<section class="echoes-section" id="echoes">
+    <div class="container">
+        <div class="echoes-eyebrow">
+            <i class="fas fa-circle"></i>
+            <span>Echoes from the Community</span>
+            <i class="fas fa-circle"></i>
+        </div>
+
+        <div class="echoes-stage">
+            <div class="echoes-inner" id="echoesInner">
+                <p class="echoes-quote font-display" id="echoesQuote">Loading voices…</p>
+                <div class="echoes-attribution" id="echoesAttrib"></div>
+            </div>
+        </div>
+
+        <div class="echoes-nav">
+            <button class="echoes-nav-btn" id="echoesPrev">
+                <i class="fas fa-arrow-left"></i> previous
+            </button>
+            <div class="echoes-dots" id="echoesDots"></div>
+            <button class="echoes-nav-btn" id="echoesNext">
+                next <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ── Photo Gallery ── -->
+<section class="gallery-section" id="gallery">
+    <div class="container">
+        <div class="gallery-header">
+            <h2 class="font-display">A Life in Pictures</h2>
+            <div class="small-divider"></div>
+            <p class="gallery-sub">Cherished moments with Samuel Wangila</p>
+        </div>
+
+        <div id="galleryMain">
+            <!-- populated by JS -->
+        </div>
+    </div>
+</section>
+
+<!-- ── Memory Wall ── -->
+<section class="memory-wall-section" id="wall">
+    <div class="container">
+        <div class="wall-header">
+            <h2 class="font-display">Memory Wall</h2>
+            <div class="small-divider"></div>
+            <p>Tributes left by family, colleagues, and community</p>
+        </div>
+
+        <div class="category-filters" id="categoryFilters">
+            <button class="cat-chip active" data-cat="all">All</button>
+            <button class="cat-chip" data-cat="Family">
+                <i class="fas fa-heart" style="font-size:.7em"></i> Family
+            </button>
+            <button class="cat-chip" data-cat="Friendship">
+                <i class="fas fa-user-friends" style="font-size:.7em"></i> Friendship
+            </button>
+            <button class="cat-chip" data-cat="Red Cross">
+                ✚ Red Cross
+            </button>
+            <button class="cat-chip" data-cat="Community">
+                <i class="fas fa-globe-africa" style="font-size:.7em"></i> Community
+            </button>
+        </div>
+
+        <div class="wall-grid" id="wallGrid">
+            <div class="loading-state" style="grid-column:1/-1">Loading tributes…</div>
+        </div>
+        <div class="wall-nav" id="wallNav" style="display:none">
+            <button class="echoes-nav-btn" id="wallPrev">
+                <i class="fas fa-arrow-left"></i> previous
+            </button>
+            <span class="wall-page-info" id="wallPageInfo"></span>
+            <button class="echoes-nav-btn" id="wallNext">
+                next <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ── Guestbook ── -->
+<section class="guestbook-section" id="guestbook">
+    <div class="container">
+        <div class="guestbook-wrap">
+            <div class="guestbook-header">
+                <h2 class="font-display">Leave a Tribute</h2>
+                <div class="small-divider"></div>
+                <p>Your words will be shared on this memorial page</p>
+            </div>
+
+            <div class="alert alert-success" id="tributeSuccess">
+                🕊️ Thank you. Your tribute has been saved and will appear on the memory wall.
+            </div>
+            <div class="alert alert-error" id="tributeError"></div>
+
+            <form id="tributeForm" class="guestbook-form">
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label>Your name <span style="color:var(--maroon)">*</span></label>
+                        <input type="text" class="form-control" id="tributeName"
+                               placeholder="e.g. A. Karani or Anonymous" maxlength="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select class="form-control" id="tributeCategory">
+                            <option value="Community">Community</option>
+                            <option value="Family">Family</option>
+                            <option value="Friendship">Friendship</option>
+                            <option value="Red Cross">Red Cross</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Relationship to Samuel</label>
+                    <input type="text" class="form-control" id="tributeOrg"
+                           placeholder="e.g. colleague, neighbour, KRCS member…" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Your tribute <span style="color:var(--maroon)">*</span></label>
+                    <textarea class="form-control" id="tributeMessage" rows="4"
+                              placeholder="Share your memory of Samuel…"
+                              maxlength="1000" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit font-display" id="tributeSubmitBtn">
+                    <i class="far fa-paper-plane"></i> Share memory
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ── Donation ── -->
+<section class="section section-muted" id="support">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="font-display">Support the Family</h2>
+            <div class="small-divider"></div>
+            <p>Use M-Pesa Paybill to send your contribution to the memorial fund</p>
+        </div>
+
+        <div class="donation-card" id="paybillCard">
+            <div class="donation-icon">💚</div>
+
+            <div class="mpesa-logo-row">
+                <span class="mpesa-badge">M-PESA</span>
+                <span style="font-size:0.8rem;color:#666;">Lipa na M-Pesa</span>
+            </div>
+
+            <h3 class="font-display" id="pbOrgName">Memorial Fund</h3>
+            <p class="subtitle">Paybill Payment Details</p>
+
+            <div class="paybill-detail-row">
+                <span class="label">Business No.</span>
+                <span class="value" id="pbPaybill">—</span>
+                <button class="copy-btn" onclick="copyField('pbPaybill', this)">Copy</button>
+            </div>
+
+            <div class="paybill-detail-row">
+                <span class="label">Account No.</span>
+                <span class="value" id="pbAccount">—</span>
+                <button class="copy-btn" onclick="copyField('pbAccount', this)">Copy</button>
+            </div>
+
+            <div class="paybill-steps">
+                <p>How to pay via M-Pesa:</p>
+                <ol>
+                    <li>Go to <strong>M-Pesa</strong> on your phone</li>
+                    <li>Select <strong>Lipa na M-Pesa &rarr; Pay Bill</strong></li>
+                    <li>Enter Business No. shown above</li>
+                    <li>Enter Account No. shown above</li>
+                    <li>Enter your <strong>amount</strong> and <strong>PIN</strong></li>
+                </ol>
+            </div>
+
+            <p class="support-note" id="pbNote">
+                Your contribution will go directly to supporting Samuel's family during this
+                difficult time. May God bless you for your generosity.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="gradient-maroon footer">
+    <div class="container">
+        <div class="footer-icon">🕊️</div>
+        <p class="footer-title font-display">KRCS Family Mourns</p>
+        <p class="footer-subtitle">Rest in Eternal Peace, Samuel Wangila</p>
+        <div class="footer-divider"></div>
+        <p class="footer-copyright">© 2026 Kenya Red Cross Society</p>
+    </div>
+</footer>
+
+<!-- ── Tribute modal ── -->
+<div id="tributeModal" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-card">
+            <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+            <span class="modal-cat" id="modalCat"></span>
+            <div class="modal-author" id="modalAuthor"></div>
+            <div class="modal-rel" id="modalRel"></div>
+            <p class="modal-message" id="modalMessage"></p>
+            <div class="modal-date" id="modalDate"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── Helpers ────────────────────────────────────────────────────────────
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function formatDate(iso) {
+        return new Date((iso || '').replace(' ', 'T')).toLocaleString('en-KE', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
+    }
+
+    function catClass(cat) {
+        const map = { Family: 'cat-family', Friendship: 'cat-friendship', 'Red Cross': 'cat-redcross', Community: 'cat-community' };
+        return map[cat] || 'cat-community';
+    }
+
+    const _csrf = document.querySelector('meta[name="csrf-token"]')?.content || 'fetch';
+
+    async function callApi(method, data = {}) {
+        const resp = await fetch(`/api/method/${method}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Frappe-CSRF-Token': _csrf,
+            },
+            body: new URLSearchParams(data),
+        });
+        const json = await resp.json();
+        if (!resp.ok) {
+            let msg = `Request failed (${resp.status}).`;
+            try { msg = JSON.parse(JSON.parse(json._server_messages)[0]).message || msg; } catch (_) {}
+            if (json.exception && msg === `Request failed (${resp.status}).`) msg = json.exception;
+            throw new Error(msg);
+        }
+        return json.message;
+    }
+
+    // ── Tributes data store ────────────────────────────────────────────────
+
+    let allTributes = [];
+    let activeCategory = 'all';
+
+    async function loadTributes() {
+        try {
+            const resp = await fetch('/api/method/agri_judge.agri_judge.api.tribute.get_tributes');
+            if (!resp.ok) throw new Error(`${resp.status}`);
+            allTributes = (await resp.json()).message || [];
+        } catch (err) {
+            allTributes = [];
+        }
+        renderEchoes();
+        renderWall();
+    }
+
+    // ── Echoes carousel ────────────────────────────────────────────────────
+
+    let echoIndex = 0;
+    let echoTimer = null;
+    let echoCount = 0;
+
+    function renderEchoes() {
+        const dotsEl = document.getElementById('echoesDots');
+
+        if (allTributes.length === 0) {
+            document.getElementById('echoesQuote').textContent = 'Be the first to leave a tribute below.';
+            document.getElementById('echoesAttrib').textContent = '';
+            dotsEl.innerHTML = '';
+            return;
+        }
+
+        // Up to 12 echoes (most recent)
+        echoCount = Math.min(allTributes.length, 12);
+
+        dotsEl.innerHTML = Array.from({ length: echoCount }, (_, i) =>
+            `<button class="echoes-dot${i === 0 ? ' active' : ''}" data-i="${i}"></button>`
+        ).join('');
+
+        dotsEl.querySelectorAll('.echoes-dot').forEach(dot => {
+            dot.addEventListener('click', () => { goToEcho(+dot.dataset.i); restartEchoTimer(); });
+        });
+
+        goToEcho(0);
+        restartEchoTimer();
+    }
+
+    function goToEcho(idx) {
+        echoIndex = ((idx % echoCount) + echoCount) % echoCount;
+        const t = allTributes[echoIndex];
+        const inner = document.getElementById('echoesInner');
+
+        inner.classList.add('fading');
+        setTimeout(() => {
+            document.getElementById('echoesQuote').textContent = '\u201c' + t.message + '\u201d';
+            const rel = t.organisation ? `<span class="echo-rel">· ${escapeHtml(t.organisation)}</span>` : '';
+            const cat = t.category ? `<span class="echo-cat">${escapeHtml(t.category)}</span>` : '';
+            document.getElementById('echoesAttrib').innerHTML =
+                `— ${escapeHtml(t.author_name)}${rel}${cat}`;
+            // Update dots
+            document.querySelectorAll('.echoes-dot').forEach((d, i) =>
+                d.classList.toggle('active', i === echoIndex));
+            inner.classList.remove('fading');
+        }, 700);
+    }
+
+    function restartEchoTimer() {
+        if (echoTimer) clearInterval(echoTimer);
+        if (echoCount < 2) return;
+        echoTimer = setInterval(() => goToEcho(echoIndex + 1), 7000);
+    }
+
+    document.getElementById('echoesPrev').addEventListener('click', () => { goToEcho(echoIndex - 1); restartEchoTimer(); });
+    document.getElementById('echoesNext').addEventListener('click', () => { goToEcho(echoIndex + 1); restartEchoTimer(); });
+
+    // ── Memory Wall ────────────────────────────────────────────────────────
+
+    const WALL_PAGE_SIZE = 6;
+    const TRUNCATE_CHARS = 220;  // ~4 lines
+    let wallPage = 0;
+    let wallTimer = null;
+    let wallFiltered = [];
+    let modalOpen = false;
+
+    function renderWall() {
+        wallFiltered = activeCategory === 'all'
+            ? allTributes
+            : allTributes.filter(t => t.category === activeCategory);
+        wallPage = 0;
+        renderWallPage(0);
+
+        const navEl = document.getElementById('wallNav');
+        navEl.style.display = wallFiltered.length > WALL_PAGE_SIZE ? 'flex' : 'none';
+
+        if (wallFiltered.length > WALL_PAGE_SIZE) startWallTimer();
+        else stopWallTimer();
+    }
+
+    function renderWallPage(page) {
+        const total = wallFiltered.length;
+        if (total === 0) {
+            const msg = allTributes.length === 0
+                ? 'No tributes yet. Leave the first memory below. 🕊️'
+                : 'No tributes in this category yet.';
+            document.getElementById('wallGrid').innerHTML =
+                `<div class="wall-empty" style="grid-column:1/-1"><i class="far fa-comment-dots"></i>${escapeHtml(msg)}</div>`;
+            return;
+        }
+
+        const totalPages = Math.ceil(total / WALL_PAGE_SIZE);
+        wallPage = ((page % totalPages) + totalPages) % totalPages;
+
+        const slice = wallFiltered.slice(wallPage * WALL_PAGE_SIZE, (wallPage + 1) * WALL_PAGE_SIZE);
+        const grid = document.getElementById('wallGrid');
+
+        grid.style.opacity = '0';
+        setTimeout(() => {
+            const cards = slice.map((t, idx) => {
+                const globalIdx = wallPage * WALL_PAGE_SIZE + idx;
+                const long = t.message.length > TRUNCATE_CHARS;
+                return `
+                <div class="wall-card">
+                    <div class="wall-card-top">
+                        <div>
+                            <div class="wall-card-author">${escapeHtml(t.author_name)}</div>
+                            ${t.organisation ? `<div class="wall-card-rel">${escapeHtml(t.organisation)}</div>` : ''}
+                        </div>
+                        ${t.category ? `<span class="wall-card-cat ${catClass(t.category)}">${escapeHtml(t.category)}</span>` : ''}
+                    </div>
+                    <p class="wall-card-message">${escapeHtml(t.message)}</p>
+                    ${long ? `<button class="wall-card-more" data-idx="${globalIdx}">Read more →</button>` : ''}
+                    <div class="wall-card-date">${formatDate(t.creation)}</div>
+                </div>`;
+            });
+
+            // Pad to WALL_PAGE_SIZE so grid height stays constant
+            while (cards.length < WALL_PAGE_SIZE) {
+                cards.push('<div class="wall-card wall-card-placeholder" aria-hidden="true"></div>');
+            }
+
+            grid.innerHTML = cards.join('');
+            if (totalPages > 1) {
+                document.getElementById('wallPageInfo').textContent = `${wallPage + 1} / ${totalPages}`;
+            }
+            grid.style.opacity = '1';
+
+            // Attach "Read more" listeners
+            grid.querySelectorAll('.wall-card-more').forEach(btn => {
+                btn.addEventListener('click', () => openModal(+btn.dataset.idx));
+            });
+        }, 250);
+    }
+
+    function startWallTimer() {
+        stopWallTimer();
+        wallTimer = setInterval(() => {
+            if (!modalOpen) renderWallPage(wallPage + 1);
+        }, 8000);
+    }
+    function stopWallTimer() {
+        if (wallTimer) { clearInterval(wallTimer); wallTimer = null; }
+    }
+
+    document.getElementById('wallPrev').addEventListener('click', () => { renderWallPage(wallPage - 1); startWallTimer(); });
+    document.getElementById('wallNext').addEventListener('click', () => { renderWallPage(wallPage + 1); startWallTimer(); });
+
+    // ── Tribute modal ──────────────────────────────────────────────────────
+
+    function openModal(idx) {
+        const t = wallFiltered[idx];
+        if (!t) return;
+
+        document.getElementById('modalCat').textContent = t.category || '';
+        document.getElementById('modalCat').className = `modal-cat ${catClass(t.category)}`;
+        document.getElementById('modalAuthor').textContent = t.author_name;
+        document.getElementById('modalRel').textContent = t.organisation || '';
+        document.getElementById('modalMessage').textContent = t.message;
+        document.getElementById('modalDate').textContent = formatDate(t.creation);
+
+        document.getElementById('tributeModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        modalOpen = true;
+    }
+
+    function closeModal() {
+        document.getElementById('tributeModal').style.display = 'none';
+        document.body.style.overflow = '';
+        modalOpen = false;
+    }
+
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // Category filter
+    document.getElementById('categoryFilters').addEventListener('click', e => {
+        const chip = e.target.closest('.cat-chip');
+        if (!chip) return;
+        document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeCategory = chip.dataset.cat;
+        renderWall();
+    });
+
+    // ── Guestbook form ─────────────────────────────────────────────────────
+
+    document.getElementById('tributeForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('tributeSubmitBtn');
+        const successEl = document.getElementById('tributeSuccess');
+        const errorEl = document.getElementById('tributeError');
+
+        successEl.classList.remove('show');
+        errorEl.classList.remove('show');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+        try {
+            await callApi('agri_judge.agri_judge.api.tribute.submit_tribute', {
+                author_name: document.getElementById('tributeName').value,
+                organisation: document.getElementById('tributeOrg').value,
+                category: document.getElementById('tributeCategory').value,
+                message: document.getElementById('tributeMessage').value,
+            });
+
+            successEl.classList.add('show');
+            this.reset();
+            await loadTributes();
+        } catch (err) {
+            errorEl.textContent = '✗ ' + err.message;
+            errorEl.classList.add('show');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="far fa-paper-plane"></i> Share memory';
+        }
+    });
+
+    // ── Photo Gallery ──────────────────────────────────────────────────────
+
+    let galleryImages = [];
+    let galleryIndex  = 0;
+    let galleryTimer  = null;
+    let galleryReady  = false;
+    const AUTOPLAY_MS = 5000;
+
+    async function loadGallery() {
+        const wrap = document.getElementById('galleryMain');
+        try {
+            galleryImages = await callApi('agri_judge.agri_judge.api.tribute.get_gallery_images');
+        } catch (_) { galleryImages = []; }
+
+        if (!galleryImages.length) {
+            wrap.innerHTML = `
+                <div class="gallery-empty">
+                    <i class="fas fa-images"></i>
+                    <p>Photos will appear here once added to the gallery folder.</p>
+                </div>`;
+            return;
+        }
+
+        // Build slides
+        const slides = galleryImages.map((img, i) => `
+            <div class="gallery-slide${i === 0 ? ' active' : ''}" data-index="${i}">
+                <img src="${escapeHtml(img.url)}" alt="${escapeHtml(img.caption)}" loading="lazy">
+                ${img.caption ? `<div class="slide-caption">${escapeHtml(img.caption)}</div>` : ''}
+            </div>`).join('');
+
+        // Build thumbnails
+        const thumbs = galleryImages.map((img, i) => `
+            <img class="gallery-thumb${i === 0 ? ' active' : ''}"
+                 src="${escapeHtml(img.url)}" alt=""
+                 data-index="${i}" loading="lazy">`).join('');
+
+        // Build dots
+        const dots = galleryImages.map((_, i) => `
+            <button class="gallery-dot${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="Slide ${i+1}"></button>`).join('');
+
+        wrap.innerHTML = `
+            <div class="gallery-track-wrap">
+                <div class="gallery-track" id="galleryTrack">${slides}</div>
+                <button class="gallery-arrow prev" id="galleryPrev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                <button class="gallery-arrow next" id="galleryNext" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                <div class="gallery-counter" id="galleryCounter">1 / ${galleryImages.length}</div>
+            </div>
+            ${galleryImages.length > 1 ? `<div class="gallery-dots" id="galleryDots">${dots}</div>` : ''}
+            ${galleryImages.length > 1 ? `<div class="gallery-thumbs" id="galleryThumbs">${thumbs}</div>` : ''}`;
+
+        bindGallery();
+        startGalleryAutoplay();
+        galleryReady = true;
+    }
+
+    function goToSlide(n) {
+        const total = galleryImages.length;
+        galleryIndex = ((n % total) + total) % total;
+
+        const track = document.getElementById('galleryTrack');
+        if (!track) return;
+
+        // Move track
+        track.style.transform = `translateX(-${galleryIndex * 100}%)`;
+
+        // Active slide class
+        track.querySelectorAll('.gallery-slide').forEach((s, i) => {
+            s.classList.toggle('active', i === galleryIndex);
+        });
+
+        // Dots
+        document.querySelectorAll('.gallery-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === galleryIndex);
+        });
+
+        // Thumbnails
+        document.querySelectorAll('.gallery-thumb').forEach((t, i) => {
+            t.classList.toggle('active', i === galleryIndex);
+        });
+
+        // Counter
+        const counter = document.getElementById('galleryCounter');
+        if (counter) counter.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
+
+        // Reset autoplay
+        startGalleryAutoplay();
+    }
+
+    function bindGallery() {
+        document.getElementById('galleryPrev')?.addEventListener('click', () => goToSlide(galleryIndex - 1));
+        document.getElementById('galleryNext')?.addEventListener('click', () => goToSlide(galleryIndex + 1));
+
+        document.querySelectorAll('.gallery-dot').forEach(d => {
+            d.addEventListener('click', () => goToSlide(parseInt(d.dataset.index, 10)));
+        });
+
+        document.querySelectorAll('.gallery-thumb').forEach(t => {
+            t.addEventListener('click', () => goToSlide(parseInt(t.dataset.index, 10)));
+        });
+
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft')  goToSlide(galleryIndex - 1);
+            if (e.key === 'ArrowRight') goToSlide(galleryIndex + 1);
+        });
+
+        // Touch swipe
+        const trackWrap = document.querySelector('.gallery-track-wrap');
+        if (trackWrap) {
+            let startX = 0;
+            trackWrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+            trackWrap.addEventListener('touchend', e => {
+                const dx = e.changedTouches[0].clientX - startX;
+                if (Math.abs(dx) > 40) goToSlide(galleryIndex + (dx < 0 ? 1 : -1));
+            });
+        }
+    }
+
+    function startGalleryAutoplay() {
+        clearInterval(galleryTimer);
+        if (galleryImages.length > 1) {
+            galleryTimer = setInterval(() => goToSlide(galleryIndex + 1), AUTOPLAY_MS);
+        }
+    }
+
+    // ── Paybill info ───────────────────────────────────────────────────────
+
+    async function loadPaybillInfo() {
+        try {
+            const data = await callApi('agri_judge.agri_judge.api.tribute.get_paybill_info');
+            if (data.paybill_number) {
+                document.getElementById('pbPaybill').textContent = data.paybill_number;
+                document.getElementById('pbAccount').textContent = data.account_number;
+                document.getElementById('pbOrgName').textContent = data.organization_name || 'Memorial Fund';
+                if (data.payment_instructions) {
+                    document.getElementById('pbNote').textContent = data.payment_instructions;
+                }
+            }
+        } catch (_) { /* leave placeholder dashes */ }
+    }
+
+    function copyField(id, btn) {
+        const text = document.getElementById(id).textContent.trim();
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    }
+
+    // ── Init ───────────────────────────────────────────────────────────────
+    loadTributes();
+    loadPaybillInfo();
+    loadGallery();
+</script>
+</body>
+</html>
