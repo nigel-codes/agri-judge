@@ -641,8 +641,7 @@
 
     <div class="container">
         <div class="krcs-badge">
-            <span>✚</span>
-            <p>Kenya Red Cross Society</p>
+            <img src="/logo.png" alt="Kenya Red Cross Society" style="height:3rem;width:auto;object-fit:contain;">
         </div>
 
         <div class="hero-content">
@@ -1090,7 +1089,7 @@
                     </div>
                     <p class="wall-card-message">${escapeHtml(t.message)}</p>
                     ${long ? `<button class="wall-card-more" data-idx="${globalIdx}">Read more →</button>` : ''}
-                    <div class="wall-card-date">${formatDate(t.creation)}</div>
+                    <div class="wall-card-date">${formatDate(t.submitted_at)}</div>
                 </div>`;
             });
 
@@ -1136,7 +1135,7 @@
         document.getElementById('modalAuthor').textContent = t.author_name;
         document.getElementById('modalRel').textContent = t.organisation || '';
         document.getElementById('modalMessage').textContent = t.message;
-        document.getElementById('modalDate').textContent = formatDate(t.creation);
+        document.getElementById('modalDate').textContent = formatDate(t.submitted_at);
 
         document.getElementById('tributeModal').style.display = 'block';
         document.body.style.overflow = 'hidden';
