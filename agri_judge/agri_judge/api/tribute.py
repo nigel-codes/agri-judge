@@ -34,12 +34,11 @@ def submit_tribute(author_name, message, organisation=None, category=None):
 
 @frappe.whitelist(allow_guest=True)
 def get_paybill_info():
-    settings = frappe.get_single("Tribute Payment Settings")
     return {
-        "paybill_number": settings.paybill_number or "",
-        "account_number": settings.account_number or "",
-        "organization_name": settings.organization_name or "",
-        "payment_instructions": settings.payment_instructions or "",
+        "paybill_number": "693849",
+        "account_number": "Samuel Wangila",
+        "organization_name": "Memorial Fund",
+        "payment_instructions": "Your contribution will go directly to supporting Samuel's family during this difficult time. May God bless you for your generosity.",
     }
 
 
