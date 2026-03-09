@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "creation": "2026-03-09 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "total_collected",
+  "currency",
+  "col_break",
+  "display_message"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "description": "Update this field each time a new contribution is received",
+   "fieldname": "total_collected",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Collected",
+   "reqd": 1
+  },
+  {
+   "default": "KES",
+   "fieldname": "currency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Currency",
+   "options": "KES\nUSD\nEUR\nGBP",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Optional short message shown below the total on the tribute page",
+   "fieldname": "display_message",
+   "fieldtype": "Small Text",
+   "label": "Display Message"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-03-09 09:28:10.753216",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Memorial Fund",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "Guest"
+  },
+  {
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -438,6 +438,47 @@
         .alert-success { background: var(--green-light); border: 1px solid #c3e6cb; color: #155724; }
         .alert-error   { background: var(--red-light);   border: 1px solid #f5c6cb; color: var(--red); }
 
+        /* ── Fund Total ── */
+        .fund-total-card {
+            max-width: 28rem; margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+            border-radius: 1rem;
+            padding: 2rem 2.25rem;
+            text-align: center;
+            color: var(--cream);
+            box-shadow: 0 6px 28px rgba(107,15,42,.22);
+        }
+        .fund-total-eyebrow {
+            font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: rgba(212,175,55,.8); font-weight: 700; margin-bottom: 0.6rem;
+        }
+        .fund-total-amount {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 3rem; font-weight: 700; color: var(--gold);
+            line-height: 1.1; margin-bottom: 0.25rem;
+        }
+        .fund-total-currency {
+            font-size: 1.1rem; font-weight: 400; margin-right: 0.2rem; opacity: 0.85;
+        }
+        .fund-goal-track {
+            background: rgba(255,255,255,.15);
+            border-radius: 2rem; height: 8px;
+            margin: 1.25rem 0 0.5rem; overflow: hidden;
+        }
+        .fund-goal-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-light), var(--gold));
+            border-radius: 2rem; width: 0%;
+            transition: width 1.6s cubic-bezier(.4,0,.2,1);
+        }
+        .fund-goal-label {
+            font-size: 0.78rem; color: rgba(212,175,55,.75); margin-bottom: 0.25rem;
+        }
+        .fund-display-msg {
+            margin-top: 1rem; font-size: 0.83rem;
+            color: rgba(250,247,242,.65); font-style: italic; line-height: 1.6;
+        }
+
         /* ── Paybill card ── */
         .donation-card {
             max-width: 28rem; margin: 0 auto; background: #fff;
@@ -630,6 +671,101 @@
             border-color: var(--gold); opacity: 1; transform: translateY(-3px);
         }
         .gallery-thumb:hover { opacity: 0.8; }
+
+        /* ── Voices from the Movement ── */
+        .movement-section {
+            background: var(--muted);
+            padding: 5rem 0;
+            border-top: 1px solid #e8e8e8;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .mov-eyebrow {
+            display: flex; align-items: center; justify-content: center;
+            gap: 1.5rem; margin-bottom: 3rem;
+        }
+        .mov-eyebrow-line { flex: 1; max-width: 100px; height: 1px; background: var(--gold); }
+        .mov-eyebrow span {
+            font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+            color: var(--maroon); font-weight: 700; white-space: nowrap;
+        }
+        .mov-card {
+            max-width: 800px; margin: 0 auto 2.5rem;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 6px 40px rgba(107,15,42,.10), 0 1px 4px rgba(0,0,0,.04);
+            border-top: 4px solid var(--gold);
+            padding: 3rem 3.5rem 2.5rem;
+            position: relative;
+        }
+        @media (max-width: 640px) { .mov-card { padding: 2rem 1.5rem 1.75rem; } }
+        .mov-inner { transition: opacity 0.7s ease; }
+        .mov-inner.fading { opacity: 0; }
+        .mov-big-quote {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 7rem; line-height: 0.6;
+            color: var(--gold); opacity: 0.45;
+            display: block; margin-bottom: 1rem; user-select: none;
+        }
+        .mov-quote {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.2rem; font-style: italic; font-weight: 400;
+            color: #2a1020; line-height: 1.9; margin: 0 0 2rem;
+        }
+        @media (min-width: 640px) { .mov-quote { font-size: 1.35rem; } }
+        .mov-rule {
+            width: 3rem; height: 2px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            margin: 0 0 1.75rem;
+        }
+        .mov-attrib {
+            display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+        }
+        .mov-photo {
+            width: 3.25rem; height: 3.25rem; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--gold); flex-shrink: 0;
+        }
+        .mov-photo-init {
+            width: 3.25rem; height: 3.25rem; border-radius: 50%;
+            background: linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1rem; font-weight: 700; color: var(--cream);
+        }
+        .mov-author-info { flex: 1; min-width: 0; }
+        .mov-author-name {
+            font-weight: 700; font-size: 0.95rem;
+            color: var(--maroon-deeper); margin-bottom: 0.15rem;
+        }
+        .mov-author-sub { font-size: 0.8rem; color: #777; line-height: 1.4; }
+        .mov-badge {
+            font-size: 0.62rem; letter-spacing: 0.13em; text-transform: uppercase;
+            font-weight: 700; padding: 0.25rem 0.85rem; border-radius: 2rem;
+            border: 1px solid; white-space: nowrap; flex-shrink: 0;
+        }
+        .mov-badge-icrc { background: #fde8ef; color: #9b2020; border-color: rgba(155,32,32,.25); }
+        .mov-badge-ifrc { background: #fde8e8; color: #9b2020; border-color: rgba(155,32,32,.25); }
+        .mov-badge-sg   { background: #f3eaf0; color: var(--maroon); border-color: rgba(139,21,56,.25); }
+        .mov-badge-ns   { background: #fff8e1; color: #8B6914; border-color: rgba(139,105,20,.25); }
+        .mov-badge-other { background: #f2f2f2; color: #555; border-color: rgba(0,0,0,.12); }
+        .mov-nav {
+            display: flex; align-items: center; justify-content: center;
+            gap: 1.25rem;
+        }
+        .mov-nav-btn {
+            background: transparent; border: 1px solid rgba(139,21,56,.3);
+            color: var(--maroon); padding: 0.4rem 1.1rem;
+            border-radius: 2rem; font-size: 0.8rem; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .mov-nav-btn:hover { background: rgba(139,21,56,.07); border-color: var(--maroon); }
+        .mov-dots { display: flex; gap: 0.4rem; align-items: center; }
+        .mov-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(139,21,56,.2); border: none; cursor: pointer; padding: 0;
+            transition: background 0.25s, transform 0.25s;
+        }
+        .mov-dot.active { background: var(--maroon); transform: scale(1.35); }
     </style>
 </head>
 <body>
@@ -701,6 +837,38 @@
                 </div>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- ── Voices from the Movement ── -->
+<section class="movement-section" id="movementTributes" style="display:none">
+    <div class="container">
+
+        <div class="mov-eyebrow">
+            <div class="mov-eyebrow-line"></div>
+            <span>Voices from the Movement</span>
+            <div class="mov-eyebrow-line"></div>
+        </div>
+
+        <div class="mov-card">
+            <div class="mov-inner" id="movInner">
+                <span class="mov-big-quote">&ldquo;</span>
+                <p class="mov-quote" id="movQuote">Loading…</p>
+                <div class="mov-rule"></div>
+                <div class="mov-attrib" id="movAttrib"></div>
+            </div>
+        </div>
+
+        <div class="mov-nav">
+            <button class="mov-nav-btn" id="movPrev">
+                <i class="fas fa-arrow-left"></i> previous
+            </button>
+            <div class="mov-dots" id="movDots"></div>
+            <button class="mov-nav-btn" id="movNext">
+                next <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
     </div>
 </section>
 
@@ -845,6 +1013,17 @@
             <h2 class="font-display">Support the Family</h2>
             <div class="small-divider"></div>
             <p>Use M-Pesa Paybill to send your contribution to the memorial fund</p>
+        </div>
+
+        <!-- Fund total — hidden until data loads -->
+        <div id="fundTotalCard" style="display:none">
+            <div class="fund-total-card">
+                <div class="fund-total-eyebrow">Total Raised</div>
+                <div class="fund-total-amount">
+                    <span class="fund-total-currency" id="ftCurrency">KES</span><span id="ftAmount">0</span>
+                </div>
+                <p class="fund-display-msg" id="ftMessage" style="display:none"></p>
+            </div>
         </div>
 
         <div class="donation-card" id="paybillCard">
@@ -1322,6 +1501,30 @@
         }
     }
 
+    // ── Fund Total ─────────────────────────────────────────────────────────
+
+    function fmtAmount(n) {
+        return Number(n).toLocaleString('en-KE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    async function loadFundTotal() {
+        try {
+            const data = await callApi('agri_judge.agri_judge.api.tribute.get_fund_total');
+            if (!data || data.total_collected <= 0) return;
+
+            document.getElementById('ftCurrency').textContent = (data.currency || 'KES') + ' ';
+            document.getElementById('ftAmount').textContent   = fmtAmount(data.total_collected);
+
+            if (data.display_message) {
+                const msgEl = document.getElementById('ftMessage');
+                msgEl.textContent   = data.display_message;
+                msgEl.style.display = 'block';
+            }
+
+            document.getElementById('fundTotalCard').style.display = 'block';
+        } catch (_) { /* silent — card stays hidden */ }
+    }
+
     // ── Paybill info ───────────────────────────────────────────────────────
 
     async function loadPaybillInfo() {
@@ -1347,8 +1550,94 @@
         });
     }
 
+    // ── Voices from the Movement ───────────────────────────────────────────
+
+    let movTributes = [];
+    let movIndex    = 0;
+    let movTimer    = null;
+    let movCount    = 0;
+
+    async function loadOfficialTributes() {
+        try {
+            const resp = await fetch('/api/method/agri_judge.agri_judge.api.tribute.get_official_tributes');
+            if (!resp.ok) throw new Error();
+            movTributes = (await resp.json()).message || [];
+            renderOfficialTributes();
+        } catch (_) { /* silent — section stays hidden */ }
+    }
+
+    function renderOfficialTributes() {
+        if (!movTributes.length) return;
+
+        const dotsEl = document.getElementById('movDots');
+        movCount = movTributes.length;
+
+        dotsEl.innerHTML = Array.from({ length: movCount }, (_, i) =>
+            `<button class="mov-dot${i === 0 ? ' active' : ''}" data-i="${i}"></button>`
+        ).join('');
+
+        dotsEl.querySelectorAll('.mov-dot').forEach(dot => {
+            dot.addEventListener('click', () => { goToMov(+dot.dataset.i); restartMovTimer(); });
+        });
+
+        goToMov(0);
+        restartMovTimer();
+        document.getElementById('movementTributes').style.display = 'block';
+    }
+
+    const MOV_BADGE = {
+        'ICRC':              'mov-badge-icrc',
+        'IFRC':              'mov-badge-ifrc',
+        'Secretary General': 'mov-badge-sg',
+        'National Society':  'mov-badge-ns',
+    };
+
+    function goToMov(idx) {
+        movIndex = ((idx % movCount) + movCount) % movCount;
+        const t     = movTributes[movIndex];
+        const inner = document.getElementById('movInner');
+
+        inner.classList.add('fading');
+        setTimeout(() => {
+            document.getElementById('movQuote').textContent = t.message;
+
+            const initials = (t.author_name || '?').trim()
+                .split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+            const photoEl = t.photo
+                ? `<img class="mov-photo" src="${escapeHtml(t.photo)}" alt="${escapeHtml(t.author_name)}">`
+                : `<div class="mov-photo-init">${escapeHtml(initials)}</div>`;
+            const sub    = [t.title, t.organisation].filter(Boolean).join(', ');
+            const badge  = MOV_BADGE[t.organisation_type] || 'mov-badge-other';
+            const badgeEl = t.organisation_type
+                ? `<span class="mov-badge ${badge}">${escapeHtml(t.organisation_type)}</span>` : '';
+
+            document.getElementById('movAttrib').innerHTML = `
+                ${photoEl}
+                <div class="mov-author-info">
+                    <div class="mov-author-name">${escapeHtml(t.author_name)}</div>
+                    ${sub ? `<div class="mov-author-sub">${escapeHtml(sub)}</div>` : ''}
+                </div>
+                ${badgeEl}`;
+
+            document.querySelectorAll('#movDots .mov-dot').forEach((d, i) =>
+                d.classList.toggle('active', i === movIndex));
+
+            inner.classList.remove('fading');
+        }, 700);
+    }
+
+    function restartMovTimer() {
+        if (movTimer) clearInterval(movTimer);
+        movTimer = setInterval(() => goToMov(movIndex + 1), 7000);
+    }
+
+    document.getElementById('movPrev').addEventListener('click', () => { goToMov(movIndex - 1); restartMovTimer(); });
+    document.getElementById('movNext').addEventListener('click', () => { goToMov(movIndex + 1); restartMovTimer(); });
+
     // ── Init ───────────────────────────────────────────────────────────────
+    loadOfficialTributes();
     loadTributes();
+    loadFundTotal();
     loadPaybillInfo();
     loadGallery();
 </script>

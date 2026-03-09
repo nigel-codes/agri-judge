@@ -33,6 +33,32 @@ def submit_tribute(author_name, message, organisation=None, category=None):
 
 
 @frappe.whitelist(allow_guest=True)
+def get_fund_total():
+    """Return the current memorial fund totals from the Memorial Fund single doctype."""
+    try:
+        doc = frappe.get_single("Memorial Fund")
+        return {
+            "total_collected": float(doc.total_collected or 0),
+            "currency":        doc.currency or "KES",
+            "display_message": doc.display_message or "",
+        }
+    except Exception:
+        return {"total_collected": 0, "currency": "KES", "display_message": ""}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_official_tributes():
+    """Return published Official Tribute records ordered by sort_order."""
+    return frappe.get_all(
+        "Official Tribute",
+        filters={"is_published": 1},
+        fields=["author_name", "title", "organisation", "organisation_type",
+                "message", "photo"],
+        order_by="creation asc",
+    )
+
+
+@frappe.whitelist(allow_guest=True)
 def get_paybill_info():
     return {
         "paybill_number": "693849",

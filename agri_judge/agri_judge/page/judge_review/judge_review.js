@@ -125,7 +125,14 @@ class JudgeReviewPage {
             callback: (r) => {
                 if (r.message && r.message.success) {
                     this.application = r.message.application;
-                    this.scores      = {};
+
+                    if (r.message.read_only) {
+                        // Already submitted — show read-only view with county peer evaluations
+                        this.renderReadOnly(r.message.evaluation, r.message.peer_evaluations || []);
+                        return;
+                    }
+
+                    this.scores = {};
                     const ev = r.message.evaluation;
                     if (ev) {
                         (ev.criteria || []).forEach(c => {
@@ -420,6 +427,114 @@ class JudgeReviewPage {
                 });
             }
         );
+    }
+
+    renderReadOnly(ownEval, peerEvals) {
+        var self   = this;
+        var app    = this.application;
+
+        // Own evaluation first, then others sorted by score descending
+        var sorted = (peerEvals || []).slice().sort(function(a, b) {
+            if (b.is_own !== a.is_own) return b.is_own ? 1 : -1;
+            return b.final_score - a.final_score;
+        });
+
+        var evalCards = sorted.map(function(ev) {
+            var criteriaMap = {};
+            (ev.criteria || []).forEach(function(c) { criteriaMap[c.criterion_id] = c; });
+
+            var criteriaRows = self.criteria.map(function(c) {
+                var cd    = criteriaMap[c.id] || {};
+                var score = cd.score || 0;
+                return '<div class="ro-crit">' +
+                    '<div class="ro-crit-header">' +
+                    '<span class="ro-crit-name">' + c.name + ' <span class="ch-weight">' + Math.round(c.weight * 100) + '%</span></span>' +
+                    '<span class="ro-crit-score">' + score.toFixed(1) + ' / ' + c.max_score + '</span>' +
+                    '</div>' +
+                    (cd.notes ? '<div class="ro-crit-notes">' + frappe.utils.escape_html(cd.notes) + '</div>' : '') +
+                    '</div>';
+            }).join('');
+
+            var scoreClass = ev.final_score >= 7 ? 'orb-high' : ev.final_score >= 5 ? 'orb-mid' : 'orb-low';
+
+            return '<div class="ro-eval-card' + (ev.is_own ? ' ro-own' : '') + '">' +
+                '<div class="ro-eval-header">' +
+                '<div class="ro-judge-info">' +
+                '<span class="ro-judge-name">' + frappe.utils.escape_html(ev.judge_name) + '</span>' +
+                (ev.is_own ? '<span class="ro-own-badge">Your Evaluation</span>' : '') +
+                '</div>' +
+                '<div class="ro-score-badge ' + scoreClass + '">' + ev.final_score.toFixed(2) + '<span>/10</span></div>' +
+                '</div>' +
+                '<div class="ro-criteria">' + criteriaRows + '</div>' +
+                (ev.female_led_bonus ? '<div class="ro-bonus">Female-led bonus applied (+1 pt)</div>' : '') +
+                (ev.overall_notes ? '<div class="ro-notes"><strong>Notes:</strong> ' + frappe.utils.escape_html(ev.overall_notes) + '</div>' : '') +
+                '</div>';
+        }).join('');
+
+        // Build header with own submitted score
+        var ownScore = ownEval ? ownEval.final_score : 0;
+        var orbClass = ownScore >= 7 ? 'orb-high' : ownScore >= 5 ? 'orb-mid' : 'orb-low';
+        var headerHTML = '<div class="rv-header"><div class="rv-header-inner">' +
+            '<div><h1>' + frappe.utils.escape_html(app.full_name) + '</h1>' +
+            '<div class="rv-chips">' +
+            '<span class="chip">📍 ' + frappe.utils.escape_html(app.county_of_residence || '—') + '</span>' +
+            '<span class="chip">' + frappe.utils.escape_html(app.gender || '—') + '</span>' +
+            '<span class="chip">' + frappe.utils.escape_html(app.level_of_project || '—') + '</span>' +
+            '<span class="chip">' + frappe.utils.escape_html(app.age_group || '—') + '</span>' +
+            '</div></div>' +
+            '<div class="score-orb ' + orbClass + '">' +
+            '<div class="orb-lbl">Your Score</div>' +
+            '<div class="orb-val">' + ownScore.toFixed(2) + '</div>' +
+            '<div class="orb-max">/ 10.0</div>' +
+            '<div class="orb-track"><div class="orb-bar" style="width:' + (ownScore / 10 * 100).toFixed(1) + '%"></div></div>' +
+            '</div>' +
+            '</div></div>';
+
+        this.wrapper.html(
+            this._styles() + this._readOnlyStyles() +
+            '<div class="rv-page">' +
+            headerHTML +
+            '<div class="rv-body">' +
+            '<div class="app-panel">' + this._appContent() + '</div>' +
+            '<div class="scoring-panel">' +
+            '<div class="sp-head"><h2>County Evaluations</h2>' +
+            '<div style="font-size:12px;color:#888;">' + sorted.length + ' evaluation(s) submitted by judges in your county</div>' +
+            '</div>' +
+            '<div class="criteria-scroll">' +
+            (sorted.length === 0
+                ? '<div style="padding:24px;text-align:center;color:#aaa;">No evaluations submitted yet.</div>'
+                : evalCards) +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            this._footer() +
+            '</div>'
+        );
+    }
+
+    _readOnlyStyles() {
+        return '<style>' +
+        '.ro-eval-card{background:#fafafa;border:2px solid #e0e0e0;border-radius:10px;margin-bottom:14px;overflow:hidden;}' +
+        '.ro-eval-card.ro-own{border-color:#ED1B2E;background:#fff8f8;}' +
+        '.ro-eval-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #eee;}' +
+        '.ro-judge-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}' +
+        '.ro-judge-name{font-weight:700;font-size:14px;color:#1a1a1a;}' +
+        '.ro-own-badge{background:#ED1B2E;color:white;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;}' +
+        '.ro-score-badge{font-size:22px;font-weight:800;color:#aaa;text-align:right;flex-shrink:0;}' +
+        '.ro-score-badge span{font-size:11px;opacity:.6;}' +
+        '.ro-score-badge.orb-high{color:#2E7D32;}' +
+        '.ro-score-badge.orb-mid{color:#E65100;}' +
+        '.ro-score-badge.orb-low{color:#C41E3A;}' +
+        '.ro-criteria{padding:8px 14px;}' +
+        '.ro-crit{padding:5px 0;border-bottom:1px solid #f2f2f2;}' +
+        '.ro-crit:last-child{border-bottom:none;}' +
+        '.ro-crit-header{display:flex;justify-content:space-between;align-items:center;}' +
+        '.ro-crit-name{font-size:12px;color:#555;font-weight:600;}' +
+        '.ro-crit-score{font-size:13px;font-weight:700;color:#ED1B2E;flex-shrink:0;margin-left:8px;}' +
+        '.ro-crit-notes{font-size:11px;color:#888;padding:3px 0 2px 8px;border-left:2px solid #ddd;margin-top:3px;font-style:italic;line-height:1.4;}' +
+        '.ro-bonus{background:#FFF8E1;color:#E65100;font-size:11px;font-weight:600;padding:5px 14px;border-top:1px solid #FFE082;}' +
+        '.ro-notes{padding:10px 14px;font-size:12px;color:#555;background:#f9f9f9;border-top:1px solid #eee;line-height:1.6;}' +
+        '</style>';
     }
 
     _appContent() {

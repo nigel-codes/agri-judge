@@ -22,6 +22,51 @@ def _get_judge_county(judge_user):
     )
 
 
+def _get_peer_evaluations(application_name, requesting_judge, county):
+    """Return all submitted evaluations for an application by judges in the same county."""
+    county_judges = frappe.get_all(
+        "Judge County Assignment",
+        filters={"assigned_county": county},
+        fields=["judge"],
+    )
+    county_judge_ids = [j.judge for j in county_judges]
+    if not county_judge_ids:
+        return []
+
+    evals = frappe.get_all(
+        "Judge Evaluation",
+        filters={
+            "application": application_name,
+            "judge": ["in", county_judge_ids],
+            "docstatus": 1,
+        },
+        fields=["name", "judge", "final_score", "overall_notes", "female_led_bonus"],
+    )
+
+    result = []
+    for ev in evals:
+        eval_doc   = frappe.get_doc("Judge Evaluation", ev.name)
+        judge_name = frappe.db.get_value("User", ev.judge, "full_name") or ev.judge
+        result.append({
+            "judge":            ev.judge,
+            "judge_name":       judge_name,
+            "is_own":           ev.judge == requesting_judge,
+            "final_score":      round(float(ev.final_score or 0), 2),
+            "female_led_bonus": bool(ev.female_led_bonus),
+            "overall_notes":    ev.overall_notes or "",
+            "criteria": [
+                {
+                    "criterion_id": c.criterion_id,
+                    "score":        float(c.score or 0),
+                    "notes":        c.notes or "",
+                }
+                for c in eval_doc.criteria
+            ],
+        })
+
+    return result
+
+
 def _get_applications_for_county(county):
     if county == "Other":
         all_apps = frappe.get_all(
@@ -143,9 +188,49 @@ def get_application_for_review(application_name, judge=None):
         if eval_name:
             eval_doc = frappe.get_doc("Judge Evaluation", eval_name)
             if eval_doc.docstatus == 1:
-                return {"success": False,
-                        "error": "You have already submitted your evaluation for this "
-                                  "application. Evaluations cannot be edited after submission."}
+                # Already submitted — return read-only view with all county peer evaluations
+                own_eval = {
+                    "name":             eval_doc.name,
+                    "overall_notes":    eval_doc.overall_notes or "",
+                    "female_led_bonus": bool(eval_doc.female_led_bonus),
+                    "final_score":      round(float(eval_doc.final_score or 0), 2),
+                    "criteria": [
+                        {
+                            "criterion_id": c.criterion_id,
+                            "score":        float(c.score or 0),
+                            "notes":        c.notes or "",
+                        }
+                        for c in eval_doc.criteria
+                    ],
+                }
+                peer_evals = _get_peer_evaluations(application_name, judge, county)
+                return {
+                    "success":          True,
+                    "read_only":        True,
+                    "application": {
+                        "name":                       app.name,
+                        "full_name":                  app.full_name or "",
+                        "gender":                     app.gender or "",
+                        "county_of_residence":        app.county_of_residence or "",
+                        "age_group":                  app.age_group or "",
+                        "level_of_project":           app.level_of_project or "",
+                        "email":                      app.email or "",
+                        "phone_number":               app.phone_number or "",
+                        "describe_your_idea":         app.describe_your_idea or "",
+                        "proposed_product":           app.proposed_product or "",
+                        "production_process":         app.production_process or "",
+                        "enviromental_contributions": app.enviromental_contributions or "",
+                        "demonstrate_innovativeness": app.demonstrate_innovativeness or "",
+                        "enterprise_benefits":        app.enterprise_benefits or "",
+                        "use_of_micro_grant":         app.use_of_micro_grant or "",
+                        "prior_experience":           app.prior_experience or "",
+                        "next_step_skills":           app.next_step_skills or "",
+                        "incubator_programs":         app.incubator_programs or "",
+                        "youtube_link":               app.youtube_link or "",
+                    },
+                    "evaluation":       own_eval,
+                    "peer_evaluations": peer_evals,
+                }
             evaluation_data = {
                 "name":              eval_doc.name,
                 "overall_notes":     eval_doc.overall_notes or "",
