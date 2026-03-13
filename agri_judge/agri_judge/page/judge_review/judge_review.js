@@ -28,11 +28,10 @@ frappe.pages['judge-review'].on_page_load = function (wrapper) {
 };
 
 frappe.pages['judge-review'].on_page_show = function (wrapper) {
-    // on_page_show fires right after on_page_load on first visit.
-    // Skip if application hasn't loaded yet (null) to avoid double-fetch.
-    if (wrapper._review && wrapper._review.application) {
+    if (wrapper._review) {
         const app_id = frappe.get_route()[1];
         if (app_id) wrapper._review.loadApplication(app_id);
+        else frappe.set_route('judge-dashboard');
     }
 };
 
@@ -112,9 +111,7 @@ class JudgeReviewPage {
     }
 
     init() {
-        const app_id = frappe.get_route()[1];
-        if (!app_id) { frappe.set_route('judge-dashboard'); return; }
-        this.loadApplication(app_id);
+        // Data loading is handled by on_page_show
     }
 
     loadApplication(app_id) {
