@@ -161,7 +161,7 @@ class JudgeDashboard {
                             <span>🆔 ${frappe.utils.escape_html(app.name)}</span>
                             <span>📍 ${frappe.utils.escape_html(app.country || '—')}</span>
                             <span>🏷 ${frappe.utils.escape_html(app.category || '—')}</span>
-                            ${app.gender === 'Female' ? '<span class="female-chip">👑 Female-led</span>' : `<span>⚥ ${frappe.utils.escape_html(app.gender || '—')}</span>`}
+                            ${app.gender === 'Female' ? '<span class="female-chip">👑 Female-led</span>' : '<span>⚥ ' + frappe.utils.escape_html(app.gender || '—') + '</span>'}
                         </div>
                     </div>
                     <div class="card-right">
@@ -170,7 +170,8 @@ class JudgeDashboard {
                         </span>
                         ${done ? `<div class="score-pill">${app.final_score.toFixed(2)}<span>/10</span></div>` : ''}
                         <button class="btn-review ${done ? 'btn-done' : ''}"
-                            onclick="window._openReview('${app.name}')">
+                            data-app="${frappe.utils.escape_html(app.name)}"
+                            onclick="window._openReview(this.dataset.app)">
                             ${done ? 'View Scores →' : 'Start Review →'}
                         </button>
                     </div>
