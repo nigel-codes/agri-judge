@@ -734,10 +734,9 @@ def get_round2_email_preview():
     settings = frappe.get_single("Application Settings")
     form_link = settings.round2_form_link or ""
 
-    # Round 2 applicants (Shortlisted or Borderline) — split by county type
+    # All Round 2 applicants — split by county type
     r2_rows = frappe.get_all(
         "Round 2 Applicant",
-        filters={"score_status": ["in", ["Shortlisted", "Borderline"]]},
         fields=["application", "applicant_name", "county", "score_status",
                 "avg_score", "invite_sent"],
         order_by="county, avg_score desc",
@@ -902,7 +901,7 @@ def send_round2_county_emails():
 
     r2_rows = frappe.get_all(
         "Round 2 Applicant",
-        filters={"score_status": ["in", ["Shortlisted", "Borderline"]]},
+        filters={"invite_sent": 0},
         fields=["name", "application", "applicant_name", "county"],
     )
     targets = [r for r in r2_rows if (r.county or "").strip() in NAMED_COUNTIES]
@@ -947,6 +946,8 @@ def send_round2_county_emails():
     result = {"success": True, "sent": sent, "total": len(targets), "errors": errors}
     if errors:
         result["warning"] = f"Sent {sent}/{len(targets)} emails. {len(errors)} failed."
+    else:
+        result["message"] = f"Sent {sent} email(s). {skipped} already sent previously — skipped."
     return result
 
 
@@ -964,7 +965,7 @@ def send_round2_other_emails():
 
     r2_rows = frappe.get_all(
         "Round 2 Applicant",
-        filters={"score_status": ["in", ["Shortlisted", "Borderline"]]},
+        filters={"invite_sent": 0},
         fields=["name", "application", "applicant_name", "county"],
     )
     targets = [r for r in r2_rows if (r.county or "").strip() not in NAMED_COUNTIES]
