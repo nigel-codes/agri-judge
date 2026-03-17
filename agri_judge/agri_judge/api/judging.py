@@ -503,6 +503,226 @@ def get_leaderboard():
 
 
 @frappe.whitelist()
+def get_advanced_metrics():
+    """
+    Advanced judging metrics — Coordinator only.
+
+    Returns:
+    - Overall totals (apps, complete, incomplete, unevaluated, shortlisted, borderline, below)
+    - Per-county breakdown with the same stats
+    - Per incomplete application: which judge(s) are still pending
+    """
+    try:
+        caller = frappe.session.user
+        if not _is_system_manager(caller):
+            return {"success": False, "error": "Access denied. Coordinator role required."}
+
+        # ── Fetch base data ────────────────────────────────────
+        all_apps = frappe.get_all(
+            "Agri Waste Innovation",
+            fields=["name", "full_name", "county_of_residence", "gender", "level_of_project"],
+            order_by="county_of_residence, creation",
+        )
+
+        assignments = frappe.get_all(
+            "Judge County Assignment",
+            fields=["judge", "assigned_county"],
+        )
+
+        # county → list of judge user-ids
+        county_judges = {}
+        for a in assignments:
+            county_judges.setdefault(a.assigned_county, []).append(a.judge)
+
+        # pre-fetch judge full names
+        judge_names = {}
+        for a in assignments:
+            if a.judge not in judge_names:
+                judge_names[a.judge] = (
+                    frappe.db.get_value("User", a.judge, "full_name") or a.judge
+                )
+
+        def effective_county(app_county):
+            return (app_county or "").strip() if (app_county or "").strip() in NAMED_COUNTIES else "Other"
+
+        # group apps by effective county
+        apps_by_county = {}
+        for app in all_apps:
+            c = effective_county(app.county_of_residence)
+            apps_by_county.setdefault(c, []).append(app)
+
+        all_counties = sorted(
+            set(list(apps_by_county.keys()) + list(county_judges.keys()))
+        )
+
+        grand = {"total_apps": len(all_apps), "complete": 0, "incomplete": 0,
+                 "unevaluated": 0, "shortlisted": 0, "borderline": 0, "below": 0}
+
+        county_metrics = []
+
+        for county in all_counties:
+            apps   = apps_by_county.get(county, [])
+            judges = county_judges.get(county, [])
+
+            if not apps:
+                continue
+
+            complete_apps    = []
+            incomplete_apps  = []
+            unevaluated_apps = []
+            c_short = c_border = c_below = 0
+
+            for app in apps:
+                if judges:
+                    evals = frappe.get_all(
+                        "Judge Evaluation",
+                        filters={"application": app.name, "judge": ["in", judges], "docstatus": 1},
+                        fields=["judge", "final_score"],
+                    )
+                else:
+                    evals = []
+
+                submitted_set  = {e.judge for e in evals}
+                pending_judges = [j for j in judges if j not in submitted_set]
+                scores         = [float(e.final_score) for e in evals]
+                avg_score      = round(sum(scores) / len(scores), 2) if scores else None
+
+                app_info = {
+                    "name":           app.name,
+                    "applicant_name": app.full_name or app.name,
+                    "gender":         app.gender or "",
+                    "category":       app.level_of_project or "",
+                    "avg_score":      avg_score,
+                    "judges_done":    len(submitted_set),
+                    "judges_total":   len(judges),
+                    "pending_judges": [
+                        {"judge": j, "judge_name": judge_names.get(j, j)}
+                        for j in pending_judges
+                    ],
+                }
+
+                if not scores:
+                    unevaluated_apps.append(app_info)
+                elif not pending_judges:
+                    complete_apps.append(app_info)
+                    if avg_score >= 7:   c_short  += 1
+                    elif avg_score >= 5: c_border += 1
+                    else:                c_below  += 1
+                else:
+                    incomplete_apps.append(app_info)
+                    if avg_score >= 7:   c_short  += 1
+                    elif avg_score >= 5: c_border += 1
+                    else:                c_below  += 1
+
+            grand["complete"]    += len(complete_apps)
+            grand["incomplete"]  += len(incomplete_apps)
+            grand["unevaluated"] += len(unevaluated_apps)
+            grand["shortlisted"] += c_short
+            grand["borderline"]  += c_border
+            grand["below"]       += c_below
+
+            county_metrics.append({
+                "county":          county,
+                "total_apps":      len(apps),
+                "judges_count":    len(judges),
+                "complete":        len(complete_apps),
+                "incomplete":      len(incomplete_apps),
+                "unevaluated":     len(unevaluated_apps),
+                "shortlisted":     c_short,
+                "borderline":      c_border,
+                "below":           c_below,
+                "complete_apps":   complete_apps,
+                "incomplete_apps": incomplete_apps,
+                "unevaluated_apps": unevaluated_apps,
+            })
+
+        # Include which apps are already in Round 2 so the UI can show correct button state
+        round2_apps = {
+            r.application
+            for r in frappe.get_all("Round 2 Applicant", fields=["application"])
+        }
+
+        return {
+            "success": True,
+            "totals": grand,
+            "counties": county_metrics,
+            "round2_apps": list(round2_apps),
+        }
+
+    except Exception as e:
+        frappe.log_error(f"get_advanced_metrics error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def add_to_round2(application_name, avg_score=None, score_status=None):
+    """Add an application to the Round 2 shortlist. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    if frappe.db.exists("Round 2 Applicant", {"application": application_name}):
+        return {"success": False, "error": "Already in Round 2 list."}
+    app = frappe.get_doc("Agri Waste Innovation", application_name)
+    doc = frappe.new_doc("Round 2 Applicant")
+    doc.application    = application_name
+    doc.applicant_name = app.full_name or application_name
+    doc.county         = app.county_of_residence or ""
+    doc.avg_score      = float(avg_score) if avg_score is not None else 0.0
+    doc.score_status   = score_status or ""
+    doc.added_by       = frappe.session.user
+    doc.added_on       = frappe.utils.now()
+    doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+    return {"success": True, "name": doc.name}
+
+
+@frappe.whitelist()
+def remove_from_round2(application_name):
+    """Remove an application from the Round 2 shortlist. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    existing = frappe.db.get_value("Round 2 Applicant", {"application": application_name}, "name")
+    if not existing:
+        return {"success": False, "error": "Not in Round 2 list."}
+    frappe.delete_doc("Round 2 Applicant", existing, ignore_permissions=True)
+    frappe.db.commit()
+    return {"success": True}
+
+
+@frappe.whitelist()
+def get_round2_list():
+    """Return all Round 2 applicants with full details. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    rows = frappe.get_all(
+        "Round 2 Applicant",
+        fields=["name", "application", "applicant_name", "county",
+                "avg_score", "score_status", "added_by", "added_on"],
+        order_by="county, avg_score desc",
+    )
+    # Enrich with gender/category from the application
+    result = []
+    for r in rows:
+        extra = frappe.db.get_value(
+            "Agri Waste Innovation", r.application,
+            ["gender", "level_of_project"], as_dict=True
+        ) or {}
+        added_by_name = frappe.db.get_value("User", r.added_by, "full_name") or r.added_by
+        result.append({
+            "name":           r.name,
+            "application":    r.application,
+            "applicant_name": r.applicant_name,
+            "county":         r.county,
+            "avg_score":      round(float(r.avg_score or 0), 2),
+            "score_status":   r.score_status,
+            "gender":         extra.get("gender", ""),
+            "category":       extra.get("level_of_project", ""),
+            "added_by_name":  added_by_name,
+            "added_on":       str(r.added_on or ""),
+        })
+    return {"success": True, "applicants": result}
+
+
+@frappe.whitelist()
 def get_criteria_definitions():
     return {
         "success": True,

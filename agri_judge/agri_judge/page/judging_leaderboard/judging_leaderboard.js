@@ -15,6 +15,9 @@ frappe.pages['judging-leaderboard'].on_page_load = function(wrapper) {
     });
     page.add_button('Home', () => frappe.set_route('/app'), 'octicon octicon-home');
     page.add_button('Back to Dashboard', () => frappe.set_route('judge-dashboard'), 'octicon octicon-arrow-left');
+    if (frappe.user_roles.includes('Coordinator')) {
+        page.add_button('Advanced Metrics', () => frappe.set_route('judging-advanced-metrics'), 'octicon octicon-graph');
+    }
     page.set_primary_action('Refresh', () => wrapper._lb && wrapper._lb.load(), 'octicon octicon-sync');
     wrapper._lb = new JudgingLeaderboard(page, wrapper);
 };
