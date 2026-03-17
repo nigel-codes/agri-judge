@@ -6,7 +6,17 @@
  "engine": "InnoDB",
  "field_order": [
   "app_name",
-  "scoring_rubric_json"
+  "scoring_rubric_json",
+  "section_round2_emails",
+  "round2_form_link",
+  "section_email_status",
+  "r2_county_emails_sent",
+  "r2_county_emails_sent_on",
+  "column_break_email_status",
+  "r2_other_emails_sent",
+  "r2_other_emails_sent_on",
+  "r2_regret_emails_sent",
+  "r2_regret_emails_sent_on"
  ],
  "fields": [
   {
@@ -19,6 +29,65 @@
    "fieldname": "scoring_rubric_json",
    "fieldtype": "Long Text",
    "label": "Scoring Rubric (JSON)"
+  },
+  {
+   "fieldname": "section_round2_emails",
+   "fieldtype": "Section Break",
+   "label": "Round 2 Email Settings"
+  },
+  {
+   "description": "Link sent to shortlisted applicants in Round 2 invitation emails",
+   "fieldname": "round2_form_link",
+   "fieldtype": "Data",
+   "label": "Round 2 Form Link"
+  },
+  {
+   "fieldname": "section_email_status",
+   "fieldtype": "Section Break",
+   "label": "Email Send Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "r2_county_emails_sent",
+   "fieldtype": "Check",
+   "label": "County Invite Emails Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r2_county_emails_sent_on",
+   "fieldtype": "Datetime",
+   "label": "County Emails Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_email_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "r2_other_emails_sent",
+   "fieldtype": "Check",
+   "label": "Other County Invite Emails Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r2_other_emails_sent_on",
+   "fieldtype": "Datetime",
+   "label": "Other County Emails Sent On",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "r2_regret_emails_sent",
+   "fieldtype": "Check",
+   "label": "Regret Emails Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r2_regret_emails_sent_on",
+   "fieldtype": "Datetime",
+   "label": "Regret Emails Sent On",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

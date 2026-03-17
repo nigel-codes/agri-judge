@@ -18,6 +18,7 @@ frappe.pages['round-2-applicants'].on_page_load = function(wrapper) {
     page.add_button('Advanced Metrics', () => frappe.set_route('judging-advanced-metrics'), 'octicon octicon-graph');
     page.add_button('Leaderboard', () => frappe.set_route('judging-leaderboard'), 'octicon octicon-list-ordered');
     page.set_primary_action('Refresh', () => wrapper._r2 && wrapper._r2.load(), 'octicon octicon-sync');
+    page.add_button('✉ Send Emails', () => wrapper._r2 && wrapper._r2.openEmailPanel(), 'octicon octicon-mail');
     wrapper._r2 = new Round2Page(page, wrapper);
 };
 
@@ -308,6 +309,196 @@ class Round2Page {
                 });
             }
         });
+    }
+
+    openEmailPanel() {
+        const d = new frappe.ui.Dialog({
+            title: '✉ Send Round 2 Emails',
+            size: 'large',
+        });
+        d.body.innerHTML = `<div style="padding:10px 0 6px;text-align:center;color:#888;">
+            <div style="font-size:28px;margin-bottom:8px;">⏳</div>
+            <p>Loading email preview…</p>
+        </div>`;
+        d.show();
+
+        frappe.call({
+            method: 'agri_judge.agri_judge.api.judging.get_round2_email_preview',
+            callback: (r) => {
+                if (!r.message || !r.message.success) {
+                    d.body.innerHTML = `<div style="color:#C62828;padding:20px;">
+                        Failed to load preview: ${frappe.utils.escape_html(r.message?.error || 'Unknown error')}
+                    </div>`;
+                    return;
+                }
+                const m = r.message;
+                d.body.innerHTML = this.emailPanelHtml(m);
+                this.wireEmailButtons(d, m);
+            }
+        });
+    }
+
+    emailPanelHtml(m) {
+        const sentBadge = (sent) => sent
+            ? `<span class="email-sent-badge">✓ Sent</span>`
+            : `<span class="email-pending-badge">Not sent</span>`;
+
+        const recipientRows = (list) => list.length === 0
+            ? `<div style="padding:10px 16px;color:#aaa;font-size:13px;">No recipients in this group.</div>`
+            : list.map(r => `
+                <div class="ep-row">
+                    <div>
+                        <div style="font-weight:700;font-size:13px;">${frappe.utils.escape_html(r.name)}</div>
+                        <div style="font-size:11px;color:#aaa;">${frappe.utils.escape_html(r.county || '')}${r.email ? ' · ' + frappe.utils.escape_html(r.email) : ''}</div>
+                    </div>
+                    <div style="font-size:11px;color:#888;">${r.score_status ? frappe.utils.escape_html(r.score_status) : ''}</div>
+                    ${r.invite_sent ? '<div style="color:#2E7D32;font-size:11px;font-weight:700;">✓ Invited</div>' : '<div></div>'}
+                </div>`).join('');
+
+        const formLinkWarning = !m.form_link
+            ? `<div class="ep-warning">⚠ No form link configured. Go to <strong>Application Settings</strong> and set the Round 2 Form Link before sending.</div>`
+            : `<div class="ep-formlink">📎 Form link: <strong>${frappe.utils.escape_html(m.form_link)}</strong></div>`;
+
+        return `
+        ${this.emailPanelStyles()}
+        ${formLinkWarning}
+
+        <!-- Email 1: Named counties -->
+        <div class="ep-section">
+            <div class="ep-section-header">
+                <div>
+                    <div class="ep-section-title">Email 1 — County Invites</div>
+                    <div class="ep-section-sub">Shortlisted &amp; Borderline from Kakamega / Homabay / Kericho / Meru
+                        &nbsp;·&nbsp; <strong>${m.county.length}</strong> recipient${m.county.length !== 1 ? 's' : ''}
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    ${sentBadge(m.county_emails_sent)}
+                    <button class="ep-send-btn" id="btnSendCounty" ${m.county.length === 0 ? 'disabled' : ''}>
+                        ${m.county_emails_sent ? '↺ Re-send' : '⬆ Send'}
+                    </button>
+                </div>
+            </div>
+            <div class="ep-list">${recipientRows(m.county)}</div>
+        </div>
+
+        <!-- Email 2: Other counties -->
+        <div class="ep-section">
+            <div class="ep-section-header">
+                <div>
+                    <div class="ep-section-title">Email 2 — Other County Invites</div>
+                    <div class="ep-section-sub">Shortlisted &amp; Borderline from all other counties (self-sponsored logistics)
+                        &nbsp;·&nbsp; <strong>${m.other.length}</strong> recipient${m.other.length !== 1 ? 's' : ''}
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    ${sentBadge(m.other_emails_sent)}
+                    <button class="ep-send-btn" id="btnSendOther" ${m.other.length === 0 ? 'disabled' : ''}>
+                        ${m.other_emails_sent ? '↺ Re-send' : '⬆ Send'}
+                    </button>
+                </div>
+            </div>
+            <div class="ep-list">${recipientRows(m.other)}</div>
+        </div>
+
+        <!-- Email 3: Regrets -->
+        <div class="ep-section">
+            <div class="ep-section-header">
+                <div>
+                    <div class="ep-section-title">Email 3 — Regret Emails</div>
+                    <div class="ep-section-sub">All applicants NOT in the Round 2 shortlist
+                        &nbsp;·&nbsp; <strong>${m.regret.length}</strong> recipient${m.regret.length !== 1 ? 's' : ''}
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    ${sentBadge(m.regret_emails_sent)}
+                    <button class="ep-send-btn ep-send-btn-regret" id="btnSendRegret" ${m.regret.length === 0 ? 'disabled' : ''}>
+                        ${m.regret_emails_sent ? '↺ Re-send' : '⬆ Send'}
+                    </button>
+                </div>
+            </div>
+            <div class="ep-list">${recipientRows(m.regret)}</div>
+        </div>`;
+    }
+
+    wireEmailButtons(d, m) {
+        const doSend = (method, label, count, confirmMsg) => {
+            frappe.confirm(
+                confirmMsg,
+                () => {
+                    frappe.call({
+                        method,
+                        freeze: true,
+                        freeze_message: `Sending ${label}…`,
+                        callback: (r) => {
+                            d.hide();
+                            if (r.message && r.message.success) {
+                                const msg = r.message.warning || r.message.message
+                                    || `Sent ${r.message.sent} email(s).`;
+                                frappe.show_alert({ message: msg, indicator: r.message.warning ? 'orange' : 'green' }, 8);
+                                if (r.message.errors && r.message.errors.length) {
+                                    frappe.msgprint({
+                                        title: `${label} — Send Errors`,
+                                        message: r.message.errors.map(e => frappe.utils.escape_html(e)).join('<br>'),
+                                        indicator: 'orange',
+                                    });
+                                }
+                            } else {
+                                frappe.show_alert({ message: r.message?.error || 'Failed to send emails.', indicator: 'red' }, 8);
+                            }
+                        }
+                    });
+                }
+            );
+        };
+
+        d.body.querySelector('#btnSendCounty')?.addEventListener('click', () => {
+            doSend(
+                'agri_judge.agri_judge.api.judging.send_round2_county_emails',
+                'County Invites',
+                m.county.length,
+                `Send <strong>Email 1 (County Invites)</strong> to <strong>${m.county.length}</strong> applicant(s) from Kakamega, Homabay, Kericho, and Meru?`
+            );
+        });
+
+        d.body.querySelector('#btnSendOther')?.addEventListener('click', () => {
+            doSend(
+                'agri_judge.agri_judge.api.judging.send_round2_other_emails',
+                'Other County Invites',
+                m.other.length,
+                `Send <strong>Email 2 (Other County Invites)</strong> to <strong>${m.other.length}</strong> applicant(s) from counties outside the four named hubs?`
+            );
+        });
+
+        d.body.querySelector('#btnSendRegret')?.addEventListener('click', () => {
+            doSend(
+                'agri_judge.agri_judge.api.judging.send_round2_regret_emails',
+                'Regret Emails',
+                m.regret.length,
+                `Send <strong>Email 3 (Regret Emails)</strong> to <strong>${m.regret.length}</strong> applicant(s) who are not in the Round 2 shortlist?`
+            );
+        });
+    }
+
+    emailPanelStyles() {
+        return `<style>
+            .ep-warning { background:#FFF8E1; border:1px solid #FFE082; border-radius:8px; padding:10px 14px; font-size:13px; color:#E65100; margin-bottom:14px; }
+            .ep-formlink { background:#E8F5E9; border:1px solid #A5D6A7; border-radius:8px; padding:8px 14px; font-size:12px; color:#2E7D32; margin-bottom:14px; word-break:break-all; }
+            .ep-section { border:1px solid #e0e0e0; border-radius:10px; margin-bottom:14px; overflow:hidden; }
+            .ep-section-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#f9f9f9; border-bottom:1px solid #e0e0e0; gap:10px; flex-wrap:wrap; }
+            .ep-section-title { font-size:14px; font-weight:800; color:#1a1a1a; }
+            .ep-section-sub { font-size:12px; color:#888; margin-top:2px; }
+            .ep-list { max-height:180px; overflow-y:auto; }
+            .ep-row { display:grid; grid-template-columns:1fr auto auto; gap:10px; padding:8px 16px; border-bottom:1px solid #f5f5f5; align-items:center; }
+            .ep-row:last-child { border-bottom:none; }
+            .ep-send-btn { background:#1565C0; color:white; border:none; padding:6px 16px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+            .ep-send-btn:hover:not(:disabled) { background:#0D47A1; }
+            .ep-send-btn:disabled { opacity:.4; cursor:not-allowed; }
+            .ep-send-btn-regret { background:#C62828; }
+            .ep-send-btn-regret:hover:not(:disabled) { background:#B71C1C; }
+            .email-sent-badge { background:#E8F5E9; color:#2E7D32; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; }
+            .email-pending-badge { background:#F5F5F5; color:#999; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700; }
+        </style>`;
     }
 
     exportCSV() {

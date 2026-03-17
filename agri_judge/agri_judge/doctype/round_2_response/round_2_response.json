@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "R2RESP-.####",
+ "creation": "2026-03-17 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "application",
+  "applicant_name",
+  "column_break_1",
+  "county",
+  "county_other",
+  "age",
+  "gender",
+  "section_project",
+  "developmental_level",
+  "financial_records",
+  "is_tech_enabled",
+  "section_responses",
+  "innovation_description",
+  "resources_needed"
+ ],
+ "fields": [
+  {
+   "fieldname": "application",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Application",
+   "options": "Agri Waste Innovation",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "application.full_name",
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "county",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "County",
+   "options": "\nKakamega\nHomabay\nMeru\nKericho\nOther",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.county == 'Other'",
+   "fieldname": "county_other",
+   "fieldtype": "Data",
+   "label": "County Name (if Other)",
+   "mandatory_depends_on": "eval:doc.county == 'Other'"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gender",
+   "options": "\nMale\nFemale\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_project",
+   "fieldtype": "Section Break",
+   "label": "Project Details"
+  },
+  {
+   "fieldname": "developmental_level",
+   "fieldtype": "Select",
+   "label": "Developmental Level",
+   "options": "\nIdea / Concept Stage (Pre-seed; no product yet)\nValidation Stage (Seed; MVP developed; testing with users)\nEarly Traction Stage (Series A; initial revenue; product-market fit emerging)\nGrowth / Scaling Stage (Series B/C; expanding operations and markets)\nMaturity Stage (Series D+; sustainable business; exit-ready)",
+   "reqd": 1
+  },
+  {
+   "description": "Required if your project has been in operation for more than 5 months",
+   "fieldname": "financial_records",
+   "fieldtype": "Attach",
+   "label": "Financial Records (if >5 months in operation)"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_tech_enabled",
+   "fieldtype": "Check",
+   "label": "Is your innovation tech-enabled?"
+  },
+  {
+   "fieldname": "section_responses",
+   "fieldtype": "Section Break",
+   "label": "Responses"
+  },
+  {
+   "description": "Please describe in your own words — max 350 words. Avoid using AI-generated text.",
+   "fieldname": "innovation_description",
+   "fieldtype": "Long Text",
+   "label": "Describe your innovation/project (max 350 words)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "resources_needed",
+   "fieldtype": "Long Text",
+   "label": "Resources/Skills needed to launch/scale your project",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-17 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Round 2 Response",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Coordinator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "applicant_name"
+}

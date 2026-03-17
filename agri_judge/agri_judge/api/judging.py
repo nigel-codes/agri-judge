@@ -723,6 +723,355 @@ def get_round2_list():
 
 
 @frappe.whitelist()
+def get_round2_email_preview():
+    """
+    Returns a preview of who will receive each of the three Round 2 emails.
+    Coordinator only.
+    """
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+
+    settings = frappe.get_single("Application Settings")
+    form_link = settings.round2_form_link or ""
+
+    # Round 2 applicants (Shortlisted or Borderline) — split by county type
+    r2_rows = frappe.get_all(
+        "Round 2 Applicant",
+        filters={"score_status": ["in", ["Shortlisted", "Borderline"]]},
+        fields=["application", "applicant_name", "county", "score_status",
+                "avg_score", "invite_sent"],
+        order_by="county, avg_score desc",
+    )
+
+    county_list = []
+    other_list  = []
+    for r in r2_rows:
+        email = frappe.db.get_value("Agri Waste Innovation", r.application, "email") or ""
+        entry = {
+            "name":           r.applicant_name,
+            "county":         r.county,
+            "score_status":   r.score_status,
+            "avg_score":      round(float(r.avg_score or 0), 2),
+            "email":          email,
+            "invite_sent":    bool(r.invite_sent),
+        }
+        if (r.county or "").strip() in NAMED_COUNTIES:
+            county_list.append(entry)
+        else:
+            other_list.append(entry)
+
+    # Regret: all applications NOT in Round 2
+    r2_app_names = {
+        r.application
+        for r in frappe.get_all("Round 2 Applicant", fields=["application"])
+    }
+    all_apps = frappe.get_all(
+        "Agri Waste Innovation",
+        fields=["name", "full_name", "email", "county_of_residence"],
+    )
+    regret_list = [
+        {
+            "name":   a.full_name or a.name,
+            "county": a.county_of_residence or "",
+            "email":  a.email or "",
+        }
+        for a in all_apps
+        if a.name not in r2_app_names
+    ]
+
+    return {
+        "success":          True,
+        "form_link":        form_link,
+        "county_emails_sent": bool(settings.r2_county_emails_sent),
+        "other_emails_sent":  bool(settings.r2_other_emails_sent),
+        "regret_emails_sent": bool(settings.r2_regret_emails_sent),
+        "county": county_list,
+        "other":  other_list,
+        "regret": regret_list,
+    }
+
+
+_EMAIL1_SUBJECT = "Congratulations! You're Shortlisted \u2013 Agri Waste Innovations Project (Level 2)"
+_EMAIL1_BODY = """\
+<p>Dear {applicant_name},</p>
+
+<p>We are pleased to inform you that your innovative solution has successfully progressed
+to the next stage of the <strong>Agri Waste Innovations Project</strong>, funded by
+<strong>Airbus</strong> and implemented by <strong>KRCS \u2013 IOMe Social Innovation Centre</strong>.</p>
+
+<p>Following a rigorous Phase 1 judging process, your application stood out, and we would
+like to invite you to proceed to the final selection phase.</p>
+
+<p><strong>Next Steps:</strong><br>
+Before the final decisions are made, we require additional information from you.
+Kindly complete the form via the link below.</p>
+
+<p>\U0001f449 <a href="{form_link}">{form_link}</a></p>
+
+<p>Please submit your responses by <strong>19/3/2026</strong>.
+Failure to provide the requested information may affect your final consideration.</p>
+
+<p>We look forward to learning more about your innovation.</p>
+
+<p>Congratulations once again and thank you for your commitment to transforming agri-waste in Kenya.</p>
+
+<p>Warm regards,<br>
+<strong>The Agri Waste Innovations Team</strong><br>
+Airbus Foundation \u00d7 KRCS-IOMe 254 Social Innovation Centre</p>
+"""
+
+_EMAIL2_SUBJECT = "Update \u2013 Your Shortlisted Status \u2013 Agri Waste Innovations Project"
+_EMAIL2_BODY = """\
+<p>Dear {applicant_name},</p>
+
+<p>Thank you for your participation in the <strong>Agri Waste Innovations Project</strong>,
+funded by <strong>Airbus</strong> and implemented by <strong>KRCS \u2013 IOMe 254 Social Innovation Centre</strong>.</p>
+
+<p>We are pleased to inform you that your application met the minimum criteria and you have
+been shortlisted for the next stage of the selection process.</p>
+
+<p>However, we note that your innovation falls outside the primary counties initially
+targeted for this phase. While we recognize the potential in your solution, participation
+in the upcoming in-person bootcamps will require you to cover your own logistical costs
+(transport and accommodation) to the hub closest to you.</p>
+
+<p><strong>Available hubs:</strong></p>
+<ul>
+  <li>Kericho</li>
+  <li>Homabay</li>
+  <li>Kakamega</li>
+  <li>Meru</li>
+</ul>
+
+<p><strong>Next Steps</strong><br>
+To confirm your continued interest under these terms, kindly complete the form below
+with the requested information:</p>
+
+<p>\U0001f449 <a href="{form_link}">{form_link}</a></p>
+
+<p><em>Please note: Final decisions will be made after reviewing your responses.
+Submission of this form does not guarantee selection but confirms your interest
+under the self-sponsored logistics arrangement.</em></p>
+
+<p>Submit by <strong>19/3/2026</strong></p>
+
+<p>We value your innovation and hope you will take advantage of this opportunity.</p>
+
+<p>Warm regards,<br>
+<strong>The Agri Waste Innovations Team</strong><br>
+Airbus \u00d7 KRCS\u2013 IOMe 254 Social Innovation Centre</p>
+"""
+
+_EMAIL3_SUBJECT = "Update on Your Application \u2013 Agri Waste Innovations Project"
+_EMAIL3_BODY = """\
+<p>Dear {applicant_name},</p>
+
+<p>Thank you for taking the time to apply for the <strong>Agri Waste Innovations Project</strong>,
+funded by <strong>Airbus</strong> and implemented by <strong>KRCS IOMe 254 Social Innovation Centre</strong>.</p>
+
+<p>We received an overwhelming number of high-quality applications, and the selection
+process was highly competitive. After careful review by our judging panel, we regret to
+inform you that your application did not achieve the minimum score required to progress
+to the next phase.</p>
+
+<p>This decision was not easy, and we encourage you not to be discouraged. We saw genuine
+effort and creativity in your submission, and we hope you will continue developing your
+innovation.</p>
+
+<p>We invite you to follow our future programs and opportunities via <strong>IOMe 254</strong> platforms.</p>
+
+<p>Thank you once again for your interest in transforming Kenya\u2019s agri-waste sector.</p>
+
+<p>Warm regards,<br>
+<strong>The Agri Waste Innovations Team</strong><br>
+Airbus \u00d7 KRCS \u2013 IOMe 254</p>
+"""
+
+
+@frappe.whitelist()
+def send_round2_county_emails():
+    """
+    Email 1: Invite shortlisted/borderline applicants from named counties (Kakamega,
+    Homabay, Kericho, Meru). Coordinator only.
+    """
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+
+    settings  = frappe.get_single("Application Settings")
+    form_link = settings.round2_form_link or "[Form link not set — please configure in Application Settings]"
+
+    r2_rows = frappe.get_all(
+        "Round 2 Applicant",
+        filters={"score_status": ["in", ["Shortlisted", "Borderline"]]},
+        fields=["name", "application", "applicant_name", "county"],
+    )
+    targets = [r for r in r2_rows if (r.county or "").strip() in NAMED_COUNTIES]
+
+    sent, skipped, errors = 0, 0, []
+    for row in targets:
+        try:
+            email = frappe.db.get_value("Agri Waste Innovation", row.application, "email")
+            full_name = frappe.db.get_value("Agri Waste Innovation", row.application, "full_name")
+            if not email:
+                errors.append(f"{row.applicant_name}: no email address on file")
+                continue
+
+            frappe.sendmail(
+                recipients=[email],
+                subject=_EMAIL1_SUBJECT,
+                message=_EMAIL1_BODY.format(
+                    applicant_name=full_name or row.applicant_name,
+                    form_link=form_link,
+                ),
+                now=True,
+            )
+
+            frappe.db.set_value("Round 2 Applicant", row.name, {
+                "invite_sent":    1,
+                "invite_sent_on": frappe.utils.now(),
+            }, update_modified=False)
+            sent += 1
+
+        except Exception as e:
+            errors.append(f"{row.applicant_name}: {str(e)}")
+            frappe.log_error(
+                f"Round 2 county email error for {row.application}: {str(e)}",
+                "Round 2 Emails"
+            )
+
+    settings.r2_county_emails_sent    = 1
+    settings.r2_county_emails_sent_on = frappe.utils.now()
+    settings.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    result = {"success": True, "sent": sent, "total": len(targets), "errors": errors}
+    if errors:
+        result["warning"] = f"Sent {sent}/{len(targets)} emails. {len(errors)} failed."
+    return result
+
+
+@frappe.whitelist()
+def send_round2_other_emails():
+    """
+    Email 2: Invite shortlisted/borderline applicants from counties outside the four
+    named counties. Coordinator only.
+    """
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+
+    settings  = frappe.get_single("Application Settings")
+    form_link = settings.round2_form_link or "[Form link not set — please configure in Application Settings]"
+
+    r2_rows = frappe.get_all(
+        "Round 2 Applicant",
+        filters={"score_status": ["in", ["Shortlisted", "Borderline"]]},
+        fields=["name", "application", "applicant_name", "county"],
+    )
+    targets = [r for r in r2_rows if (r.county or "").strip() not in NAMED_COUNTIES]
+
+    sent, errors = 0, []
+    for row in targets:
+        try:
+            email     = frappe.db.get_value("Agri Waste Innovation", row.application, "email")
+            full_name = frappe.db.get_value("Agri Waste Innovation", row.application, "full_name")
+            if not email:
+                errors.append(f"{row.applicant_name}: no email address on file")
+                continue
+
+            frappe.sendmail(
+                recipients=[email],
+                subject=_EMAIL2_SUBJECT,
+                message=_EMAIL2_BODY.format(
+                    applicant_name=full_name or row.applicant_name,
+                    form_link=form_link,
+                ),
+                now=True,
+            )
+
+            frappe.db.set_value("Round 2 Applicant", row.name, {
+                "invite_sent":    1,
+                "invite_sent_on": frappe.utils.now(),
+            }, update_modified=False)
+            sent += 1
+
+        except Exception as e:
+            errors.append(f"{row.applicant_name}: {str(e)}")
+            frappe.log_error(
+                f"Round 2 other-county email error for {row.application}: {str(e)}",
+                "Round 2 Emails"
+            )
+
+    settings.r2_other_emails_sent    = 1
+    settings.r2_other_emails_sent_on = frappe.utils.now()
+    settings.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    result = {"success": True, "sent": sent, "total": len(targets), "errors": errors}
+    if errors:
+        result["warning"] = f"Sent {sent}/{len(targets)} emails. {len(errors)} failed."
+    return result
+
+
+@frappe.whitelist()
+def send_round2_regret_emails():
+    """
+    Email 3: Send regret emails to all applicants NOT in the Round 2 shortlist.
+    Coordinator only.
+    """
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+
+    r2_app_names = {
+        r.application
+        for r in frappe.get_all("Round 2 Applicant", fields=["application"])
+    }
+
+    all_apps = frappe.get_all(
+        "Agri Waste Innovation",
+        fields=["name", "full_name", "email", "county_of_residence"],
+    )
+    targets = [a for a in all_apps if a.name not in r2_app_names]
+
+    if not targets:
+        return {"success": False, "error": "All applicants are already in the Round 2 list."}
+
+    sent, errors = 0, []
+    for app in targets:
+        try:
+            if not app.email:
+                errors.append(f"{app.full_name}: no email address on file")
+                continue
+
+            frappe.sendmail(
+                recipients=[app.email],
+                subject=_EMAIL3_SUBJECT,
+                message=_EMAIL3_BODY.format(
+                    applicant_name=app.full_name or app.name,
+                ),
+                now=True,
+            )
+            sent += 1
+
+        except Exception as e:
+            errors.append(f"{app.full_name}: {str(e)}")
+            frappe.log_error(
+                f"Round 2 regret email error for {app.name}: {str(e)}",
+                "Round 2 Emails"
+            )
+
+    settings = frappe.get_single("Application Settings")
+    settings.r2_regret_emails_sent    = 1
+    settings.r2_regret_emails_sent_on = frappe.utils.now()
+    settings.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    result = {"success": True, "sent": sent, "total": len(targets), "errors": errors}
+    if errors:
+        result["warning"] = f"Sent {sent}/{len(targets)} regret emails. {len(errors)} failed."
+    return result
+
+
+@frappe.whitelist()
 def get_criteria_definitions():
     return {
         "success": True,
