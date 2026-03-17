@@ -1,18 +1,16 @@
 {
  "actions": [],
- "allow_rename": 0,
  "autoname": "R2RESP-.####",
  "creation": "2026-03-17 00:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "application",
   "applicant_name",
+  "gender",
   "column_break_1",
   "county",
   "county_other",
   "age",
-  "gender",
   "section_project",
   "developmental_level",
   "financial_records",
@@ -23,22 +21,12 @@
  ],
  "fields": [
   {
-   "fieldname": "application",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Application",
-   "options": "Agri Waste Innovation",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fetch_from": "application.full_name",
    "fieldname": "applicant_name",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Full Name",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "column_break_1",
@@ -106,15 +94,17 @@
    "label": "Responses"
   },
   {
-   "description": "Please describe in your own words — max 350 words. Avoid using AI-generated text.",
+   "description": "Please describe in your own words \u2014 max 350 words. Avoid using AI-generated text.",
    "fieldname": "innovation_description",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
    "label": "Describe your innovation/project (max 350 words)",
    "reqd": 1
   },
   {
    "fieldname": "resources_needed",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
    "label": "Resources/Skills needed to launch/scale your project",
    "reqd": 1
   }
@@ -122,7 +112,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 00:00:00",
+ "modified": "2026-03-17 15:46:00.713033",
  "modified_by": "Administrator",
  "module": "Agri Judge",
  "name": "Round 2 Response",
