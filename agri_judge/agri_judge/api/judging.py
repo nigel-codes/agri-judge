@@ -1014,13 +1014,22 @@ def send_round2_other_emails():
 
 
 @frappe.whitelist()
-def send_round2_regret_emails():
+def send_round2_regret_emails(force=0):
     """
     Email 3: Send regret emails to all applicants NOT in the Round 2 shortlist.
-    Coordinator only.
+    Coordinator only. Pass force=1 to override the already-sent guard.
     """
     if not _is_system_manager(frappe.session.user):
         return {"success": False, "error": "Access denied."}
+
+    settings = frappe.get_single("Application Settings")
+    if settings.r2_regret_emails_sent and not int(force):
+        return {
+            "success": False,
+            "already_sent": True,
+            "sent_on": str(settings.r2_regret_emails_sent_on or ""),
+            "error": "Regret emails have already been sent. Use force send to resend."
+        }
 
     r2_app_names = {
         r.application
@@ -1084,3 +1093,142 @@ def get_criteria_definitions():
             {"id": "presentation",   "name": "Completeness & Presentation", "weight": 0.10, "max_score": 1},
         ],
     }
+
+
+# ── Round 2 Judging ───────────────────────────────────────────
+
+@frappe.whitelist()
+def get_round2_response_for_review(response_name):
+    """Return full Round 2 Response detail + attachments + current score. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        if not frappe.db.exists("Round 2 Response", response_name):
+            return {"success": False, "error": "Round 2 Response not found."}
+
+        doc = frappe.get_doc("Round 2 Response", response_name)
+
+        scored_by_name = (
+            frappe.db.get_value("User", doc.scored_by, "full_name") or doc.scored_by
+            if doc.scored_by else None
+        )
+
+        # Attachments: the financial_records field + any files attached to this doc
+        attachments = []
+        if doc.financial_records:
+            attachments.append({
+                "file_url":  doc.financial_records,
+                "file_name": doc.financial_records.split("/")[-1],
+                "label":     "Financial Records",
+            })
+        extra_files = frappe.get_all(
+            "File",
+            filters={"attached_to_doctype": "Round 2 Response", "attached_to_name": response_name},
+            fields=["file_url", "file_name", "file_size"],
+        )
+        for f in extra_files:
+            if f.file_url != doc.financial_records:
+                attachments.append({"file_url": f.file_url, "file_name": f.file_name, "label": None})
+
+        return {
+            "success": True,
+            "response": {
+                "name":                 doc.name,
+                "applicant_name":       doc.applicant_name or "",
+                "county":               doc.county or "",
+                "county_other":         doc.county_other or "",
+                "gender":               doc.gender or "",
+                "age":                  doc.age or "",
+                "developmental_level":  doc.developmental_level or "",
+                "is_tech_enabled":      bool(doc.is_tech_enabled),
+                "innovation_description": doc.innovation_description or "",
+                "resources_needed":     doc.resources_needed or "",
+                "score":                round(float(doc.score), 1) if doc.score else 0,
+                "score_notes":          doc.score_notes or "",
+                "scored_by":            doc.scored_by or "",
+                "scored_by_name":       scored_by_name or "",
+                "scored_on":            str(doc.scored_on) if doc.scored_on else "",
+            },
+            "attachments": attachments,
+        }
+    except Exception as e:
+        frappe.log_error(f"get_round2_response_for_review error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def get_round2_responses_for_judging():
+    """Return all Round 2 Responses with existing scores. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        rows = frappe.get_all(
+            "Round 2 Response",
+            fields=[
+                "name", "applicant_name", "county", "gender", "age",
+                "developmental_level", "is_tech_enabled",
+                "innovation_description", "resources_needed",
+                "score", "score_notes", "scored_by", "scored_on",
+            ],
+            order_by="county, applicant_name",
+        )
+        result = []
+        for r in rows:
+            scored_by_name = (
+                frappe.db.get_value("User", r.scored_by, "full_name") or r.scored_by
+                if r.scored_by else None
+            )
+            result.append({
+                "name":                 r.name,
+                "applicant_name":       r.applicant_name or "",
+                "county":               r.county or "",
+                "gender":               r.gender or "",
+                "age":                  r.age or "",
+                "developmental_level":  r.developmental_level or "",
+                "is_tech_enabled":      bool(r.is_tech_enabled),
+                "innovation_description": r.innovation_description or "",
+                "resources_needed":     r.resources_needed or "",
+                "score":                round(float(r.score), 1) if r.score else 0,
+                "score_notes":          r.score_notes or "",
+                "scored_by":            r.scored_by or "",
+                "scored_by_name":       scored_by_name or "",
+                "scored_on":            str(r.scored_on) if r.scored_on else "",
+            })
+        return {"success": True, "responses": result}
+    except Exception as e:
+        frappe.log_error(f"get_round2_responses_for_judging error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def save_round2_score(response_name, score, notes=""):
+    """Save (or overwrite) the coordinator's score on a Round 2 Response. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        score = float(score)
+        if score < 0 or score > 10:
+            return {"success": False, "error": "Score must be between 0 and 10."}
+
+        if not frappe.db.exists("Round 2 Response", response_name):
+            return {"success": False, "error": "Round 2 Response not found."}
+
+        doc = frappe.get_doc("Round 2 Response", response_name)
+        doc.score      = score
+        doc.score_notes = notes or ""
+        doc.scored_by  = frappe.session.user
+        doc.scored_on  = frappe.utils.now()
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        scored_by_name = frappe.db.get_value("User", doc.scored_by, "full_name") or doc.scored_by
+        return {
+            "success":        True,
+            "scored_by":      doc.scored_by,
+            "scored_by_name": scored_by_name,
+            "scored_on":      str(doc.scored_on),
+        }
+    except Exception as e:
+        frappe.log_error(f"save_round2_score error: {str(e)}", "Judging API")
+        frappe.db.rollback()
+        return {"success": False, "error": str(e)}

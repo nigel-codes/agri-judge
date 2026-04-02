@@ -17,7 +17,13 @@
   "is_tech_enabled",
   "section_responses",
   "innovation_description",
-  "resources_needed"
+  "resources_needed",
+  "section_scoring",
+  "score",
+  "score_notes",
+  "column_break_scoring",
+  "scored_by",
+  "scored_on"
  ],
  "fields": [
   {
@@ -107,6 +113,40 @@
    "in_list_view": 1,
    "label": "Resources/Skills needed to launch/scale your project",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_scoring",
+   "fieldtype": "Section Break",
+   "label": "Coordinator Scoring"
+  },
+  {
+   "fieldname": "score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Score (0–10)",
+   "precision": "1"
+  },
+  {
+   "fieldname": "score_notes",
+   "fieldtype": "Text",
+   "label": "Scoring Notes"
+  },
+  {
+   "fieldname": "column_break_scoring",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "scored_by",
+   "fieldtype": "Link",
+   "label": "Scored By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scored_on",
+   "fieldtype": "Datetime",
+   "label": "Scored On",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

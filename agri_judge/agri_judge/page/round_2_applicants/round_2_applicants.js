@@ -17,6 +17,7 @@ frappe.pages['round-2-applicants'].on_page_load = function(wrapper) {
     page.add_button('Home', () => frappe.set_route('/app'), 'octicon octicon-home');
     page.add_button('Advanced Metrics', () => frappe.set_route('judging-advanced-metrics'), 'octicon octicon-graph');
     page.add_button('Leaderboard', () => frappe.set_route('judging-leaderboard'), 'octicon octicon-list-ordered');
+    page.add_button('Round 2 Judging', () => frappe.set_route('round-2-judging'), 'octicon octicon-law');
     page.set_primary_action('Refresh', () => wrapper._r2 && wrapper._r2.load(), 'octicon octicon-sync');
     page.add_button('✉ Send Emails', () => wrapper._r2 && wrapper._r2.openEmailPanel(), 'octicon octicon-mail');
     wrapper._r2 = new Round2Page(page, wrapper);
@@ -471,12 +472,35 @@ class Round2Page {
         });
 
         d.body.querySelector('#btnSendRegret')?.addEventListener('click', () => {
-            doSend(
-                'agri_judge.agri_judge.api.judging.send_round2_regret_emails',
-                'Regret Emails',
-                m.regret.length,
-                `Send <strong>Email 3 (Regret Emails)</strong> to <strong>${m.regret.length}</strong> applicant(s) who are not in the Round 2 shortlist?`
-            );
+            if (m.regret_emails_sent) {
+                // Already sent — require hard confirmation before force-sending
+                frappe.confirm(
+                    `⚠ <strong>Regret emails have already been sent.</strong><br><br>
+                    Sending again will deliver a duplicate regret email to all
+                    <strong>${m.regret.length}</strong> non-shortlisted applicant(s).<br><br>
+                    Are you absolutely sure you want to resend?`,
+                    () => {
+                        frappe.call({
+                            method: 'agri_judge.agri_judge.api.judging.send_round2_regret_emails',
+                            args: { force: 1 },
+                            freeze: true,
+                            freeze_message: 'Sending Regret Emails…',
+                            callback: (r) => {
+                                d.hide();
+                                const msg = r.message?.warning || r.message?.message || `Sent ${r.message?.sent} email(s).`;
+                                frappe.show_alert({ message: msg, indicator: r.message?.warning ? 'orange' : 'green' }, 8);
+                            }
+                        });
+                    }
+                );
+            } else {
+                doSend(
+                    'agri_judge.agri_judge.api.judging.send_round2_regret_emails',
+                    'Regret Emails',
+                    m.regret.length,
+                    `Send <strong>Email 3 (Regret Emails)</strong> to <strong>${m.regret.length}</strong> applicant(s) who are not in the Round 2 shortlist?`
+                );
+            }
         });
     }
 
