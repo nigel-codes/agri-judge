@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Business Mapping | Kenya Red Cross</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --rc-red:      rgb(237, 28, 36);
+            --rc-red-dark: #C2001B;
+            --rc-red-deep: #800010;
+            --rc-white:    #FFFFFF;
+            --rc-light:    #FEF0F1;
+            --rc-grey:     #F2F2F2;
+            --rc-border:   #DDD;
+            --text-dark:   #111111;
+            --text-mid:    #505050;
+            --text-light:  #888888;
+            --shadow-sm:   0 2px 8px rgba(0,0,0,.07);
+            --shadow-md:   0 6px 32px rgba(0,0,0,.10);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--rc-grey);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Top bar ── */
+        .topbar {
+            background: var(--rc-red-dark);
+            color: #fff;
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 3px 12px rgba(0,0,0,.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        .topbar-logo {
+            height: 36px;
+            width: auto;
+            object-fit: contain;
+        }
+        .topbar-divider {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.35);
+        }
+        .topbar-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 0.03em;
+            line-height: 1.3;
+        }
+        .topbar-title strong {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ── Progress bar ── */
+        .progress-wrap {
+            background: var(--rc-red);
+            padding: 0.6rem 1.5rem;
+            display: none;
+        }
+        .progress-wrap.visible { display: block; }
+        .progress-label {
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            border-radius: 99px;
+            height: 6px;
+        }
+        .progress-fill {
+            background: #fff;
+            border-radius: 99px;
+            height: 6px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Main area ── */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2.5rem 1rem 2rem;
+        }
+
+        .card {
+            background: var(--rc-white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 780px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--rc-red-dark) 0%, var(--rc-red) 100%);
+            color: #fff;
+            padding: 2rem 2.5rem 1.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-header::after {
+            content: '';
+            position: absolute;
+            right: -40px;
+            top: -40px;
+            width: 160px;
+            height: 160px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 50%;
+        }
+        .card-header::before {
+            content: '';
+            position: absolute;
+            right: 40px;
+            bottom: -60px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .card-header .part-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.85rem;
+            border-radius: 99px;
+            border: 1px solid rgba(255,255,255,0.25);
+            margin-bottom: 0.85rem;
+        }
+        .card-header h2 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            line-height: 1.25;
+            position: relative;
+        }
+        .card-header p {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            opacity: 0.88;
+            line-height: 1.65;
+            position: relative;
+        }
+
+        .card-body {
+            padding: 2rem 2.5rem 2.5rem;
+        }
+
+        /* ── Landing page ── */
+        .landing-header {
+            background: linear-gradient(150deg, var(--rc-red-deep) 0%, var(--rc-red-dark) 45%, var(--rc-red) 100%);
+            color: #fff;
+            padding: 3rem 2.5rem 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .landing-header::before {
+            content: '';
+            position: absolute;
+            left: -60px; top: -60px;
+            width: 220px; height: 220px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+        }
+        .landing-header::after {
+            content: '';
+            position: absolute;
+            right: -40px; bottom: -80px;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .landing-logo-wrap {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .landing-logo {
+            height: 64px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 12px rgba(0,0,0,.25));
+        }
+        .landing-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.9);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            padding: 0.3rem 1rem;
+            border-radius: 99px;
+            margin-bottom: 1rem;
+        }
+        .landing-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+        .landing-header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: 400;
+            position: relative;
+        }
+        .landing-body {
+            padding: 2.25rem 2.5rem 2rem;
+        }
+        .landing-body h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--rc-red-dark);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .landing-body h3::before {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background: var(--rc-red);
+            border-radius: 2px;
+        }
+        .landing-body p {
+            font-size: 0.875rem;
+            color: var(--text-mid);
+            line-height: 1.75;
+            margin-bottom: 1rem;
+        }
+        .parts-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+            margin: 1.25rem 0 2rem;
+        }
+        .parts-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.83rem;
+            color: var(--text-mid);
+            background: var(--rc-light);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--rc-red);
+        }
+        .parts-list li i {
+            color: var(--rc-red);
+            font-size: 0.65rem;
+            flex-shrink: 0;
+        }
+        .start-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            width: 100%;
+            background: linear-gradient(135deg, var(--rc-red-dark), var(--rc-red));
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(237,28,36,.4);
+        }
+        .start-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(237,28,36,.45); }
+
+        /* ── Form elements ── */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label.field-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.45rem;
+            letter-spacing: 0.01em;
+        }
+        label.field-label .req {
+            color: var(--rc-red);
+            margin-left: 2px;
+        }
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--rc-border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            color: var(--text-dark);
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--rc-red);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(237,28,36,.1);
+        }
+        textarea { resize: vertical; min-height: 84px; }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-color: #fafafa; padding-right: 2.5rem; }
+
+        /* Checkboxes */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.6rem 0.85rem;
+            border: 1.5px solid var(--rc-border);
+            border-radius: 9px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+            background: #fafafa;
+        }
+        .checkbox-item:hover { border-color: var(--rc-red); background: var(--rc-light); box-shadow: 0 2px 8px rgba(237,28,36,.1); }
+        .checkbox-item.checked { border-color: var(--rc-red); background: var(--rc-light); box-shadow: 0 2px 8px rgba(237,28,36,.12); }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-top: 2px;
+            accent-color: var(--rc-red);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .checkbox-item span {
+            font-size: 0.82rem;
+            color: var(--text-mid);
+            line-height: 1.45;
+        }
+
+        .hint { font-size: 0.78rem; color: var(--text-light); margin-top: 0.3rem; }
+
+        /* Conditional fields */
+        .conditional { display: none; }
+        .conditional.visible { display: block; }
+
+        /* ── Navigation buttons ── */
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--rc-light);
+            gap: 1rem;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.75rem;
+            border-radius: 9px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--rc-border);
+            color: var(--text-mid);
+        }
+        .btn-outline:hover { border-color: var(--rc-red); color: var(--rc-red); background: var(--rc-light); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--rc-red-dark), var(--rc-red));
+            color: #fff;
+            margin-left: auto;
+            box-shadow: 0 3px 12px rgba(237,28,36,.35);
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(237,28,36,.4); }
+        .btn-primary:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; transform: none; opacity: 1; }
+        .btn-success {
+            background: linear-gradient(135deg, #1a7a4a, #22a060);
+            color: #fff;
+            margin-left: auto;
+            box-shadow: 0 3px 12px rgba(26,122,74,.35);
+        }
+        .btn-success:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(26,122,74,.4); }
+
+        /* ── Success page ── */
+        .success-body {
+            padding: 3rem 2.5rem;
+            text-align: center;
+        }
+        .success-icon {
+            width: 80px; height: 80px;
+            background: #e8f8f0;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.25rem;
+            color: #1a7a4a;
+        }
+        .success-body h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+        }
+        .success-body p {
+            font-size: 0.9rem;
+            color: var(--text-mid);
+            line-height: 1.7;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .ref-number {
+            display: inline-block;
+            background: var(--rc-light);
+            border: 1px solid #f8c0c0;
+            color: var(--rc-red-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            border-radius: 99px;
+            margin-top: 1rem;
+        }
+
+        /* ── Error message ── */
+        .error-msg {
+            background: #fff0f0;
+            border: 1px solid #f8c0c0;
+            color: var(--rc-red-deep);
+            border-radius: 7px;
+            padding: 0.75rem 1rem;
+            font-size: 0.84rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        .error-msg.visible { display: block; }
+
+        /* ── Sub-section ── */
+        .sub-section {
+            margin: 1.75rem 0 1rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid var(--rc-light);
+        }
+        .sub-section h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--rc-red-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+        .sub-section h4 i { font-size: 0.78rem; }
+
+        /* ── Footer ── */
+        footer {
+            background: var(--rc-red-deep);
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 1.1rem 1.5rem;
+            font-size: 0.78rem;
+            letter-spacing: 0.03em;
+        }
+        footer span { color: #fff; font-weight: 600; }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .card-header, .card-body, .landing-body, .landing-header { padding-left: 1.25rem; padding-right: 1.25rem; }
+            .checkbox-grid { grid-template-columns: 1fr; }
+            .parts-list { grid-template-columns: 1fr; }
+            .landing-header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="/KRCS.Logos_-_onBlack@4x.png" alt="Kenya Red Cross" class="topbar-logo">
+        <div class="topbar-divider"></div>
+        <div class="topbar-title">
+            <strong>Social Business Mapping</strong>
+            IFRC / RCRC Network
+        </div>
+    </div>
+</div>
+
+<!-- Progress bar (hidden on landing/success) -->
+<div class="progress-wrap" id="progressWrap">
+    <div class="progress-label">
+        <span id="progressLabel">Part 1 of 6</span>
+        <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+</div>
+
+<main>
+    <!-- ── STEP 0: Landing ── -->
+    <div class="card" id="step-0">
+        <div class="landing-header">
+            <div class="landing-logo-wrap">
+                <img src="/KRCS.Logos_-_onBlack@4x.png" alt="Kenya Red Cross Society" class="landing-logo">
+            </div>
+            <div class="landing-badge">IFRC / RCRC Network Initiative</div>
+            <h1>Social Business Mapping<br>Questionnaire</h1>
+            <p class="subtitle">Mapping social business activities across the RCRC network</p>
+        </div>
+        <div class="landing-body">
+            <h3>About this Questionnaire</h3>
+            <p>
+                This form is designed to help the <strong>International Federation of Red Cross and Red Crescent Societies (IFRC)</strong>
+                and its National Society partners map existing social business activities across the RCRC network.
+            </p>
+            <p>
+                The information collected will be used to build a comprehensive picture of social business maturity,
+                identify support needs, share best practices, and inform the development of a Social Business Toolkit
+                for National Societies worldwide.
+            </p>
+            <p>All responses are confidential and will only be shared in aggregated, anonymised form.</p>
+
+            <ul class="parts-list">
+                <li><i class="fa-solid fa-circle"></i> Part 1 — Identity &amp; Structure</li>
+                <li><i class="fa-solid fa-circle"></i> Part 2 — Value Proposition &amp; Impact</li>
+                <li><i class="fa-solid fa-circle"></i> Part 3 — Users &amp; Beneficiaries</li>
+                <li><i class="fa-solid fa-circle"></i> Part 4 — Revenue Streams</li>
+                <li><i class="fa-solid fa-circle"></i> Part 5 — Maturity &amp; Capacity</li>
+                <li><i class="fa-solid fa-circle"></i> Part 6 — Documents &amp; Consent</li>
+            </ul>
+
+            <button class="start-btn" onclick="goTo(1)">
+                <i class="fa-solid fa-play"></i> Start Questionnaire
+            </button>
+        </div>
+    </div>
+
+    <!-- ── STEP 1: Part 1 — Identity & Structure ── -->
+    <div class="card" id="step-1" style="display:none">
+        <div class="card-header">
+            <span class="part-badge">Part 1 of 6</span>
+            <h2>Identity &amp; Structure</h2>
+            <p>Tell us about your National Society and the business activity you are registering.</p>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="field-label">National Society <span class="req">*</span></label>
+                <input type="text" id="national_society" placeholder="e.g. Kenya Red Cross Society">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Name of the Business Activity <span class="req">*</span></label>
+                <input type="text" id="business_activity_name" placeholder="e.g. KRCS Blood Bank Services">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Matrix Quadrant <span class="req">*</span></label>
+                <select id="matrix_quadrant">
+                    <option value="">— Select —</option>
+                    <option>1. Commercial Zone</option>
+                    <option>2. Livelihood Zone</option>
+                    <option>3. Social Business Zone</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Year of Establishment <span class="req">*</span></label>
+                <input type="number" id="year_of_establishment" placeholder="e.g. 2018" min="1900" max="2030">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Level of Operation <span class="req">*</span></label>
+                <select id="level_of_operation">
+                    <option value="">— Select —</option>
+                    <option>HQ-level initiative</option>
+                    <option>Branch-level initiative</option>
+                    <option>Both HQ and branches</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Hosting Unit within the National Society <span class="req">*</span></label>
+                <input type="text" id="hosting_unit" placeholder="e.g. Health Services Department">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Is your business activity part of a broader Social Entrepreneurship Program? <span class="req">*</span></label>
+                <input type="text" id="broader_program" placeholder="e.g. Yes — IFRC Social Enterprise Accelerator">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Legal Status of the Activity <span class="req">*</span></label>
+                <select id="legal_status" onchange="toggleLegalForm()">
+                    <option value="">— Select —</option>
+                    <option>Not formally registered yet</option>
+                    <option>Registered as a department of the National Society</option>
+                    <option>Registered as a separate legal entity</option>
+                </select>
+            </div>
+            <div class="conditional form-group" id="legal_form_wrap">
+                <label class="field-label">Legal Form (if separate entity)</label>
+                <select id="legal_form" onchange="toggleLegalFormOther()">
+                    <option value="">— Select —</option>
+                    <option>Non-profit organization</option>
+                    <option>Cooperative</option>
+                    <option>Limited liability company (LLC)</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="conditional form-group" id="legal_form_other_wrap">
+                <label class="field-label">Legal Form — Other (specify)</label>
+                <input type="text" id="legal_form_other" placeholder="Please specify">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Country / Countries of Operation <span class="req">*</span></label>
+                <textarea id="countries_of_operation" rows="2" placeholder="e.g. Kenya, Uganda"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Key Contact Person <span class="req">*</span></label>
+                <textarea id="key_contact" rows="2" placeholder="Name, Title, Email — e.g. Jane Doe, Social Enterprise Manager, jane@redcross.or.ke"></textarea>
+            </div>
+            <div class="error-msg" id="err-1">Please fill in all required fields before continuing.</div>
+            <div class="nav-row">
+                <button class="btn btn-outline" onclick="goTo(0)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="next(1)">Next <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── STEP 2: Part 2 — Value Proposition & Impact ── -->
+    <div class="card" id="step-2" style="display:none">
+        <div class="card-header">
+            <span class="part-badge">Part 2 of 6</span>
+            <h2>Value Proposition &amp; Impact</h2>
+            <p>Describe what your social business does and the problem it addresses.</p>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="field-label">Main Business Activity <span class="req">*</span></label>
+                <textarea id="main_business_activity" rows="3" placeholder="Describe your core business activity in one or two sentences."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Social / Humanitarian Problem Addressed <span class="req">*</span></label>
+                <textarea id="social_problem_addressed" rows="3" placeholder="What social or humanitarian issue does this activity address?"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Main Sector of Operation <span class="req">*</span></label>
+                <select id="main_sector" onchange="toggleSectorOther()">
+                    <option value="">— Select —</option>
+                    <option>Livelihoods/Empowerment</option>
+                    <option>Health</option>
+                    <option>WASH</option>
+                    <option>Climate &amp; Environment</option>
+                    <option>Logistics</option>
+                    <option>Training</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="conditional form-group" id="main_sector_other_wrap">
+                <label class="field-label">Main Sector — Other (specify)</label>
+                <input type="text" id="main_sector_other" placeholder="Please specify">
+            </div>
+            <div class="error-msg" id="err-2">Please fill in all required fields before continuing.</div>
+            <div class="nav-row">
+                <button class="btn btn-outline" onclick="goTo(1)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="next(2)">Next <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── STEP 3: Part 3 — Users & Beneficiaries ── -->
+    <div class="card" id="step-3" style="display:none">
+        <div class="card-header">
+            <span class="part-badge">Part 3 of 6</span>
+            <h2>Users &amp; Beneficiaries</h2>
+            <p>Who does your social business serve and how do you reach them?</p>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="field-label">Business Model Type <span class="req">*</span></label>
+                <select id="business_model_type">
+                    <option value="">— Select —</option>
+                    <option>B2C (selling directly to individuals)</option>
+                    <option>B2B (selling to companies)</option>
+                    <option>B2G (selling to government)</option>
+                    <option>Internal (selling to the National Society)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Main Paying Customers <span class="req">*</span></label>
+                <textarea id="paying_customers" rows="2" placeholder="e.g. Hospitals, clinics, and community health workers"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Non-Paying Customers / Beneficiaries (if any)</label>
+                <textarea id="non_paying_customers" rows="2" placeholder="e.g. Low-income families receiving subsidised services"></textarea>
+            </div>
+
+            <div class="sub-section">
+                <h4><i class="fa-solid fa-bullhorn"></i> How do you reach your paying customers?</h4>
+            </div>
+            <div class="checkbox-grid">
+                <label class="checkbox-item" id="lbl-reach_online">
+                    <input type="checkbox" id="reach_online" onchange="syncCheck(this,'lbl-reach_online')">
+                    <span>Online channels (social media, website, platforms)</span>
+                </label>
+                <label class="checkbox-item" id="lbl-reach_events">
+                    <input type="checkbox" id="reach_events" onchange="syncCheck(this,'lbl-reach_events')">
+                    <span>Events and public outreach</span>
+                </label>
+                <label class="checkbox-item" id="lbl-reach_direct_sales">
+                    <input type="checkbox" id="reach_direct_sales" onchange="syncCheck(this,'lbl-reach_direct_sales')">
+                    <span>Direct sales / community outreach</span>
+                </label>
+                <label class="checkbox-item" id="lbl-reach_partnerships">
+                    <input type="checkbox" id="reach_partnerships" onchange="syncCheck(this,'lbl-reach_partnerships')">
+                    <span>Partnerships (companies, NGOs, government)</span>
+                </label>
+                <label class="checkbox-item" id="lbl-reach_other">
+                    <input type="checkbox" id="reach_other" onchange="syncCheck(this,'lbl-reach_other'); toggleConditionalCheck('reach_other','reach_other_specify_wrap')">
+                    <span>Other</span>
+                </label>
+            </div>
+            <div class="conditional form-group" id="reach_other_specify_wrap" style="margin-top:0.75rem">
+                <label class="field-label">Customer Reach — Other (specify)</label>
+                <input type="text" id="reach_other_specify" placeholder="Please specify">
+            </div>
+
+            <div class="error-msg" id="err-3">Please fill in all required fields before continuing.</div>
+            <div class="nav-row">
+                <button class="btn btn-outline" onclick="goTo(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="next(3)">Next <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── STEP 4: Part 4 — Revenue Streams ── -->
+    <div class="card" id="step-4" style="display:none">
+        <div class="card-header">
+            <span class="part-badge">Part 4 of 6</span>
+            <h2>Revenue Streams &amp; Business Model</h2>
+            <p>How is your social business funded and what are its revenue sources?</p>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="field-label">How is the Social Business Currently Funded? <span class="req">*</span></label>
+                <select id="funding_type">
+                    <option value="">— Select —</option>
+                    <option>Primarily grants</option>
+                    <option>Primarily revenue-generated</option>
+                    <option>Hybrid (grants + revenue)</option>
+                    <option>Still in pilot phase (not yet generating revenue)</option>
+                </select>
+            </div>
+
+            <div class="sub-section">
+                <h4><i class="fa-solid fa-coins"></i> Main Revenue Sources (select all that apply)</h4>
+            </div>
+            <div class="checkbox-grid">
+                <label class="checkbox-item" id="lbl-rev_product_sales">
+                    <input type="checkbox" id="rev_product_sales" onchange="syncCheck(this,'lbl-rev_product_sales')"><span>Product sales</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_service_contracts">
+                    <input type="checkbox" id="rev_service_contracts" onchange="syncCheck(this,'lbl-rev_service_contracts')"><span>Service contracts</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_subscription">
+                    <input type="checkbox" id="rev_subscription" onchange="syncCheck(this,'lbl-rev_subscription')"><span>Subscription model</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_licensing">
+                    <input type="checkbox" id="rev_licensing" onchange="syncCheck(this,'lbl-rev_licensing')"><span>Licensing / franchising</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_membership">
+                    <input type="checkbox" id="rev_membership" onchange="syncCheck(this,'lbl-rev_membership')"><span>Membership fees</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_consulting">
+                    <input type="checkbox" id="rev_consulting" onchange="syncCheck(this,'lbl-rev_consulting')"><span>Consulting services</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_commission">
+                    <input type="checkbox" id="rev_commission" onchange="syncCheck(this,'lbl-rev_commission')"><span>Commission-based income</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_procurement">
+                    <input type="checkbox" id="rev_procurement" onchange="syncCheck(this,'lbl-rev_procurement')"><span>Public procurement contracts</span>
+                </label>
+                <label class="checkbox-item" id="lbl-rev_other">
+                    <input type="checkbox" id="rev_other" onchange="syncCheck(this,'lbl-rev_other'); toggleConditionalCheck('rev_other','rev_other_specify_wrap')"><span>Other</span>
+                </label>
+            </div>
+            <div class="conditional form-group" id="rev_other_specify_wrap" style="margin-top:0.75rem">
+                <label class="field-label">Revenue Sources — Other (specify)</label>
+                <input type="text" id="rev_other_specify" placeholder="Please specify">
+            </div>
+
+            <div class="form-group" style="margin-top:1.5rem">
+                <label class="field-label">Annual Revenue Range <span class="req">*</span></label>
+                <input type="text" id="annual_revenue_range" placeholder="e.g. USD 50,000 – 100,000">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Financial Situation <span class="req">*</span></label>
+                <select id="financial_situation" onchange="toggleSurplus()">
+                    <option value="">— Select —</option>
+                    <option>Operating at a loss</option>
+                    <option>Break-even</option>
+                    <option>Generating surplus reinvested into mission</option>
+                    <option>Generating surplus redistributed to National Society core costs</option>
+                </select>
+            </div>
+            <div class="conditional form-group" id="surplus_split_wrap">
+                <label class="field-label">Surplus Split: % to Social Mission vs National Society Core Costs</label>
+                <textarea id="surplus_split" rows="2" placeholder="e.g. 70% to social mission, 30% to core costs"></textarea>
+            </div>
+
+            <div class="error-msg" id="err-4">Please fill in all required fields before continuing.</div>
+            <div class="nav-row">
+                <button class="btn btn-outline" onclick="goTo(3)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="next(4)">Next <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── STEP 5: Part 5 — Maturity & Capacity ── -->
+    <div class="card" id="step-5" style="display:none">
+        <div class="card-header">
+            <span class="part-badge">Part 5 of 6</span>
+            <h2>Maturity &amp; Capacity</h2>
+            <p>Tell us about the stage of your social business and the support it needs.</p>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="field-label">Stage of Development <span class="req">*</span></label>
+                <select id="development_stage">
+                    <option value="">— Select —</option>
+                    <option>Pilot stage</option>
+                    <option>Early growth</option>
+                    <option>Scaling nationally</option>
+                    <option>Scaling internationally</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Number of Paid Staff <span class="req">*</span></label>
+                <select id="paid_staff_count">
+                    <option value="">— Select —</option>
+                    <option>0–2</option>
+                    <option>3–10</option>
+                    <option>11–25</option>
+                    <option>25+</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Number of Customers Reached Annually <span class="req">*</span></label>
+                <input type="text" id="customers_reached_annually" placeholder="e.g. 2,500">
+            </div>
+            <div class="form-group">
+                <label class="field-label">Entrepreneurship / Business Development Training Received (if any)</label>
+                <textarea id="training_received" rows="2" placeholder="e.g. IFRC Social Enterprise Bootcamp 2023"></textarea>
+            </div>
+
+            <div class="sub-section">
+                <h4><i class="fa-solid fa-hand-holding-heart"></i> Main Current Needs <small style="font-weight:400;color:#888">(select up to 3)</small></h4>
+            </div>
+            <div class="checkbox-grid" id="needs-grid">
+                <label class="checkbox-item" id="lbl-need_funding">
+                    <input type="checkbox" id="need_funding" onchange="limitCheck(this,'lbl-need_funding','needs-grid',3)"><span>Access to funding / investment</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_biz_dev">
+                    <input type="checkbox" id="need_biz_dev" onchange="limitCheck(this,'lbl-need_biz_dev','needs-grid',3)"><span>Business development support</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_impact">
+                    <input type="checkbox" id="need_impact" onchange="limitCheck(this,'lbl-need_impact','needs-grid',3)"><span>Impact measurement tools</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_legal">
+                    <input type="checkbox" id="need_legal" onchange="limitCheck(this,'lbl-need_legal','needs-grid',3)"><span>Legal advice</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_marketing">
+                    <input type="checkbox" id="need_marketing" onchange="limitCheck(this,'lbl-need_marketing','needs-grid',3)"><span>Marketing &amp; branding</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_market_access">
+                    <input type="checkbox" id="need_market_access" onchange="limitCheck(this,'lbl-need_market_access','needs-grid',3)"><span>Market access / partnerships</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_digital">
+                    <input type="checkbox" id="need_digital" onchange="limitCheck(this,'lbl-need_digital','needs-grid',3)"><span>Digital tools</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_hr">
+                    <input type="checkbox" id="need_hr" onchange="limitCheck(this,'lbl-need_hr','needs-grid',3)"><span>HR / recruitment</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_rd">
+                    <input type="checkbox" id="need_rd" onchange="limitCheck(this,'lbl-need_rd','needs-grid',3)"><span>R&amp;D / product development</span>
+                </label>
+                <label class="checkbox-item" id="lbl-need_other">
+                    <input type="checkbox" id="need_other" onchange="limitCheck(this,'lbl-need_other','needs-grid',3); toggleConditionalCheck('need_other','need_other_specify_wrap')"><span>Other</span>
+                </label>
+            </div>
+            <div class="conditional form-group" id="need_other_specify_wrap" style="margin-top:0.75rem">
+                <label class="field-label">Main Needs — Other (specify)</label>
+                <input type="text" id="need_other_specify" placeholder="Please specify">
+            </div>
+
+            <div class="sub-section" style="margin-top:2rem">
+                <h4><i class="fa-solid fa-star"></i> Main Strengths <small style="font-weight:400;color:#888">(select up to 3)</small></h4>
+            </div>
+            <div class="checkbox-grid" id="str-grid">
+                <label class="checkbox-item" id="lbl-str_mission">
+                    <input type="checkbox" id="str_mission" onchange="limitCheck(this,'lbl-str_mission','str-grid',3)"><span>Strong mission alignment</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_volunteers">
+                    <input type="checkbox" id="str_volunteers" onchange="limitCheck(this,'lbl-str_volunteers','str-grid',3)"><span>Strong volunteer base</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_legitimacy">
+                    <input type="checkbox" id="str_legitimacy" onchange="limitCheck(this,'lbl-str_legitimacy','str-grid',3)"><span>Strong local legitimacy</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_partnerships">
+                    <input type="checkbox" id="str_partnerships" onchange="limitCheck(this,'lbl-str_partnerships','str-grid',3)"><span>Solid partnerships</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_financial">
+                    <input type="checkbox" id="str_financial" onchange="limitCheck(this,'lbl-str_financial','str-grid',3)"><span>Financial sustainability</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_innovation">
+                    <input type="checkbox" id="str_innovation" onchange="limitCheck(this,'lbl-str_innovation','str-grid',3)"><span>Innovation capacity</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_leadership">
+                    <input type="checkbox" id="str_leadership" onchange="limitCheck(this,'lbl-str_leadership','str-grid',3)"><span>Strong leadership</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_brand">
+                    <input type="checkbox" id="str_brand" onchange="limitCheck(this,'lbl-str_brand','str-grid',3)"><span>Strong brand recognition</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_government">
+                    <input type="checkbox" id="str_government" onchange="limitCheck(this,'lbl-str_government','str-grid',3)"><span>Government relationships</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_scalable">
+                    <input type="checkbox" id="str_scalable" onchange="limitCheck(this,'lbl-str_scalable','str-grid',3)"><span>Scalable model</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_rcrc">
+                    <input type="checkbox" id="str_rcrc" onchange="limitCheck(this,'lbl-str_rcrc','str-grid',3)"><span>Access to RCRC network / partners</span>
+                </label>
+                <label class="checkbox-item" id="lbl-str_other">
+                    <input type="checkbox" id="str_other" onchange="limitCheck(this,'lbl-str_other','str-grid',3); toggleConditionalCheck('str_other','str_other_specify_wrap')"><span>Other</span>
+                </label>
+            </div>
+            <div class="conditional form-group" id="str_other_specify_wrap" style="margin-top:0.75rem">
+                <label class="field-label">Main Strengths — Other (specify)</label>
+                <input type="text" id="str_other_specify" placeholder="Please specify">
+            </div>
+
+            <div class="error-msg" id="err-5">Please fill in all required fields before continuing.</div>
+            <div class="nav-row">
+                <button class="btn btn-outline" onclick="goTo(4)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn btn-primary" onclick="next(5)">Next <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── STEP 6: Part 6 — Documents & Consent ── -->
+    <div class="card" id="step-6" style="display:none">
+        <div class="card-header">
+            <span class="part-badge">Part 6 of 6</span>
+            <h2>Documents &amp; Consent</h2>
+            <p>Indicate which supporting documents you have available and confirm your consent.</p>
+        </div>
+        <div class="card-body">
+            <div class="sub-section" style="margin-top:0">
+                <h4><i class="fa-solid fa-file-alt"></i> Available Supporting Documents (select all that apply)</h4>
+            </div>
+            <div class="checkbox-grid">
+                <label class="checkbox-item" id="lbl-doc_business_plan">
+                    <input type="checkbox" id="doc_business_plan" onchange="syncCheck(this,'lbl-doc_business_plan')"><span>Business Plan</span>
+                </label>
+                <label class="checkbox-item" id="lbl-doc_annual_reports">
+                    <input type="checkbox" id="doc_annual_reports" onchange="syncCheck(this,'lbl-doc_annual_reports')"><span>Annual Reports</span>
+                </label>
+                <label class="checkbox-item" id="lbl-doc_photos_media">
+                    <input type="checkbox" id="doc_photos_media" onchange="syncCheck(this,'lbl-doc_photos_media')"><span>Photos / Media</span>
+                </label>
+                <label class="checkbox-item" id="lbl-doc_impact_report">
+                    <input type="checkbox" id="doc_impact_report" onchange="syncCheck(this,'lbl-doc_impact_report')"><span>Impact Report</span>
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-top:1.75rem">
+                <label class="field-label">Open to Sharing Content with the RCRC Network? <span class="req">*</span></label>
+                <select id="open_to_sharing">
+                    <option value="">— Select —</option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+                <p class="hint">Your information may be used in aggregate reports or case studies shared across the RCRC network.</p>
+            </div>
+
+            <div class="error-msg" id="err-6">Please fill in all required fields before submitting.</div>
+            <div class="error-msg" id="err-submit"></div>
+            <div class="nav-row">
+                <button class="btn btn-outline" onclick="goTo(5)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <button class="btn btn-success" id="submitBtn" onclick="submitForm()">
+                    <i class="fa-solid fa-paper-plane"></i> Submit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── STEP 7: Success ── -->
+    <div class="card" id="step-7" style="display:none">
+        <div class="success-body">
+            <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+            <h2>Submission Received!</h2>
+            <p>
+                Thank you for completing the Social Business Mapping questionnaire.
+                Your response has been recorded and will contribute to the IFRC's understanding
+                of social business activities across the RCRC network.
+            </p>
+            <p style="margin-top:1rem">
+                If you have any questions or wish to follow up, please contact your regional IFRC focal point.
+            </p>
+            <div class="ref-number" id="refNumber"></div>
+            <div style="margin-top:2rem">
+                <button class="btn btn-outline" onclick="location.reload()"><i class="fa-solid fa-plus"></i> Submit Another Response</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>window.frappe = window.frappe || {};</script>
+<!-- csrf_token -->
+<footer>
+    Made by <span>Kenya Red Cross Digital Transformation Department</span>
+</footer>
+
+<script>
+    let currentStep = 0;
+
+    function goTo(step) {
+        document.getElementById('step-' + currentStep).style.display = 'none';
+        currentStep = step;
+        document.getElementById('step-' + currentStep).style.display = '';
+        updateProgress();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateProgress() {
+        const wrap = document.getElementById('progressWrap');
+        const fill = document.getElementById('progressFill');
+        const label = document.getElementById('progressLabel');
+        const pct = document.getElementById('progressPct');
+
+        if (currentStep === 0 || currentStep === 7) {
+            wrap.classList.remove('visible');
+            return;
+        }
+        wrap.classList.add('visible');
+        const pctVal = Math.round(((currentStep - 1) / 6) * 100);
+        fill.style.width = pctVal + '%';
+        label.textContent = 'Part ' + currentStep + ' of 6';
+        pct.textContent = pctVal + '%';
+    }
+
+    function syncCheck(el, labelId) {
+        const lbl = document.getElementById(labelId);
+        if (el.checked) lbl.classList.add('checked');
+        else lbl.classList.remove('checked');
+    }
+
+    function limitCheck(el, labelId, gridId, max) {
+        const grid = document.getElementById(gridId);
+        const checked = grid.querySelectorAll('input[type="checkbox"]:checked');
+        if (!el.checked) {
+            document.getElementById(labelId).classList.remove('checked');
+            return;
+        }
+        if (checked.length > max) {
+            el.checked = false;
+            return;
+        }
+        document.getElementById(labelId).classList.add('checked');
+    }
+
+    function toggleConditionalCheck(checkId, wrapId) {
+        const el = document.getElementById(checkId);
+        const wrap = document.getElementById(wrapId);
+        if (el.checked) wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function toggleLegalForm() {
+        const val = document.getElementById('legal_status').value;
+        const wrap = document.getElementById('legal_form_wrap');
+        if (val === 'Registered as a separate legal entity') wrap.classList.add('visible');
+        else {
+            wrap.classList.remove('visible');
+            document.getElementById('legal_form_other_wrap').classList.remove('visible');
+        }
+    }
+
+    function toggleLegalFormOther() {
+        const val = document.getElementById('legal_form').value;
+        const wrap = document.getElementById('legal_form_other_wrap');
+        if (val === 'Other') wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function toggleSectorOther() {
+        const val = document.getElementById('main_sector').value;
+        const wrap = document.getElementById('main_sector_other_wrap');
+        if (val === 'Other') wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function toggleSurplus() {
+        const val = document.getElementById('financial_situation').value;
+        const wrap = document.getElementById('surplus_split_wrap');
+        const surplus = ['Generating surplus reinvested into mission', 'Generating surplus redistributed to National Society core costs'];
+        if (surplus.includes(val)) wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function val(id) {
+        return (document.getElementById(id).value || '').trim();
+    }
+    function chk(id) {
+        return document.getElementById(id).checked ? 1 : 0;
+    }
+
+    const requiredFields = {
+        1: ['national_society','business_activity_name','matrix_quadrant','year_of_establishment','level_of_operation','hosting_unit','broader_program','legal_status','countries_of_operation','key_contact'],
+        2: ['main_business_activity','social_problem_addressed','main_sector'],
+        3: ['business_model_type','paying_customers'],
+        4: ['funding_type','annual_revenue_range','financial_situation'],
+        5: ['development_stage','paid_staff_count','customers_reached_annually'],
+        6: ['open_to_sharing']
+    };
+
+    function next(step) {
+        const reqs = requiredFields[step] || [];
+        const errEl = document.getElementById('err-' + step);
+        let missing = false;
+        reqs.forEach(function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (!el.value || el.value.trim() === '') missing = true;
+        });
+        if (missing) {
+            errEl.classList.add('visible');
+            return;
+        }
+        errEl.classList.remove('visible');
+        goTo(step + 1);
+    }
+
+    function collectData() {
+        return {
+            national_society:           val('national_society'),
+            business_activity_name:     val('business_activity_name'),
+            matrix_quadrant:            val('matrix_quadrant'),
+            year_of_establishment:      parseInt(val('year_of_establishment')) || 0,
+            level_of_operation:         val('level_of_operation'),
+            hosting_unit:               val('hosting_unit'),
+            broader_program:            val('broader_program'),
+            legal_status:               val('legal_status'),
+            legal_form:                 val('legal_form'),
+            legal_form_other:           val('legal_form_other'),
+            countries_of_operation:     val('countries_of_operation'),
+            key_contact:                val('key_contact'),
+            main_business_activity:     val('main_business_activity'),
+            social_problem_addressed:   val('social_problem_addressed'),
+            main_sector:                val('main_sector'),
+            main_sector_other:          val('main_sector_other'),
+            business_model_type:        val('business_model_type'),
+            paying_customers:           val('paying_customers'),
+            non_paying_customers:       val('non_paying_customers'),
+            reach_online:               chk('reach_online'),
+            reach_events:               chk('reach_events'),
+            reach_direct_sales:         chk('reach_direct_sales'),
+            reach_partnerships:         chk('reach_partnerships'),
+            reach_other:                chk('reach_other'),
+            reach_other_specify:        val('reach_other_specify'),
+            funding_type:               val('funding_type'),
+            rev_product_sales:          chk('rev_product_sales'),
+            rev_service_contracts:      chk('rev_service_contracts'),
+            rev_subscription:           chk('rev_subscription'),
+            rev_licensing:              chk('rev_licensing'),
+            rev_membership:             chk('rev_membership'),
+            rev_consulting:             chk('rev_consulting'),
+            rev_commission:             chk('rev_commission'),
+            rev_procurement:            chk('rev_procurement'),
+            rev_other:                  chk('rev_other'),
+            rev_other_specify:          val('rev_other_specify'),
+            annual_revenue_range:       val('annual_revenue_range'),
+            financial_situation:        val('financial_situation'),
+            surplus_split:              val('surplus_split'),
+            development_stage:          val('development_stage'),
+            paid_staff_count:           val('paid_staff_count'),
+            customers_reached_annually: val('customers_reached_annually'),
+            training_received:          val('training_received'),
+            need_funding:               chk('need_funding'),
+            need_biz_dev:               chk('need_biz_dev'),
+            need_impact:                chk('need_impact'),
+            need_legal:                 chk('need_legal'),
+            need_marketing:             chk('need_marketing'),
+            need_market_access:         chk('need_market_access'),
+            need_digital:               chk('need_digital'),
+            need_hr:                    chk('need_hr'),
+            need_rd:                    chk('need_rd'),
+            need_other:                 chk('need_other'),
+            need_other_specify:         val('need_other_specify'),
+            str_mission:                chk('str_mission'),
+            str_volunteers:             chk('str_volunteers'),
+            str_legitimacy:             chk('str_legitimacy'),
+            str_partnerships:           chk('str_partnerships'),
+            str_financial:              chk('str_financial'),
+            str_innovation:             chk('str_innovation'),
+            str_leadership:             chk('str_leadership'),
+            str_brand:                  chk('str_brand'),
+            str_government:             chk('str_government'),
+            str_scalable:               chk('str_scalable'),
+            str_rcrc:                   chk('str_rcrc'),
+            str_other:                  chk('str_other'),
+            str_other_specify:          val('str_other_specify'),
+            doc_business_plan:          chk('doc_business_plan'),
+            doc_annual_reports:         chk('doc_annual_reports'),
+            doc_photos_media:           chk('doc_photos_media'),
+            doc_impact_report:          chk('doc_impact_report'),
+            open_to_sharing:            val('open_to_sharing')
+        };
+    }
+
+    function submitForm() {
+        const errEl = document.getElementById('err-6');
+        const errSubmit = document.getElementById('err-submit');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (!val('open_to_sharing')) {
+            errEl.classList.add('visible');
+            return;
+        }
+        errEl.classList.remove('visible');
+        errSubmit.classList.remove('visible');
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting…';
+
+        const data = collectData();
+
+        fetch('/api/method/agri_judge.agri_judge.api.sbm.submit_sbm', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Frappe-CSRF-Token': _csrf,
+            },
+            body: new URLSearchParams(data),
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(resp) {
+            if (resp && resp.message && resp.message.name) {
+                document.getElementById('refNumber').textContent = 'Reference: ' + resp.message.name;
+                goTo(7);
+            } else if (resp && resp.exc) {
+                throw new Error(resp.exc);
+            } else {
+                throw new Error('Unexpected response from server.');
+            }
+        })
+        .catch(function(err) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit';
+            errSubmit.textContent = 'Submission failed: ' + (err.message || 'Please try again or contact support.');
+            errSubmit.classList.add('visible');
+        });
+    }
+
+    const _csrf = (typeof frappe !== 'undefined' && frappe.csrf_token) || '';
+</script>
+</body>
+</html>

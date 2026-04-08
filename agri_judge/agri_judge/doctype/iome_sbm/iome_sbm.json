@@ -1,0 +1,620 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-04-08 03:30:03.328830",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_miib",
+  "part_1_section",
+  "national_society",
+  "business_activity_name",
+  "matrix_quadrant",
+  "year_of_establishment",
+  "level_of_operation",
+  "hosting_unit",
+  "broader_program",
+  "legal_status",
+  "legal_form",
+  "legal_form_other",
+  "countries_of_operation",
+  "key_contact",
+  "part_2_section",
+  "main_business_activity",
+  "social_problem_addressed",
+  "main_sector",
+  "main_sector_other",
+  "part_3_section",
+  "business_model_type",
+  "paying_customers",
+  "non_paying_customers",
+  "reach_section_break",
+  "reach_online",
+  "reach_events",
+  "reach_direct_sales",
+  "reach_partnerships",
+  "reach_other",
+  "reach_other_specify",
+  "part_4_section",
+  "funding_type",
+  "revenue_sources_section",
+  "rev_product_sales",
+  "rev_service_contracts",
+  "rev_subscription",
+  "rev_licensing",
+  "rev_membership",
+  "rev_consulting",
+  "rev_commission",
+  "rev_procurement",
+  "rev_other",
+  "rev_other_specify",
+  "annual_revenue_range",
+  "financial_situation",
+  "surplus_split",
+  "part_5_section",
+  "development_stage",
+  "paid_staff_count",
+  "customers_reached_annually",
+  "training_received",
+  "needs_section_break",
+  "need_funding",
+  "need_biz_dev",
+  "need_impact",
+  "need_legal",
+  "need_marketing",
+  "need_market_access",
+  "need_digital",
+  "need_hr",
+  "need_rd",
+  "need_other",
+  "need_other_specify",
+  "strengths_section_break",
+  "str_mission",
+  "str_volunteers",
+  "str_legitimacy",
+  "str_partnerships",
+  "str_financial",
+  "str_innovation",
+  "str_leadership",
+  "str_brand",
+  "str_government",
+  "str_scalable",
+  "str_rcrc",
+  "str_other",
+  "str_other_specify",
+  "part_6_section",
+  "doc_business_plan",
+  "doc_annual_reports",
+  "doc_photos_media",
+  "doc_impact_report",
+  "open_to_sharing"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_miib",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "part_1_section",
+   "fieldtype": "Section Break",
+   "label": "Part 1 \u2014 Identity & Structure"
+  },
+  {
+   "fieldname": "national_society",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "National Society",
+   "reqd": 1
+  },
+  {
+   "fieldname": "business_activity_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name of the Business Activity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "matrix_quadrant",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Matrix Quadrant",
+   "options": "\n1. Commercial Zone\n2. Livelihood Zone\n3. Social Business Zone",
+   "reqd": 1
+  },
+  {
+   "fieldname": "year_of_establishment",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Year of Establishment of the Business Activity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "level_of_operation",
+   "fieldtype": "Select",
+   "label": "Level of Operation",
+   "options": "\nHQ-level initiative\nBranch-level initiative\nBoth HQ and branches",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hosting_unit",
+   "fieldtype": "Data",
+   "label": "Hosting Unit within the National Society",
+   "reqd": 1
+  },
+  {
+   "fieldname": "broader_program",
+   "fieldtype": "Data",
+   "label": "Is your business activity part of a broader Social Entrepreneurship Program?",
+   "reqd": 1
+  },
+  {
+   "fieldname": "legal_status",
+   "fieldtype": "Select",
+   "label": "Legal Status of the Activity",
+   "options": "\nNot formally registered yet\nRegistered as a department of the National Society\nRegistered as a separate legal entity",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.legal_status == 'Registered as a separate legal entity'",
+   "fieldname": "legal_form",
+   "fieldtype": "Select",
+   "label": "Legal Form (if separate entity)",
+   "options": "\nNon-profit organization\nCooperative\nLimited liability company (LLC)\nOther"
+  },
+  {
+   "depends_on": "eval:doc.legal_form == 'Other'",
+   "fieldname": "legal_form_other",
+   "fieldtype": "Data",
+   "label": "Legal Form \u2014 Other (specify)"
+  },
+  {
+   "fieldname": "countries_of_operation",
+   "fieldtype": "Small Text",
+   "label": "Country/Countries of Operation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "key_contact",
+   "fieldtype": "Small Text",
+   "label": "Key Contact Person (name, title, email)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "part_2_section",
+   "fieldtype": "Section Break",
+   "label": "Part 2 \u2014 Value Proposition & Impact"
+  },
+  {
+   "fieldname": "main_business_activity",
+   "fieldtype": "Small Text",
+   "label": "Main Business Activity (one sentence)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "social_problem_addressed",
+   "fieldtype": "Small Text",
+   "label": "Social / Humanitarian Problem Addressed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "main_sector",
+   "fieldtype": "Select",
+   "label": "Main Sector of Operation",
+   "options": "\nLivelihoods/Empowerment\nHealth\nWASH\nClimate & Environment\nLogistics\nTraining\nOther",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.main_sector == 'Other'",
+   "fieldname": "main_sector_other",
+   "fieldtype": "Data",
+   "label": "Main Sector \u2014 Other (specify)"
+  },
+  {
+   "fieldname": "part_3_section",
+   "fieldtype": "Section Break",
+   "label": "Part 3 \u2014 Users & Beneficiaries"
+  },
+  {
+   "fieldname": "business_model_type",
+   "fieldtype": "Select",
+   "label": "Business Model Type",
+   "options": "\nB2C (selling directly to individuals)\nB2B (selling to companies)\nB2G (selling to government)\nInternal (selling to the National Society)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "paying_customers",
+   "fieldtype": "Small Text",
+   "label": "Main Paying Customers",
+   "reqd": 1
+  },
+  {
+   "fieldname": "non_paying_customers",
+   "fieldtype": "Small Text",
+   "label": "Non-Paying Customers / Beneficiaries (if any)"
+  },
+  {
+   "fieldname": "reach_section_break",
+   "fieldtype": "Section Break",
+   "label": "How to Reach Paying Customers"
+  },
+  {
+   "default": "0",
+   "fieldname": "reach_online",
+   "fieldtype": "Check",
+   "label": "Online channels (social media, website, platforms)"
+  },
+  {
+   "default": "0",
+   "fieldname": "reach_events",
+   "fieldtype": "Check",
+   "label": "Events and public outreach"
+  },
+  {
+   "default": "0",
+   "fieldname": "reach_direct_sales",
+   "fieldtype": "Check",
+   "label": "Direct sales / community outreach"
+  },
+  {
+   "default": "0",
+   "fieldname": "reach_partnerships",
+   "fieldtype": "Check",
+   "label": "Partnerships (companies, NGOs, government)"
+  },
+  {
+   "default": "0",
+   "fieldname": "reach_other",
+   "fieldtype": "Check",
+   "label": "Other (customer reach)"
+  },
+  {
+   "depends_on": "eval:doc.reach_other == 1",
+   "fieldname": "reach_other_specify",
+   "fieldtype": "Data",
+   "label": "Customer Reach \u2014 Other (specify)"
+  },
+  {
+   "fieldname": "part_4_section",
+   "fieldtype": "Section Break",
+   "label": "Part 4 \u2014 Revenue Streams & Business Model"
+  },
+  {
+   "fieldname": "funding_type",
+   "fieldtype": "Select",
+   "label": "How is the Social Business Currently Funded?",
+   "options": "\nPrimarily grants\nPrimarily revenue-generated\nHybrid (grants + revenue)\nStill in pilot phase (not yet generating revenue)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "revenue_sources_section",
+   "fieldtype": "Section Break",
+   "label": "Main Revenue Sources"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_product_sales",
+   "fieldtype": "Check",
+   "label": "Product sales"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_service_contracts",
+   "fieldtype": "Check",
+   "label": "Service contracts"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_subscription",
+   "fieldtype": "Check",
+   "label": "Subscription model"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_licensing",
+   "fieldtype": "Check",
+   "label": "Licensing / franchising"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_membership",
+   "fieldtype": "Check",
+   "label": "Membership fees"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_consulting",
+   "fieldtype": "Check",
+   "label": "Consulting services"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_commission",
+   "fieldtype": "Check",
+   "label": "Commission-based income"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_procurement",
+   "fieldtype": "Check",
+   "label": "Public procurement contracts"
+  },
+  {
+   "default": "0",
+   "fieldname": "rev_other",
+   "fieldtype": "Check",
+   "label": "Other (revenue source)"
+  },
+  {
+   "depends_on": "eval:doc.rev_other == 1",
+   "fieldname": "rev_other_specify",
+   "fieldtype": "Data",
+   "label": "Revenue Sources \u2014 Other (specify)"
+  },
+  {
+   "fieldname": "annual_revenue_range",
+   "fieldtype": "Data",
+   "label": "Annual Revenue Range",
+   "reqd": 1
+  },
+  {
+   "fieldname": "financial_situation",
+   "fieldtype": "Select",
+   "label": "Financial Situation",
+   "options": "\nOperating at a loss\nBreak-even\nGenerating surplus reinvested into mission\nGenerating surplus redistributed to National Society core costs",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:['Generating surplus reinvested into mission','Generating surplus redistributed to National Society core costs'].includes(doc.financial_situation)",
+   "fieldname": "surplus_split",
+   "fieldtype": "Small Text",
+   "label": "Surplus Split: % to Social Mission vs National Society Core Costs"
+  },
+  {
+   "fieldname": "part_5_section",
+   "fieldtype": "Section Break",
+   "label": "Part 5 \u2014 Maturity & Capacity"
+  },
+  {
+   "fieldname": "development_stage",
+   "fieldtype": "Select",
+   "label": "Stage of Development",
+   "options": "\nPilot stage\nEarly growth\nScaling nationally\nScaling internationally",
+   "reqd": 1
+  },
+  {
+   "fieldname": "paid_staff_count",
+   "fieldtype": "Select",
+   "label": "Number of Paid Staff",
+   "options": "\n0\u20132\n3\u201310\n11\u201325\n25+",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customers_reached_annually",
+   "fieldtype": "Data",
+   "label": "Number of Customers Reached Annually",
+   "reqd": 1
+  },
+  {
+   "fieldname": "training_received",
+   "fieldtype": "Small Text",
+   "label": "Entrepreneurship / Business Development Training Received (if any)"
+  },
+  {
+   "fieldname": "needs_section_break",
+   "fieldtype": "Section Break",
+   "label": "Main Current Needs (select up to 3)"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_funding",
+   "fieldtype": "Check",
+   "label": "Access to funding / investment"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_biz_dev",
+   "fieldtype": "Check",
+   "label": "Business development support"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_impact",
+   "fieldtype": "Check",
+   "label": "Impact measurement tools"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_legal",
+   "fieldtype": "Check",
+   "label": "Legal advice"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_marketing",
+   "fieldtype": "Check",
+   "label": "Marketing & branding"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_market_access",
+   "fieldtype": "Check",
+   "label": "Market access / partnerships"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_digital",
+   "fieldtype": "Check",
+   "label": "Digital tools"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_hr",
+   "fieldtype": "Check",
+   "label": "HR / recruitment"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_rd",
+   "fieldtype": "Check",
+   "label": "R&D / product development"
+  },
+  {
+   "default": "0",
+   "fieldname": "need_other",
+   "fieldtype": "Check",
+   "label": "Other (need)"
+  },
+  {
+   "depends_on": "eval:doc.need_other == 1",
+   "fieldname": "need_other_specify",
+   "fieldtype": "Data",
+   "label": "Main Needs \u2014 Other (specify)"
+  },
+  {
+   "fieldname": "strengths_section_break",
+   "fieldtype": "Section Break",
+   "label": "Main Strengths (select up to 3)"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_mission",
+   "fieldtype": "Check",
+   "label": "Strong mission alignment"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_volunteers",
+   "fieldtype": "Check",
+   "label": "Strong volunteer base"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_legitimacy",
+   "fieldtype": "Check",
+   "label": "Strong local legitimacy"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_partnerships",
+   "fieldtype": "Check",
+   "label": "Solid partnerships"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_financial",
+   "fieldtype": "Check",
+   "label": "Financial sustainability"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_innovation",
+   "fieldtype": "Check",
+   "label": "Innovation capacity"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_leadership",
+   "fieldtype": "Check",
+   "label": "Strong leadership"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_brand",
+   "fieldtype": "Check",
+   "label": "Strong brand recognition"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_government",
+   "fieldtype": "Check",
+   "label": "Government relationships"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_scalable",
+   "fieldtype": "Check",
+   "label": "Scalable model"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_rcrc",
+   "fieldtype": "Check",
+   "label": "Access to RCRC network / partners"
+  },
+  {
+   "default": "0",
+   "fieldname": "str_other",
+   "fieldtype": "Check",
+   "label": "Other (strength)"
+  },
+  {
+   "depends_on": "eval:doc.str_other == 1",
+   "fieldname": "str_other_specify",
+   "fieldtype": "Data",
+   "label": "Main Strengths \u2014 Other (specify)"
+  },
+  {
+   "fieldname": "part_6_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Documents & Consent"
+  },
+  {
+   "default": "0",
+   "fieldname": "doc_business_plan",
+   "fieldtype": "Check",
+   "label": "Business Plan"
+  },
+  {
+   "default": "0",
+   "fieldname": "doc_annual_reports",
+   "fieldtype": "Check",
+   "label": "Annual reports"
+  },
+  {
+   "default": "0",
+   "fieldname": "doc_photos_media",
+   "fieldtype": "Check",
+   "label": "Photos/Media"
+  },
+  {
+   "default": "0",
+   "fieldname": "doc_impact_report",
+   "fieldtype": "Check",
+   "label": "Impact report"
+  },
+  {
+   "fieldname": "open_to_sharing",
+   "fieldtype": "Select",
+   "label": "Open to Sharing Content with the RCRC Network?",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-08 03:34:29.549820",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "IOMe SBM",
+ "owner": "nigelnathan2@gmail.com",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
