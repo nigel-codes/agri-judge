@@ -1,10 +1,10 @@
+import json
 import frappe
 from frappe import _
 
 
 @frappe.whitelist(allow_guest=True)
 def submit_sbm(**kwargs):
-    int_fields = {"year_of_establishment"}
     check_fields = {
         "reach_online", "reach_events", "reach_direct_sales", "reach_partnerships", "reach_other",
         "rev_product_sales", "rev_service_contracts", "rev_subscription", "rev_licensing",
@@ -16,10 +16,9 @@ def submit_sbm(**kwargs):
         "str_rcrc", "str_other",
         "doc_business_plan", "doc_annual_reports", "doc_photos_media", "doc_impact_report",
     }
-    required = [
-        "national_society", "business_activity_name", "matrix_quadrant",
-        "year_of_establishment", "level_of_operation", "hosting_unit", "broader_program",
-        "legal_status", "countries_of_operation", "key_contact",
+    required_parent = [
+        "national_society", "broader_program", "legal_status",
+        "countries_of_operation", "key_contact_name", "key_contact_title", "key_contact_email",
         "main_business_activity", "social_problem_addressed", "main_sector",
         "business_model_type", "paying_customers",
         "funding_type", "annual_revenue_range", "financial_situation",
@@ -27,20 +26,42 @@ def submit_sbm(**kwargs):
         "open_to_sharing",
     ]
 
-    for field in required:
+    # Validate parent required fields
+    for field in required_parent:
         if not kwargs.get(field):
             frappe.throw(_("Missing required field: {0}").format(field))
 
-    values = {}
+    # Parse child table rows sent as JSON string
+    activities_raw = kwargs.pop("business_activities", "[]")
+    if isinstance(activities_raw, str):
+        try:
+            activities = json.loads(activities_raw)
+        except (ValueError, TypeError):
+            activities = []
+    else:
+        activities = activities_raw
+
+    if not activities:
+        frappe.throw(_("At least one business activity is required."))
+
+    # Validate each activity row
+    for i, row in enumerate(activities):
+        for f in ("business_activity_name", "matrix_quadrant", "year_of_establishment",
+                  "level_of_operation", "hosting_unit"):
+            if not row.get(f):
+                frappe.throw(_("Row {0}: missing field '{1}' in business activities.").format(i + 1, f))
+        row["year_of_establishment"] = frappe.utils.cint(row["year_of_establishment"])
+        row["doctype"] = "IOMe SBM Business Activity"
+
+    # Build parent document values
+    values = {"doctype": "IOMe SBM"}
     for key, value in kwargs.items():
-        if key in int_fields:
-            values[key] = frappe.utils.cint(value)
-        elif key in check_fields:
+        if key in check_fields:
             values[key] = 1 if value in (1, "1", True, "true") else 0
         else:
             values[key] = value
 
-    values["doctype"] = "IOMe SBM"
+    values["business_activities"] = activities
 
     doc = frappe.get_doc(values)
     doc.insert(ignore_permissions=True)

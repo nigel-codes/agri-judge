@@ -310,8 +310,415 @@
             letter-spacing: 0.04em;
             transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
             box-shadow: 0 4px 16px rgba(237,28,36,.4);
+            margin-top: 2rem;
         }
         .start-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(237,28,36,.45); }
+
+        /* ── Child table (activity rows) ── */
+        .activity-row {
+            background: #fafafa;
+            border: 1.5px solid var(--rc-border);
+            border-radius: 10px;
+            margin-bottom: 0.65rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .activity-row.is-open { border-color: rgba(237,28,36,.35); }
+        .activity-row-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.7rem 1rem;
+            cursor: pointer;
+            user-select: none;
+            background: #fff;
+            gap: 0.75rem;
+        }
+        .activity-row-header:hover { background: var(--rc-light); }
+        .activity-row-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex: 1;
+            min-width: 0;
+        }
+        .activity-row-num {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--rc-red-dark);
+            background: var(--rc-light);
+            border: 1px solid rgba(237,28,36,.2);
+            padding: 0.18rem 0.6rem;
+            border-radius: 99px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .activity-row-summary {
+            font-size: 0.82rem;
+            color: var(--text-mid);
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .activity-row-summary.empty { color: var(--text-light); font-style: italic; }
+        .activity-row-right {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex-shrink: 0;
+        }
+        .btn-remove-row {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 5px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .btn-remove-row:hover { color: var(--rc-red); background: var(--rc-light); }
+        .activity-chevron {
+            color: var(--text-light);
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .activity-row.is-open .activity-chevron { transform: rotate(180deg); color: var(--rc-red); }
+        .activity-row-body {
+            padding: 0.85rem 1rem 1rem;
+            border-top: 1px solid var(--rc-border);
+            display: none;
+        }
+        .activity-row.is-open .activity-row-body { display: block; }
+        .activity-row .form-group { margin-bottom: 0.85rem; }
+        .activity-row .form-group:last-child { margin-bottom: 0; }
+        .activity-row-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1rem;
+        }
+        .btn-add-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1.5px dashed var(--rc-red);
+            color: var(--rc-red-dark);
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.6rem 1.1rem;
+            border-radius: 9px;
+            cursor: pointer;
+            width: 100%;
+            justify-content: center;
+            transition: background 0.15s, border-style 0.15s;
+            margin-top: 0.25rem;
+        }
+        .btn-add-row:hover { background: var(--rc-light); border-style: solid; }
+
+        /* ── Contact person grid ── */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1rem;
+        }
+
+        /* ── Landing intro sections ── */
+        .intro-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--rc-border);
+        }
+        .intro-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+        .intro-section h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--rc-red-dark);
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .intro-section h3 i { font-size: 0.85rem; }
+        .intro-section > p {
+            font-size: 0.875rem;
+            color: var(--text-mid);
+            line-height: 1.75;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Org list */
+        .org-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+        }
+        .org-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--rc-light);
+            border: 1px solid rgba(237,28,36,.2);
+            color: var(--rc-red-dark);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.35rem 0.85rem;
+            border-radius: 99px;
+        }
+        .org-list li i { font-size: 0.6rem; color: var(--rc-red); }
+        .join-note {
+            font-size: 0.82rem !important;
+            color: var(--text-light) !important;
+            margin-top: 0.5rem !important;
+        }
+        .join-note a { color: var(--rc-red-dark); font-weight: 500; }
+        .join-note i { margin-right: 0.25rem; }
+
+        /* Definition cards */
+        .def-card {
+            background: var(--rc-grey);
+            border-left: 3px solid var(--rc-red);
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.85rem;
+        }
+        .def-tag {
+            display: inline-block;
+            background: var(--rc-red);
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.65rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .def-card p {
+            font-size: 0.83rem !important;
+            color: var(--text-mid) !important;
+            line-height: 1.65 !important;
+            margin-bottom: 0.4rem !important;
+        }
+        .def-card em { color: var(--text-light); font-size: 0.8rem; }
+        .def-note {
+            font-size: 0.82rem !important;
+            color: var(--text-dark) !important;
+            margin-top: 0.35rem !important;
+        }
+
+        /* ── Matrix diagram ── */
+        .matrix-outer {
+            display: grid;
+            grid-template-columns: 28px 1fr auto;
+            gap: 0;
+            align-items: stretch;
+            margin: 1rem 0 0.5rem;
+        }
+
+        /* Y-axis column */
+        .matrix-y-col {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .matrix-y-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #444;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .matrix-y-label i {
+            transform: rotate(180deg);
+            font-size: 0.8rem;
+            color: #333;
+        }
+
+        /* Center column: grid + x-axis */
+        .matrix-center-col {
+            display: flex;
+            flex-direction: column;
+            border-left: 2.5px solid #333;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            flex: 1;
+            border-bottom: 2.5px solid #333;
+        }
+
+        /* Quadrants */
+        .quad {
+            padding: 1rem;
+            position: relative;
+            min-height: 130px;
+        }
+        .quad strong {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        .quad p {
+            font-size: 0.75rem !important;
+            color: #333 !important;
+            line-height: 1.5 !important;
+            margin: 0 0 0.25rem !important;
+        }
+        .quad-ex {
+            font-style: italic;
+            color: var(--rc-red) !important;
+            font-size: 0.72rem !important;
+        }
+        .quad-num {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.6rem;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.15);
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .quad-empty {
+            background: #F0F0F0;
+            border-right: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+        }
+        .quad-sbz {
+            background: #7ECECE;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .quad-sbz strong { color: #1a4a4a; }
+        .quad-sbz .quad-num { background: #2a8080; }
+        .quad-commercial {
+            background: #FAFAFA;
+            border-right: 1px solid #ccc;
+        }
+        .quad-commercial strong { color: #333; }
+        .quad-commercial .quad-num { background: #888; }
+        .quad-livelihood { background: #A8DCDC; }
+        .quad-livelihood strong { color: #1a4a4a; }
+        .quad-livelihood .quad-num { background: #2a8080; }
+
+        /* X-axis */
+        .matrix-x-axis {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            padding: 4px 0 0 4px;
+        }
+        .x-axis-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #444;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .x-axis-label i { font-size: 0.8rem; color: #333; }
+
+        /* Right impact labels */
+        .matrix-right-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 0 0 24px 12px;
+            gap: 0;
+        }
+        .impact-label-top,
+        .impact-label-bottom {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.45;
+            max-width: 130px;
+        }
+        .impact-label-top i,
+        .impact-label-bottom i {
+            font-size: 0.85rem;
+            color: #333;
+            flex-shrink: 0;
+        }
+
+        /* Indirect impact label */
+        .indirect-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0.4rem 0 0.85rem 28px;
+            line-height: 1.45;
+        }
+        .indirect-label i { font-size: 0.85rem; flex-shrink: 0; }
+
+        .zone-note {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            background: var(--rc-grey);
+            padding: 0.6rem 0.85rem;
+            border-radius: 7px;
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+            line-height: 1.55;
+            margin-top: 0.5rem;
+        }
+        .zone-note i { color: var(--rc-red); margin-top: 2px; flex-shrink: 0; }
+
+        /* Introductory questions */
+        .intro-q-list { display: flex; flex-direction: column; gap: 0.6rem; }
+        .intro-q {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            background: var(--rc-grey);
+            border-radius: 9px;
+            padding: 0.75rem 1rem;
+            font-size: 0.855rem;
+            color: var(--text-mid);
+            line-height: 1.55;
+        }
+        .intro-q-num {
+            width: 24px; height: 24px;
+            background: var(--rc-red);
+            color: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .intro-q em { color: var(--text-light); font-size: 0.82rem; }
 
         /* ── Form elements ── */
         .form-group {
@@ -514,11 +921,18 @@
         footer span { color: #fff; font-weight: 600; }
 
         /* ── Responsive ── */
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
             .card-header, .card-body, .landing-body, .landing-header { padding-left: 1.25rem; padding-right: 1.25rem; }
             .checkbox-grid { grid-template-columns: 1fr; }
             .parts-list { grid-template-columns: 1fr; }
             .landing-header h1 { font-size: 1.5rem; }
+            .topbar { padding: 0 1rem; }
+            .topbar-title { display: none; }
+            .org-list { flex-direction: column; }
+            .matrix-outer { grid-template-columns: 22px 1fr; }
+            .matrix-right-col { display: none; }
+            .quad { min-height: 100px; padding: 0.75rem; }
+            .impact-label-top, .impact-label-bottom { font-size: 0.65rem; max-width: 100px; }
         }
     </style>
 </head>
@@ -559,26 +973,163 @@
             <p class="subtitle">Mapping social business activities across the RCRC network</p>
         </div>
         <div class="landing-body">
-            <h3>About this Questionnaire</h3>
-            <p>
-                This form is designed to help the <strong>International Federation of Red Cross and Red Crescent Societies (IFRC)</strong>
-                and its National Society partners map existing social business activities across the RCRC network.
-            </p>
-            <p>
-                The information collected will be used to build a comprehensive picture of social business maturity,
-                identify support needs, share best practices, and inform the development of a Social Business Toolkit
-                for National Societies worldwide.
-            </p>
-            <p>All responses are confidential and will only be shared in aggregated, anonymised form.</p>
 
-            <ul class="parts-list">
-                <li><i class="fa-solid fa-circle"></i> Part 1 — Identity &amp; Structure</li>
-                <li><i class="fa-solid fa-circle"></i> Part 2 — Value Proposition &amp; Impact</li>
-                <li><i class="fa-solid fa-circle"></i> Part 3 — Users &amp; Beneficiaries</li>
-                <li><i class="fa-solid fa-circle"></i> Part 4 — Revenue Streams</li>
-                <li><i class="fa-solid fa-circle"></i> Part 5 — Maturity &amp; Capacity</li>
-                <li><i class="fa-solid fa-circle"></i> Part 6 — Documents &amp; Consent</li>
-            </ul>
+            <!-- WHO ARE WE -->
+            <div class="intro-section">
+                <h3><i class="fa-solid fa-users"></i> Who Are We?</h3>
+                <p>
+                    The <strong>Social Entrepreneurship informal working group</strong> meets every 2 weeks to work on the
+                    priorities set by the 3rd Social Entrepreneurship Meet-up in <strong>Mombasa, Kenya in July 2025</strong>.
+                    It is represented by:
+                </p>
+                <ul class="org-list">
+                    <li><i class="fa-solid fa-plus"></i> Kenya Red Cross Society</li>
+                    <li><i class="fa-solid fa-plus"></i> French Red Cross</li>
+                    <li><i class="fa-solid fa-plus"></i> Austrian Red Cross</li>
+                    <li><i class="fa-solid fa-plus"></i> Lebanese Red Cross</li>
+                    <li><i class="fa-solid fa-plus"></i> IFRC Secretariat</li>
+                </ul>
+                <p class="join-note">
+                    <i class="fa-solid fa-envelope"></i>
+                    It is an informal and open group that welcomes new members. Want to join?
+                    Contact <a href="mailto:mariealice.manderscheid@croix-rouge.fr">mariealice.manderscheid@croix-rouge.fr</a>
+                </p>
+            </div>
+
+            <!-- OBJECTIVE -->
+            <div class="intro-section">
+                <h3><i class="fa-solid fa-bullseye"></i> Reminder of the Objective</h3>
+                <p>
+                    Through this collective exercise, the working group would like to <strong>build a shared understanding
+                    of Social Entrepreneurship (SE) in the RCRC Network</strong> by creating an extensive, living, structured
+                    document enabling a wide range of National Societies to present their initiatives clearly using a common template.
+                </p>
+                <p>
+                    This understanding should help identify what works, what doesn't, and highlight common social problems,
+                    challenges, and potential opportunities.
+                </p>
+            </div>
+
+            <!-- KEY DEFINITIONS -->
+            <div class="intro-section">
+                <h3><i class="fa-solid fa-book-open"></i> Key Definitions</h3>
+                <div class="def-card">
+                    <div class="def-tag">Social Entrepreneurship</div>
+                    <p>"An entrepreneurial action which aims to solve social or environmental challenges while pursuing
+                    financial sustainability." <em>(How to Foster Resilience through Social Entrepreneurship, 2024)</em></p>
+                    <p class="def-note">In other words, social entrepreneurship is <strong>a mindset</strong>.</p>
+                </div>
+                <div class="def-card">
+                    <div class="def-tag">Social Business</div>
+                    <p>"An organisation that applies business strategies to address social or environmental issues,
+                    prioritising positive impact alongside financial sustainability. Profits are reinvested into the
+                    social impact project." <em>(How to Foster Resilience through Social Entrepreneurship, 2024)</em></p>
+                    <p class="def-note">In other words, a social business is <strong>an organisation</strong>.</p>
+                </div>
+
+                <p style="margin-top:1rem; font-size:0.85rem; color:var(--text-mid)">
+                    The working group has formalised the following <strong>three-zone matrix</strong> to identify SE activities:
+                </p>
+                <!-- Matrix diagram -->
+                <div class="matrix-outer">
+
+                    <!-- Y-axis label -->
+                    <div class="matrix-y-col">
+                        <div class="matrix-y-label">
+                            <span>Social mission at core</span>
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </div>
+                    </div>
+
+                    <!-- Main grid + X-axis -->
+                    <div class="matrix-center-col">
+                        <div class="matrix-grid">
+                            <!-- Row 1 -->
+                            <div class="quad quad-empty"></div>
+                            <div class="quad quad-sbz">
+                                <div class="quad-num">3</div>
+                                <strong>SOCIAL BUSINESS ZONE</strong>
+                                <p>Business or activities that generate income while resolving social / environmental challenges</p>
+                                <p class="quad-ex">Ex: Waste sorting management center (DRC RC)</p>
+                            </div>
+                            <!-- Row 2 -->
+                            <div class="quad quad-commercial">
+                                <div class="quad-num">1</div>
+                                <strong>COMMERCIAL ZONE</strong>
+                                <p>Business or activities that generate income to cover costs or activities of branches</p>
+                                <p class="quad-ex">Ex: Car Rental for humanitarians (Guinean RC)</p>
+                            </div>
+                            <div class="quad quad-livelihood">
+                                <div class="quad-num">2</div>
+                                <strong>LIVELIHOOD ZONE</strong>
+                                <p>Business or activities that generate income to increase community resilience</p>
+                            </div>
+                        </div>
+                        <!-- X-axis -->
+                        <div class="matrix-x-axis">
+                            <div class="x-axis-line"></div>
+                            <div class="x-axis-label">Social Impact <i class="fa-solid fa-arrow-right"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Right impact labels -->
+                    <div class="matrix-right-col">
+                        <div class="impact-label-top">
+                            <i class="fa-solid fa-arrow-right"></i>
+                            <span>Direct impact on<br>society or environment</span>
+                        </div>
+                        <div class="impact-label-bottom">
+                            <i class="fa-solid fa-arrow-right"></i>
+                            <span>Direct impact on the<br>socio-economic well-being<br>of communities</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indirect impact label below Commercial -->
+                <div class="indirect-label">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Indirect impact on communities by sustaining core services of NS</span>
+                </div>
+
+                <p class="zone-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    This mapping covers all three types of activities. On the long run, we strive to bring all businesses
+                    into Zone 3, although we recognise this may not always be easy or possible.
+                </p>
+            </div>
+
+            <!-- INTRODUCTORY QUESTIONS -->
+            <div class="intro-section">
+                <h3><i class="fa-solid fa-circle-question"></i> Before You Begin</h3>
+                <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:1rem">Please confirm the following before starting the questionnaire:</p>
+                <div class="intro-q-list">
+                    <div class="intro-q">
+                        <span class="intro-q-num">1</span>
+                        <span>Does your National Society run a Social Entrepreneurship Program?</span>
+                    </div>
+                    <div class="intro-q">
+                        <span class="intro-q-num">2</span>
+                        <span>Are you aware of a business activity launched or run by your NS? <em>(If no, but interested in launching one, please contact us first.)</em></span>
+                    </div>
+                    <div class="intro-q">
+                        <span class="intro-q-num">3</span>
+                        <span>Is your business part of a Social Entrepreneurship Program? <em>(If yes, which one?)</em></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WHAT'S INSIDE -->
+            <div class="intro-section" style="margin-bottom:0">
+                <h3><i class="fa-solid fa-list-check"></i> Questionnaire Structure</h3>
+                <ul class="parts-list">
+                    <li><i class="fa-solid fa-circle"></i> Part 1 — Identity &amp; Structure</li>
+                    <li><i class="fa-solid fa-circle"></i> Part 2 — Value Proposition &amp; Impact</li>
+                    <li><i class="fa-solid fa-circle"></i> Part 3 — Users &amp; Beneficiaries</li>
+                    <li><i class="fa-solid fa-circle"></i> Part 4 — Revenue Streams</li>
+                    <li><i class="fa-solid fa-circle"></i> Part 5 — Maturity &amp; Capacity</li>
+                    <li><i class="fa-solid fa-circle"></i> Part 6 — Documents &amp; Consent</li>
+                </ul>
+            </div>
 
             <button class="start-btn" onclick="goTo(1)">
                 <i class="fa-solid fa-play"></i> Start Questionnaire
@@ -591,46 +1142,31 @@
         <div class="card-header">
             <span class="part-badge">Part 1 of 6</span>
             <h2>Identity &amp; Structure</h2>
-            <p>Tell us about your National Society and the business activity you are registering.</p>
+            <p>Tell us about your National Society and the business activities you are registering.</p>
         </div>
         <div class="card-body">
             <div class="form-group">
                 <label class="field-label">National Society <span class="req">*</span></label>
                 <input type="text" id="national_society" placeholder="e.g. Kenya Red Cross Society">
             </div>
+
+            <!-- ── Business Activities child table ── -->
             <div class="form-group">
-                <label class="field-label">Name of the Business Activity <span class="req">*</span></label>
-                <input type="text" id="business_activity_name" placeholder="e.g. KRCS Blood Bank Services">
+                <label class="field-label">Business Activities <span class="req">*</span></label>
+                <p class="hint" style="margin-bottom:0.75rem">Add one row per business activity. You can register multiple activities.</p>
+
+                <div id="activities-table">
+                    <!-- rows injected by JS -->
+                </div>
+
+                <button type="button" class="btn-add-row" onclick="addActivityRow()">
+                    <i class="fa-solid fa-plus"></i> Add Business Activity
+                </button>
             </div>
-            <div class="form-group">
-                <label class="field-label">Matrix Quadrant <span class="req">*</span></label>
-                <select id="matrix_quadrant">
-                    <option value="">— Select —</option>
-                    <option>1. Commercial Zone</option>
-                    <option>2. Livelihood Zone</option>
-                    <option>3. Social Business Zone</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="field-label">Year of Establishment <span class="req">*</span></label>
-                <input type="number" id="year_of_establishment" placeholder="e.g. 2018" min="1900" max="2030">
-            </div>
-            <div class="form-group">
-                <label class="field-label">Level of Operation <span class="req">*</span></label>
-                <select id="level_of_operation">
-                    <option value="">— Select —</option>
-                    <option>HQ-level initiative</option>
-                    <option>Branch-level initiative</option>
-                    <option>Both HQ and branches</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="field-label">Hosting Unit within the National Society <span class="req">*</span></label>
-                <input type="text" id="hosting_unit" placeholder="e.g. Health Services Department">
-            </div>
+
             <div class="form-group">
                 <label class="field-label">Is your business activity part of a broader Social Entrepreneurship Program? <span class="req">*</span></label>
-                <input type="text" id="broader_program" placeholder="e.g. Yes — IFRC Social Enterprise Accelerator">
+                <input type="text" id="broader_program" placeholder="e.g. Yes — IFRC Social Enterprise Accelerator / REDPreneur / WSEI">
             </div>
             <div class="form-group">
                 <label class="field-label">Legal Status of the Activity <span class="req">*</span></label>
@@ -659,11 +1195,24 @@
                 <label class="field-label">Country / Countries of Operation <span class="req">*</span></label>
                 <textarea id="countries_of_operation" rows="2" placeholder="e.g. Kenya, Uganda"></textarea>
             </div>
-            <div class="form-group">
-                <label class="field-label">Key Contact Person <span class="req">*</span></label>
-                <textarea id="key_contact" rows="2" placeholder="Name, Title, Email — e.g. Jane Doe, Social Enterprise Manager, jane@redcross.or.ke"></textarea>
+            <div class="sub-section">
+                <h4><i class="fa-solid fa-user"></i> Key Contact Person</h4>
             </div>
-            <div class="error-msg" id="err-1">Please fill in all required fields before continuing.</div>
+            <div class="contact-grid">
+                <div class="form-group">
+                    <label class="field-label">Full Name <span class="req">*</span></label>
+                    <input type="text" id="key_contact_name" placeholder="e.g. Jane Doe">
+                </div>
+                <div class="form-group">
+                    <label class="field-label">Job Title <span class="req">*</span></label>
+                    <input type="text" id="key_contact_title" placeholder="e.g. Social Enterprise Manager">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="field-label">Email Address <span class="req">*</span></label>
+                <input type="text" id="key_contact_email" placeholder="e.g. jane@redcross.or.ke">
+            </div>
+            <div class="error-msg" id="err-1">Please fill in all required fields and add at least one business activity.</div>
             <div class="nav-row">
                 <button class="btn btn-outline" onclick="goTo(0)"><i class="fa-solid fa-arrow-left"></i> Back</button>
                 <button class="btn btn-primary" onclick="next(1)">Next <i class="fa-solid fa-arrow-right"></i></button>
@@ -1067,6 +1616,123 @@
 
 <script>
     let currentStep = 0;
+    let activityRowCount = 0;
+
+    function collapseAllRows() {
+        document.querySelectorAll('#activities-table .activity-row').forEach(function(r) {
+            r.classList.remove('is-open');
+        });
+    }
+
+    function toggleActivityRow(idx) {
+        var row = document.getElementById('activity-row-' + idx);
+        if (!row) return;
+        var isOpen = row.classList.contains('is-open');
+        collapseAllRows();
+        if (!isOpen) row.classList.add('is-open');
+    }
+
+    function updateRowSummary(idx) {
+        var nameEl = document.getElementById('act_name_' + idx);
+        var summaryEl = document.getElementById('act_summary_' + idx);
+        if (!nameEl || !summaryEl) return;
+        var v = nameEl.value.trim();
+        if (v) {
+            summaryEl.textContent = v;
+            summaryEl.classList.remove('empty');
+        } else {
+            summaryEl.textContent = 'No name entered yet';
+            summaryEl.classList.add('empty');
+        }
+    }
+
+    function addActivityRow() {
+        // Collapse any open rows first
+        collapseAllRows();
+
+        activityRowCount++;
+        var idx = activityRowCount;
+        var tbl = document.getElementById('activities-table');
+        var div = document.createElement('div');
+        div.className = 'activity-row is-open';
+        div.id = 'activity-row-' + idx;
+        div.innerHTML = `
+            <div class="activity-row-header" onclick="toggleActivityRow(${idx})">
+                <div class="activity-row-left">
+                    <span class="activity-row-num">Activity ${idx}</span>
+                    <span class="activity-row-summary empty" id="act_summary_${idx}">No name entered yet</span>
+                </div>
+                <div class="activity-row-right">
+                    <button type="button" class="btn-remove-row" onclick="event.stopPropagation(); removeActivityRow(${idx})">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                    <i class="fa-solid fa-chevron-down activity-chevron"></i>
+                </div>
+            </div>
+            <div class="activity-row-body">
+                <div class="form-group">
+                    <label class="field-label">Name of Business Activity <span class="req">*</span></label>
+                    <input type="text" id="act_name_${idx}" placeholder="e.g. KRCS Blood Bank Services"
+                           oninput="updateRowSummary(${idx})">
+                </div>
+                <div class="activity-row-grid">
+                    <div class="form-group">
+                        <label class="field-label">Matrix Quadrant <span class="req">*</span></label>
+                        <select id="act_quadrant_${idx}">
+                            <option value="">— Select —</option>
+                            <option>1. Commercial Zone</option>
+                            <option>2. Livelihood Zone</option>
+                            <option>3. Social Business Zone</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="field-label">Year of Establishment <span class="req">*</span></label>
+                        <input type="number" id="act_year_${idx}" placeholder="e.g. 2018" min="1900" max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label class="field-label">Level of Operation <span class="req">*</span></label>
+                        <select id="act_level_${idx}">
+                            <option value="">— Select —</option>
+                            <option>HQ-level initiative</option>
+                            <option>Branch-level initiative</option>
+                            <option>Both HQ and branches</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="field-label">Hosting Unit <span class="req">*</span></label>
+                        <input type="text" id="act_unit_${idx}" placeholder="e.g. Health Services Dept">
+                    </div>
+                </div>
+            </div>
+        `;
+        tbl.appendChild(div);
+    }
+
+    function removeActivityRow(idx) {
+        var row = document.getElementById('activity-row-' + idx);
+        if (row) row.remove();
+    }
+
+    function collectActivityRows() {
+        var rows = document.querySelectorAll('#activities-table .activity-row');
+        var results = [];
+        rows.forEach(function(row) {
+            var id = row.id.replace('activity-row-', '');
+            var name = (document.getElementById('act_name_' + id) || {}).value || '';
+            var quad = (document.getElementById('act_quadrant_' + id) || {}).value || '';
+            var year = (document.getElementById('act_year_' + id) || {}).value || '';
+            var level = (document.getElementById('act_level_' + id) || {}).value || '';
+            var unit = (document.getElementById('act_unit_' + id) || {}).value || '';
+            results.push({
+                business_activity_name: name.trim(),
+                matrix_quadrant: quad,
+                year_of_establishment: year,
+                level_of_operation: level,
+                hosting_unit: unit.trim()
+            });
+        });
+        return results;
+    }
 
     function goTo(step) {
         document.getElementById('step-' + currentStep).style.display = 'none';
@@ -1160,7 +1826,7 @@
     }
 
     const requiredFields = {
-        1: ['national_society','business_activity_name','matrix_quadrant','year_of_establishment','level_of_operation','hosting_unit','broader_program','legal_status','countries_of_operation','key_contact'],
+        1: ['national_society','broader_program','legal_status','countries_of_operation','key_contact_name','key_contact_title','key_contact_email'],
         2: ['main_business_activity','social_problem_addressed','main_sector'],
         3: ['business_model_type','paying_customers'],
         4: ['funding_type','annual_revenue_range','financial_situation'],
@@ -1177,6 +1843,21 @@
             if (!el) return;
             if (!el.value || el.value.trim() === '') missing = true;
         });
+
+        // Validate activity rows for step 1
+        if (step === 1) {
+            const rows = collectActivityRows();
+            if (rows.length === 0) { missing = true; }
+            else {
+                rows.forEach(function(r) {
+                    if (!r.business_activity_name || !r.matrix_quadrant ||
+                        !r.year_of_establishment || !r.level_of_operation || !r.hosting_unit) {
+                        missing = true;
+                    }
+                });
+            }
+        }
+
         if (missing) {
             errEl.classList.add('visible');
             return;
@@ -1185,20 +1866,21 @@
         goTo(step + 1);
     }
 
+    // Seed one blank row on page load
+    document.addEventListener('DOMContentLoaded', function() { addActivityRow(); });
+
     function collectData() {
         return {
             national_society:           val('national_society'),
-            business_activity_name:     val('business_activity_name'),
-            matrix_quadrant:            val('matrix_quadrant'),
-            year_of_establishment:      parseInt(val('year_of_establishment')) || 0,
-            level_of_operation:         val('level_of_operation'),
-            hosting_unit:               val('hosting_unit'),
+            business_activities:        JSON.stringify(collectActivityRows()),
             broader_program:            val('broader_program'),
             legal_status:               val('legal_status'),
             legal_form:                 val('legal_form'),
             legal_form_other:           val('legal_form_other'),
             countries_of_operation:     val('countries_of_operation'),
-            key_contact:                val('key_contact'),
+            key_contact_name:           val('key_contact_name'),
+            key_contact_title:          val('key_contact_title'),
+            key_contact_email:          val('key_contact_email'),
             main_business_activity:     val('main_business_activity'),
             social_problem_addressed:   val('social_problem_addressed'),
             main_sector:                val('main_sector'),

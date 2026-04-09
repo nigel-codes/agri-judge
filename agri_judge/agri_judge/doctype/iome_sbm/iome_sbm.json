@@ -8,17 +8,15 @@
   "section_break_miib",
   "part_1_section",
   "national_society",
-  "business_activity_name",
-  "matrix_quadrant",
-  "year_of_establishment",
-  "level_of_operation",
-  "hosting_unit",
+  "business_activities",
   "broader_program",
   "legal_status",
   "legal_form",
   "legal_form_other",
   "countries_of_operation",
-  "key_contact",
+  "key_contact_name",
+  "key_contact_title",
+  "key_contact_email",
   "part_2_section",
   "main_business_activity",
   "social_problem_addressed",
@@ -97,48 +95,21 @@
   {
    "fieldname": "part_1_section",
    "fieldtype": "Section Break",
-   "label": "Part 1 \u2014 Identity & Structure"
+   "label": "Part 1 — Identity & Structure"
   },
   {
    "fieldname": "national_society",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "National Society",
-   "reqd": 1
+   "reqd": 1,
+   "options": "Country"
   },
   {
-   "fieldname": "business_activity_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Name of the Business Activity",
-   "reqd": 1
-  },
-  {
-   "fieldname": "matrix_quadrant",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Matrix Quadrant",
-   "options": "\n1. Commercial Zone\n2. Livelihood Zone\n3. Social Business Zone",
-   "reqd": 1
-  },
-  {
-   "fieldname": "year_of_establishment",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Year of Establishment of the Business Activity",
-   "reqd": 1
-  },
-  {
-   "fieldname": "level_of_operation",
-   "fieldtype": "Select",
-   "label": "Level of Operation",
-   "options": "\nHQ-level initiative\nBranch-level initiative\nBoth HQ and branches",
-   "reqd": 1
-  },
-  {
-   "fieldname": "hosting_unit",
-   "fieldtype": "Data",
-   "label": "Hosting Unit within the National Society",
+   "fieldname": "business_activities",
+   "fieldtype": "Table",
+   "label": "Business Activities",
+   "options": "IOMe SBM Business Activity",
    "reqd": 1
   },
   {
@@ -165,7 +136,7 @@
    "depends_on": "eval:doc.legal_form == 'Other'",
    "fieldname": "legal_form_other",
    "fieldtype": "Data",
-   "label": "Legal Form \u2014 Other (specify)"
+   "label": "Legal Form — Other (specify)"
   },
   {
    "fieldname": "countries_of_operation",
@@ -174,15 +145,27 @@
    "reqd": 1
   },
   {
-   "fieldname": "key_contact",
-   "fieldtype": "Small Text",
-   "label": "Key Contact Person (name, title, email)",
+   "fieldname": "key_contact_name",
+   "fieldtype": "Data",
+   "label": "Contact Full Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "key_contact_title",
+   "fieldtype": "Data",
+   "label": "Contact Job Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "key_contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email",
    "reqd": 1
   },
   {
    "fieldname": "part_2_section",
    "fieldtype": "Section Break",
-   "label": "Part 2 \u2014 Value Proposition & Impact"
+   "label": "Part 2 — Value Proposition & Impact"
   },
   {
    "fieldname": "main_business_activity",
@@ -207,12 +190,12 @@
    "depends_on": "eval:doc.main_sector == 'Other'",
    "fieldname": "main_sector_other",
    "fieldtype": "Data",
-   "label": "Main Sector \u2014 Other (specify)"
+   "label": "Main Sector — Other (specify)"
   },
   {
    "fieldname": "part_3_section",
    "fieldtype": "Section Break",
-   "label": "Part 3 \u2014 Users & Beneficiaries"
+   "label": "Part 3 — Users & Beneficiaries"
   },
   {
    "fieldname": "business_model_type",
@@ -271,12 +254,12 @@
    "depends_on": "eval:doc.reach_other == 1",
    "fieldname": "reach_other_specify",
    "fieldtype": "Data",
-   "label": "Customer Reach \u2014 Other (specify)"
+   "label": "Customer Reach — Other (specify)"
   },
   {
    "fieldname": "part_4_section",
    "fieldtype": "Section Break",
-   "label": "Part 4 \u2014 Revenue Streams & Business Model"
+   "label": "Part 4 — Revenue Streams & Business Model"
   },
   {
    "fieldname": "funding_type",
@@ -348,7 +331,7 @@
    "depends_on": "eval:doc.rev_other == 1",
    "fieldname": "rev_other_specify",
    "fieldtype": "Data",
-   "label": "Revenue Sources \u2014 Other (specify)"
+   "label": "Revenue Sources — Other (specify)"
   },
   {
    "fieldname": "annual_revenue_range",
@@ -372,7 +355,7 @@
   {
    "fieldname": "part_5_section",
    "fieldtype": "Section Break",
-   "label": "Part 5 \u2014 Maturity & Capacity"
+   "label": "Part 5 — Maturity & Capacity"
   },
   {
    "fieldname": "development_stage",
@@ -385,7 +368,7 @@
    "fieldname": "paid_staff_count",
    "fieldtype": "Select",
    "label": "Number of Paid Staff",
-   "options": "\n0\u20132\n3\u201310\n11\u201325\n25+",
+   "options": "\n0–2\n3–10\n11–25\n25+",
    "reqd": 1
   },
   {
@@ -468,7 +451,7 @@
    "depends_on": "eval:doc.need_other == 1",
    "fieldname": "need_other_specify",
    "fieldtype": "Data",
-   "label": "Main Needs \u2014 Other (specify)"
+   "label": "Main Needs — Other (specify)"
   },
   {
    "fieldname": "strengths_section_break",
@@ -551,7 +534,7 @@
    "depends_on": "eval:doc.str_other == 1",
    "fieldname": "str_other_specify",
    "fieldtype": "Data",
-   "label": "Main Strengths \u2014 Other (specify)"
+   "label": "Main Strengths — Other (specify)"
   },
   {
    "fieldname": "part_6_section",

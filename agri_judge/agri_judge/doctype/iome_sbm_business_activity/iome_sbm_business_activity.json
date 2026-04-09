@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "creation": "2026-04-08 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "business_activity_name",
+  "matrix_quadrant",
+  "year_of_establishment",
+  "level_of_operation",
+  "hosting_unit"
+ ],
+ "fields": [
+  {
+   "fieldname": "business_activity_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name of the Business Activity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "matrix_quadrant",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Matrix Quadrant",
+   "options": "\n1. Commercial Zone\n2. Livelihood Zone\n3. Social Business Zone",
+   "reqd": 1
+  },
+  {
+   "fieldname": "year_of_establishment",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Year of Establishment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "level_of_operation",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Level of Operation",
+   "options": "\nHQ-level initiative\nBranch-level initiative\nBoth HQ and branches",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hosting_unit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Hosting Unit within the National Society",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-08 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "IOMe SBM Business Activity",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
