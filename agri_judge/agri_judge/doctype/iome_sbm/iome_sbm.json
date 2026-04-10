@@ -10,9 +10,11 @@
   "national_society",
   "business_activities",
   "broader_program",
+  "broader_program_name",
   "legal_status",
   "legal_form",
   "legal_form_other",
+  "legal_status_other",
   "countries_of_operation",
   "key_contact_name",
   "key_contact_title",
@@ -23,9 +25,32 @@
   "main_sector",
   "main_sector_other",
   "part_3_section",
-  "business_model_type",
-  "paying_customers",
-  "non_paying_customers",
+  "bmt_section_break",
+  "bmt_b2c",
+  "bmt_b2b",
+  "bmt_b2g",
+  "bmt_internal",
+  "bmt_hybrid",
+  "paying_customers_section_break",
+  "pc_individuals",
+  "pc_smes",
+  "pc_large_corp",
+  "pc_government",
+  "pc_schools",
+  "pc_hospitals",
+  "pc_community",
+  "pc_other",
+  "pc_other_specify",
+  "non_paying_section_break",
+  "npc_individuals",
+  "npc_smes",
+  "npc_large_corp",
+  "npc_government",
+  "npc_schools",
+  "npc_hospitals",
+  "npc_community",
+  "npc_other",
+  "npc_other_specify",
   "reach_section_break",
   "reach_online",
   "reach_events",
@@ -35,6 +60,7 @@
   "reach_other_specify",
   "part_4_section",
   "funding_type",
+  "funding_type_other",
   "revenue_sources_section",
   "rev_product_sales",
   "rev_service_contracts",
@@ -48,12 +74,15 @@
   "rev_other_specify",
   "annual_revenue_range",
   "financial_situation",
+  "financial_situation_other",
   "surplus_split",
   "part_5_section",
   "development_stage",
   "paid_staff_count",
   "customers_reached_annually",
   "training_received",
+  "ns_coaching_support",
+  "ns_coaching_describe",
   "needs_section_break",
   "need_funding",
   "need_biz_dev",
@@ -80,6 +109,12 @@
   "str_rcrc",
   "str_other",
   "str_other_specify",
+  "digitalization_section_break",
+  "digit_offline",
+  "digit_basic",
+  "digit_online_presence",
+  "digit_ecommerce",
+  "digit_integrated",
   "part_6_section",
   "doc_business_plan",
   "doc_annual_reports",
@@ -114,15 +149,22 @@
   },
   {
    "fieldname": "broader_program",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Is your business activity part of a broader Social Entrepreneurship Program?",
+   "options": "\nYes\nNo",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.broader_program == 'Yes'",
+   "fieldname": "broader_program_name",
+   "fieldtype": "Data",
+   "label": "Program Name (if yes, please specify)"
   },
   {
    "fieldname": "legal_status",
    "fieldtype": "Select",
    "label": "Legal Status of the Activity",
-   "options": "\nNot formally registered yet\nRegistered as a department of the National Society\nRegistered as a separate legal entity",
+   "options": "\nNot formally registered yet\nRegistered as a department / unit / program / sector of the National Society\nRegistered as a separate legal entity\nOther",
    "reqd": 1
   },
   {
@@ -137,6 +179,12 @@
    "fieldname": "legal_form_other",
    "fieldtype": "Data",
    "label": "Legal Form — Other (specify)"
+  },
+  {
+   "depends_on": "eval:doc.legal_status == 'Other'",
+   "fieldname": "legal_status_other",
+   "fieldtype": "Data",
+   "label": "Legal Status — Other (specify)"
   },
   {
    "fieldname": "countries_of_operation",
@@ -183,7 +231,7 @@
    "fieldname": "main_sector",
    "fieldtype": "Select",
    "label": "Main Sector of Operation",
-   "options": "\nLivelihoods/Empowerment\nHealth\nWASH\nClimate & Environment\nLogistics\nTraining\nOther",
+   "options": "\nLivelihoods/Empowerment\nHealth\nWASH\nClimate & Environment\nLogistics\nOther",
    "reqd": 1
   },
   {
@@ -198,22 +246,157 @@
    "label": "Part 3 — Users & Beneficiaries"
   },
   {
-   "fieldname": "business_model_type",
-   "fieldtype": "Select",
-   "label": "Business Model Type",
-   "options": "\nB2C (selling directly to individuals)\nB2B (selling to companies)\nB2G (selling to government)\nInternal (selling to the National Society)",
-   "reqd": 1
+   "fieldname": "bmt_section_break",
+   "fieldtype": "Section Break",
+   "label": "Business Model Type (select all that apply)"
   },
   {
-   "fieldname": "paying_customers",
-   "fieldtype": "Small Text",
-   "label": "Main Paying Customers",
-   "reqd": 1
+   "default": "0",
+   "fieldname": "bmt_b2c",
+   "fieldtype": "Check",
+   "label": "B2C (selling directly to individuals)"
   },
   {
-   "fieldname": "non_paying_customers",
-   "fieldtype": "Small Text",
-   "label": "Non-Paying Customers / Beneficiaries (if any)"
+   "default": "0",
+   "fieldname": "bmt_b2b",
+   "fieldtype": "Check",
+   "label": "B2B (selling to companies)"
+  },
+  {
+   "default": "0",
+   "fieldname": "bmt_b2g",
+   "fieldtype": "Check",
+   "label": "B2G (selling to government)"
+  },
+  {
+   "default": "0",
+   "fieldname": "bmt_internal",
+   "fieldtype": "Check",
+   "label": "Internal (selling to the National Society)"
+  },
+  {
+   "default": "0",
+   "fieldname": "bmt_hybrid",
+   "fieldtype": "Check",
+   "label": "Hybrid / Multiple model types"
+  },
+  {
+   "fieldname": "paying_customers_section_break",
+   "fieldtype": "Section Break",
+   "label": "Main Paying Customers (select all that apply)"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_individuals",
+   "fieldtype": "Check",
+   "label": "Individuals / Households"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_smes",
+   "fieldtype": "Check",
+   "label": "Small & Medium Enterprises (SMEs)"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_large_corp",
+   "fieldtype": "Check",
+   "label": "Large Corporations"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_government",
+   "fieldtype": "Check",
+   "label": "Government / International Organizations"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_schools",
+   "fieldtype": "Check",
+   "label": "Schools / Universities"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_hospitals",
+   "fieldtype": "Check",
+   "label": "Hospitals / Health Institutions"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_community",
+   "fieldtype": "Check",
+   "label": "Community Groups / Cooperatives"
+  },
+  {
+   "default": "0",
+   "fieldname": "pc_other",
+   "fieldtype": "Check",
+   "label": "Other (paying customers)"
+  },
+  {
+   "depends_on": "eval:doc.pc_other == 1",
+   "fieldname": "pc_other_specify",
+   "fieldtype": "Data",
+   "label": "Paying Customers — Other (specify)"
+  },
+  {
+   "fieldname": "non_paying_section_break",
+   "fieldtype": "Section Break",
+   "label": "Non-Paying Customers / Beneficiaries (select all that apply)"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_individuals",
+   "fieldtype": "Check",
+   "label": "Individuals / Households"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_smes",
+   "fieldtype": "Check",
+   "label": "Small & Medium Enterprises (SMEs)"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_large_corp",
+   "fieldtype": "Check",
+   "label": "Large Corporations"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_government",
+   "fieldtype": "Check",
+   "label": "Government / International Organizations"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_schools",
+   "fieldtype": "Check",
+   "label": "Schools / Universities"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_hospitals",
+   "fieldtype": "Check",
+   "label": "Hospitals / Health Institutions"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_community",
+   "fieldtype": "Check",
+   "label": "Community Groups / Cooperatives"
+  },
+  {
+   "default": "0",
+   "fieldname": "npc_other",
+   "fieldtype": "Check",
+   "label": "Other (non-paying customers)"
+  },
+  {
+   "depends_on": "eval:doc.npc_other == 1",
+   "fieldname": "npc_other_specify",
+   "fieldtype": "Data",
+   "label": "Non-Paying Customers — Other (specify)"
   },
   {
    "fieldname": "reach_section_break",
@@ -265,8 +448,14 @@
    "fieldname": "funding_type",
    "fieldtype": "Select",
    "label": "How is the Social Business Currently Funded?",
-   "options": "\nPrimarily grants\nPrimarily revenue-generated\nHybrid (grants + revenue)\nStill in pilot phase (not yet generating revenue)",
+   "options": "\nPrimarily grants\nPrimarily revenue-generated\nHybrid (grants + revenue)\nStill in pilot phase (not yet generating revenue)\nOther",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.funding_type == 'Other'",
+   "fieldname": "funding_type_other",
+   "fieldtype": "Data",
+   "label": "Funding Type — Other (specify)"
   },
   {
    "fieldname": "revenue_sources_section",
@@ -335,16 +524,23 @@
   },
   {
    "fieldname": "annual_revenue_range",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Annual Revenue Range",
+   "options": "\n$0 – $10,000\n$10,001 – $50,000\n$50,001 – $250,000\n$250,001 – $1,000,000\nMore than $1,000,000\nPrefer not to say",
    "reqd": 1
   },
   {
    "fieldname": "financial_situation",
    "fieldtype": "Select",
    "label": "Financial Situation",
-   "options": "\nOperating at a loss\nBreak-even\nGenerating surplus reinvested into mission\nGenerating surplus redistributed to National Society core costs",
+   "options": "\nOperating at a loss\nBreak-even\nGenerating surplus reinvested into mission\nGenerating surplus redistributed to National Society core costs\nOther",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.financial_situation == 'Other'",
+   "fieldname": "financial_situation_other",
+   "fieldtype": "Data",
+   "label": "Financial Situation — Other (specify)"
   },
   {
    "depends_on": "eval:['Generating surplus reinvested into mission','Generating surplus redistributed to National Society core costs'].includes(doc.financial_situation)",
@@ -381,6 +577,18 @@
    "fieldname": "training_received",
    "fieldtype": "Small Text",
    "label": "Entrepreneurship / Business Development Training Received (if any)"
+  },
+  {
+   "fieldname": "ns_coaching_support",
+   "fieldtype": "Select",
+   "label": "Does your National Society provide coaching or monitoring support to this business activity?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.ns_coaching_support == 'Yes'",
+   "fieldname": "ns_coaching_describe",
+   "fieldtype": "Small Text",
+   "label": "Please describe the coaching / monitoring support briefly"
   },
   {
    "fieldname": "needs_section_break",
@@ -433,13 +641,13 @@
    "default": "0",
    "fieldname": "need_hr",
    "fieldtype": "Check",
-   "label": "HR / recruitment"
+   "label": "Human Resources (HR) / recruitment"
   },
   {
    "default": "0",
    "fieldname": "need_rd",
    "fieldtype": "Check",
-   "label": "R&D / product development"
+   "label": "Research & Development (R&D) / product development"
   },
   {
    "default": "0",
@@ -456,7 +664,7 @@
   {
    "fieldname": "strengths_section_break",
    "fieldtype": "Section Break",
-   "label": "Main Strengths (select up to 3)"
+   "label": "Main Strengths (select up to 4)"
   },
   {
    "default": "0",
@@ -537,6 +745,41 @@
    "label": "Main Strengths — Other (specify)"
   },
   {
+   "fieldname": "digitalization_section_break",
+   "fieldtype": "Section Break",
+   "label": "Level of Digitalization (select all that apply)"
+  },
+  {
+   "default": "0",
+   "fieldname": "digit_offline",
+   "fieldtype": "Check",
+   "label": "Fully offline"
+  },
+  {
+   "default": "0",
+   "fieldname": "digit_basic",
+   "fieldtype": "Check",
+   "label": "Basic digital tools (Excel, email)"
+  },
+  {
+   "default": "0",
+   "fieldname": "digit_online_presence",
+   "fieldtype": "Check",
+   "label": "Online presence (website / social media)"
+  },
+  {
+   "default": "0",
+   "fieldname": "digit_ecommerce",
+   "fieldtype": "Check",
+   "label": "Digital sales channels (e-commerce, platforms)"
+  },
+  {
+   "default": "0",
+   "fieldname": "digit_integrated",
+   "fieldtype": "Check",
+   "label": "Fully integrated digital system"
+  },
+  {
    "fieldname": "part_6_section",
    "fieldtype": "Section Break",
    "label": "Additional Documents & Consent"
@@ -576,7 +819,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-08 03:34:29.549820",
+ "modified": "2026-04-09 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Agri Judge",
  "name": "IOMe SBM",

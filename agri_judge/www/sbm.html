@@ -934,6 +934,106 @@
             .quad { min-height: 100px; padding: 0.75rem; }
             .impact-label-top, .impact-label-bottom { font-size: 0.65rem; max-width: 100px; }
         }
+
+        /* ── Radio group ── */
+        .radio-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .radio-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+        .radio-item input[type="radio"] {
+            accent-color: var(--rc-red);
+            width: 1.1rem;
+            height: 1.1rem;
+            cursor: pointer;
+        }
+
+        /* ── Country picker ── */
+        .country-picker { position: relative; }
+        .country-search-wrap {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--rc-border);
+            border-radius: 8px;
+            background: #fff;
+            padding: 0.45rem 0.75rem;
+            gap: 0.5rem;
+            cursor: text;
+            transition: border-color .2s;
+        }
+        .country-search-wrap:focus-within { border-color: var(--rc-red); }
+        .country-search-wrap input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background: transparent;
+            min-width: 120px;
+        }
+        .country-search-wrap input::placeholder { color: var(--text-light); }
+        .country-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0; right: 0;
+            background: #fff;
+            border: 1.5px solid var(--rc-border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 200;
+            display: none;
+        }
+        .country-dropdown.open { display: block; }
+        .country-option {
+            padding: 0.55rem 1rem;
+            font-size: 0.92rem;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: background .15s;
+        }
+        .country-option:hover, .country-option.active { background: var(--rc-light); color: var(--rc-red-dark); }
+        .country-option.selected { opacity: .4; pointer-events: none; }
+        .country-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.55rem;
+        }
+        .country-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--rc-light);
+            border: 1px solid #f0b8bb;
+            color: var(--rc-red-dark);
+            border-radius: 99px;
+            padding: 0.25rem 0.65rem 0.25rem 0.8rem;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+        .country-pill button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--rc-red);
+            font-size: 0.8rem;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        .country-pill button:hover { color: var(--rc-red-dark); }
     </style>
 </head>
 <body>
@@ -1147,7 +1247,15 @@
         <div class="card-body">
             <div class="form-group">
                 <label class="field-label">National Society <span class="req">*</span></label>
-                <input type="text" id="national_society" placeholder="e.g. Kenya Red Cross Society">
+                <div class="country-picker" id="national_society_picker">
+                    <div class="country-search-wrap" onclick="document.getElementById('national_society_input').focus()">
+                        <i class="fa-solid fa-magnifying-glass" style="color:var(--text-light);font-size:0.85rem"></i>
+                        <input type="text" id="national_society_input" placeholder="Search for a country…" autocomplete="off">
+                        <i class="fa-solid fa-xmark" id="national_society_clear" style="color:var(--text-light);font-size:0.85rem;cursor:pointer;display:none" onclick="clearNationalSociety()"></i>
+                    </div>
+                    <div class="country-dropdown" id="national_society_dropdown"></div>
+                </div>
+                <input type="hidden" id="national_society">
             </div>
 
             <!-- ── Business Activities child table ── -->
@@ -1166,16 +1274,35 @@
 
             <div class="form-group">
                 <label class="field-label">Is your business activity part of a broader Social Entrepreneurship Program? <span class="req">*</span></label>
-                <input type="text" id="broader_program" placeholder="e.g. Yes — IFRC Social Enterprise Accelerator / REDPreneur / WSEI">
+                <input type="hidden" id="broader_program">
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="broader_program_radio" value="Yes" onchange="document.getElementById('broader_program').value='Yes'; toggleBroaderProgram()">
+                        <span>Yes</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="broader_program_radio" value="No" onchange="document.getElementById('broader_program').value='No'; toggleBroaderProgram()">
+                        <span>No</span>
+                    </label>
+                </div>
+            </div>
+            <div class="conditional form-group" id="broader_program_name_wrap">
+                <label class="field-label">If yes, please specify the program name</label>
+                <input type="text" id="broader_program_name" placeholder="e.g. IFRC Social Enterprise Accelerator / REDPreneur / WSEI">
             </div>
             <div class="form-group">
                 <label class="field-label">Legal Status of the Activity <span class="req">*</span></label>
-                <select id="legal_status" onchange="toggleLegalForm()">
+                <select id="legal_status" onchange="toggleLegalForm(); toggleLegalStatusOther()">
                     <option value="">— Select —</option>
                     <option>Not formally registered yet</option>
-                    <option>Registered as a department of the National Society</option>
+                    <option>Registered as a department / unit / program / sector of the National Society</option>
                     <option>Registered as a separate legal entity</option>
+                    <option>Other</option>
                 </select>
+            </div>
+            <div class="conditional form-group" id="legal_status_other_wrap">
+                <label class="field-label">Legal Status — Other (specify)</label>
+                <input type="text" id="legal_status_other" placeholder="Please specify">
             </div>
             <div class="conditional form-group" id="legal_form_wrap">
                 <label class="field-label">Legal Form (if separate entity)</label>
@@ -1193,7 +1320,16 @@
             </div>
             <div class="form-group">
                 <label class="field-label">Country / Countries of Operation <span class="req">*</span></label>
-                <textarea id="countries_of_operation" rows="2" placeholder="e.g. Kenya, Uganda"></textarea>
+                <!-- hidden input holds comma-separated value for validation & submission -->
+                <input type="hidden" id="countries_of_operation">
+                <div class="country-picker" id="country_picker">
+                    <div class="country-search-wrap" onclick="document.getElementById('country_search_input').focus()">
+                        <i class="fa-solid fa-magnifying-glass" style="color:var(--text-light);font-size:0.85rem"></i>
+                        <input type="text" id="country_search_input" placeholder="Search for a country…" autocomplete="off">
+                    </div>
+                    <div class="country-dropdown" id="country_dropdown"></div>
+                    <div class="country-pills" id="country_pills"></div>
+                </div>
             </div>
             <div class="sub-section">
                 <h4><i class="fa-solid fa-user"></i> Key Contact Person</h4>
@@ -1245,7 +1381,6 @@
                     <option>WASH</option>
                     <option>Climate &amp; Environment</option>
                     <option>Logistics</option>
-                    <option>Training</option>
                     <option>Other</option>
                 </select>
             </div>
@@ -1269,23 +1404,97 @@
             <p>Who does your social business serve and how do you reach them?</p>
         </div>
         <div class="card-body">
-            <div class="form-group">
-                <label class="field-label">Business Model Type <span class="req">*</span></label>
-                <select id="business_model_type">
-                    <option value="">— Select —</option>
-                    <option>B2C (selling directly to individuals)</option>
-                    <option>B2B (selling to companies)</option>
-                    <option>B2G (selling to government)</option>
-                    <option>Internal (selling to the National Society)</option>
-                </select>
+            <div class="sub-section" style="margin-top:0">
+                <h4><i class="fa-solid fa-diagram-project"></i> Business Model Type <span class="req">*</span> <small style="font-weight:400;color:#888">(select all that apply)</small></h4>
             </div>
-            <div class="form-group">
-                <label class="field-label">Main Paying Customers <span class="req">*</span></label>
-                <textarea id="paying_customers" rows="2" placeholder="e.g. Hospitals, clinics, and community health workers"></textarea>
+            <div class="checkbox-grid" id="bmt-grid">
+                <label class="checkbox-item" id="lbl-bmt_b2c">
+                    <input type="checkbox" id="bmt_b2c" onchange="syncCheck(this,'lbl-bmt_b2c'); syncBmtHidden()"><span>B2C — selling directly to individuals</span>
+                </label>
+                <label class="checkbox-item" id="lbl-bmt_b2b">
+                    <input type="checkbox" id="bmt_b2b" onchange="syncCheck(this,'lbl-bmt_b2b'); syncBmtHidden()"><span>B2B — selling to companies</span>
+                </label>
+                <label class="checkbox-item" id="lbl-bmt_b2g">
+                    <input type="checkbox" id="bmt_b2g" onchange="syncCheck(this,'lbl-bmt_b2g'); syncBmtHidden()"><span>B2G — selling to government</span>
+                </label>
+                <label class="checkbox-item" id="lbl-bmt_internal">
+                    <input type="checkbox" id="bmt_internal" onchange="syncCheck(this,'lbl-bmt_internal'); syncBmtHidden()"><span>Internal — selling to the National Society</span>
+                </label>
+                <label class="checkbox-item" id="lbl-bmt_hybrid">
+                    <input type="checkbox" id="bmt_hybrid" onchange="syncCheck(this,'lbl-bmt_hybrid'); syncBmtHidden()"><span>Hybrid / Multiple model types</span>
+                </label>
             </div>
-            <div class="form-group">
-                <label class="field-label">Non-Paying Customers / Beneficiaries (if any)</label>
-                <textarea id="non_paying_customers" rows="2" placeholder="e.g. Low-income families receiving subsidised services"></textarea>
+            <!-- hidden field for validation -->
+            <input type="hidden" id="bmt_required_check">
+
+            <div class="sub-section" style="margin-top:1.75rem">
+                <h4><i class="fa-solid fa-users"></i> Main Paying Customers <span class="req">*</span> <small style="font-weight:400;color:#888">(select all that apply)</small></h4>
+            </div>
+            <div class="checkbox-grid" id="pc-grid">
+                <label class="checkbox-item" id="lbl-pc_individuals">
+                    <input type="checkbox" id="pc_individuals" onchange="syncCheck(this,'lbl-pc_individuals'); syncPcHidden()"><span>Individuals / Households</span>
+                </label>
+                <label class="checkbox-item" id="lbl-pc_smes">
+                    <input type="checkbox" id="pc_smes" onchange="syncCheck(this,'lbl-pc_smes'); syncPcHidden()"><span>Small &amp; Medium Enterprises (SMEs)</span>
+                </label>
+                <label class="checkbox-item" id="lbl-pc_large_corp">
+                    <input type="checkbox" id="pc_large_corp" onchange="syncCheck(this,'lbl-pc_large_corp'); syncPcHidden()"><span>Large Corporations</span>
+                </label>
+                <label class="checkbox-item" id="lbl-pc_government">
+                    <input type="checkbox" id="pc_government" onchange="syncCheck(this,'lbl-pc_government'); syncPcHidden()"><span>Government / International Organizations</span>
+                </label>
+                <label class="checkbox-item" id="lbl-pc_schools">
+                    <input type="checkbox" id="pc_schools" onchange="syncCheck(this,'lbl-pc_schools'); syncPcHidden()"><span>Schools / Universities</span>
+                </label>
+                <label class="checkbox-item" id="lbl-pc_hospitals">
+                    <input type="checkbox" id="pc_hospitals" onchange="syncCheck(this,'lbl-pc_hospitals'); syncPcHidden()"><span>Hospitals / Health Institutions</span>
+                </label>
+                <label class="checkbox-item" id="lbl-pc_community">
+                    <input type="checkbox" id="pc_community" onchange="syncCheck(this,'lbl-pc_community'); syncPcHidden()"><span>Community Groups / Cooperatives</span>
+                </label>
+                <label class="checkbox-item" id="lbl-pc_other">
+                    <input type="checkbox" id="pc_other" onchange="syncCheck(this,'lbl-pc_other'); syncPcHidden(); toggleConditionalCheck('pc_other','pc_other_specify_wrap')"><span>Other</span>
+                </label>
+            </div>
+            <div class="conditional form-group" id="pc_other_specify_wrap" style="margin-top:0.75rem">
+                <label class="field-label">Paying Customers — Other (specify)</label>
+                <input type="text" id="pc_other_specify" placeholder="Please specify">
+            </div>
+            <!-- hidden field for validation -->
+            <input type="hidden" id="pc_required_check">
+
+            <div class="sub-section" style="margin-top:1.75rem">
+                <h4><i class="fa-solid fa-hand-holding-heart"></i> Non-Paying Customers / Beneficiaries <small style="font-weight:400;color:#888">(select all that apply, if any)</small></h4>
+            </div>
+            <div class="checkbox-grid" id="npc-grid">
+                <label class="checkbox-item" id="lbl-npc_individuals">
+                    <input type="checkbox" id="npc_individuals" onchange="syncCheck(this,'lbl-npc_individuals')"><span>Individuals / Households</span>
+                </label>
+                <label class="checkbox-item" id="lbl-npc_smes">
+                    <input type="checkbox" id="npc_smes" onchange="syncCheck(this,'lbl-npc_smes')"><span>Small &amp; Medium Enterprises (SMEs)</span>
+                </label>
+                <label class="checkbox-item" id="lbl-npc_large_corp">
+                    <input type="checkbox" id="npc_large_corp" onchange="syncCheck(this,'lbl-npc_large_corp')"><span>Large Corporations</span>
+                </label>
+                <label class="checkbox-item" id="lbl-npc_government">
+                    <input type="checkbox" id="npc_government" onchange="syncCheck(this,'lbl-npc_government')"><span>Government / International Organizations</span>
+                </label>
+                <label class="checkbox-item" id="lbl-npc_schools">
+                    <input type="checkbox" id="npc_schools" onchange="syncCheck(this,'lbl-npc_schools')"><span>Schools / Universities</span>
+                </label>
+                <label class="checkbox-item" id="lbl-npc_hospitals">
+                    <input type="checkbox" id="npc_hospitals" onchange="syncCheck(this,'lbl-npc_hospitals')"><span>Hospitals / Health Institutions</span>
+                </label>
+                <label class="checkbox-item" id="lbl-npc_community">
+                    <input type="checkbox" id="npc_community" onchange="syncCheck(this,'lbl-npc_community')"><span>Community Groups / Cooperatives</span>
+                </label>
+                <label class="checkbox-item" id="lbl-npc_other">
+                    <input type="checkbox" id="npc_other" onchange="syncCheck(this,'lbl-npc_other'); toggleConditionalCheck('npc_other','npc_other_specify_wrap')"><span>Other</span>
+                </label>
+            </div>
+            <div class="conditional form-group" id="npc_other_specify_wrap" style="margin-top:0.75rem">
+                <label class="field-label">Non-Paying Customers — Other (specify)</label>
+                <input type="text" id="npc_other_specify" placeholder="Please specify">
             </div>
 
             <div class="sub-section">
@@ -1336,13 +1545,18 @@
         <div class="card-body">
             <div class="form-group">
                 <label class="field-label">How is the Social Business Currently Funded? <span class="req">*</span></label>
-                <select id="funding_type">
+                <select id="funding_type" onchange="toggleFundingOther()">
                     <option value="">— Select —</option>
                     <option>Primarily grants</option>
                     <option>Primarily revenue-generated</option>
                     <option>Hybrid (grants + revenue)</option>
                     <option>Still in pilot phase (not yet generating revenue)</option>
+                    <option>Other</option>
                 </select>
+            </div>
+            <div class="conditional form-group" id="funding_type_other_wrap">
+                <label class="field-label">Funding Type — Other (specify)</label>
+                <input type="text" id="funding_type_other" placeholder="Please specify">
             </div>
 
             <div class="sub-section">
@@ -1384,17 +1598,30 @@
 
             <div class="form-group" style="margin-top:1.5rem">
                 <label class="field-label">Annual Revenue Range <span class="req">*</span></label>
-                <input type="text" id="annual_revenue_range" placeholder="e.g. USD 50,000 – 100,000">
+                <select id="annual_revenue_range">
+                    <option value="">— Select —</option>
+                    <option>$0 – $10,000</option>
+                    <option>$10,001 – $50,000</option>
+                    <option>$50,001 – $250,000</option>
+                    <option>$250,001 – $1,000,000</option>
+                    <option>More than $1,000,000</option>
+                    <option>Prefer not to say</option>
+                </select>
             </div>
             <div class="form-group">
                 <label class="field-label">Financial Situation <span class="req">*</span></label>
-                <select id="financial_situation" onchange="toggleSurplus()">
+                <select id="financial_situation" onchange="toggleSurplus(); toggleFinancialOther()">
                     <option value="">— Select —</option>
                     <option>Operating at a loss</option>
                     <option>Break-even</option>
                     <option>Generating surplus reinvested into mission</option>
                     <option>Generating surplus redistributed to National Society core costs</option>
+                    <option>Other</option>
                 </select>
+            </div>
+            <div class="conditional form-group" id="financial_situation_other_wrap">
+                <label class="field-label">Financial Situation — Other (specify)</label>
+                <input type="text" id="financial_situation_other" placeholder="Please specify">
             </div>
             <div class="conditional form-group" id="surplus_split_wrap">
                 <label class="field-label">Surplus Split: % to Social Mission vs National Society Core Costs</label>
@@ -1445,6 +1672,24 @@
                 <label class="field-label">Entrepreneurship / Business Development Training Received (if any)</label>
                 <textarea id="training_received" rows="2" placeholder="e.g. IFRC Social Enterprise Bootcamp 2023"></textarea>
             </div>
+            <div class="form-group">
+                <label class="field-label">Does your National Society provide coaching or monitoring support to this business activity?</label>
+                <input type="hidden" id="ns_coaching_support">
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="ns_coaching_radio" value="Yes" onchange="document.getElementById('ns_coaching_support').value='Yes'; toggleCoachingDescribe()">
+                        <span>Yes</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="ns_coaching_radio" value="No" onchange="document.getElementById('ns_coaching_support').value='No'; toggleCoachingDescribe()">
+                        <span>No</span>
+                    </label>
+                </div>
+            </div>
+            <div class="conditional form-group" id="ns_coaching_describe_wrap">
+                <label class="field-label">Please describe the coaching / monitoring support briefly</label>
+                <textarea id="ns_coaching_describe" rows="2" placeholder="e.g. Quarterly business review meetings with the SE program coordinator"></textarea>
+            </div>
 
             <div class="sub-section">
                 <h4><i class="fa-solid fa-hand-holding-heart"></i> Main Current Needs <small style="font-weight:400;color:#888">(select up to 3)</small></h4>
@@ -1472,10 +1717,10 @@
                     <input type="checkbox" id="need_digital" onchange="limitCheck(this,'lbl-need_digital','needs-grid',3)"><span>Digital tools</span>
                 </label>
                 <label class="checkbox-item" id="lbl-need_hr">
-                    <input type="checkbox" id="need_hr" onchange="limitCheck(this,'lbl-need_hr','needs-grid',3)"><span>HR / recruitment</span>
+                    <input type="checkbox" id="need_hr" onchange="limitCheck(this,'lbl-need_hr','needs-grid',3)"><span>Human Resources (HR) / recruitment</span>
                 </label>
                 <label class="checkbox-item" id="lbl-need_rd">
-                    <input type="checkbox" id="need_rd" onchange="limitCheck(this,'lbl-need_rd','needs-grid',3)"><span>R&amp;D / product development</span>
+                    <input type="checkbox" id="need_rd" onchange="limitCheck(this,'lbl-need_rd','needs-grid',3)"><span>Research &amp; Development (R&amp;D) / product development</span>
                 </label>
                 <label class="checkbox-item" id="lbl-need_other">
                     <input type="checkbox" id="need_other" onchange="limitCheck(this,'lbl-need_other','needs-grid',3); toggleConditionalCheck('need_other','need_other_specify_wrap')"><span>Other</span>
@@ -1487,49 +1732,70 @@
             </div>
 
             <div class="sub-section" style="margin-top:2rem">
-                <h4><i class="fa-solid fa-star"></i> Main Strengths <small style="font-weight:400;color:#888">(select up to 3)</small></h4>
+                <h4><i class="fa-solid fa-star"></i> Main Strengths <small style="font-weight:400;color:#888">(select up to 4)</small></h4>
             </div>
             <div class="checkbox-grid" id="str-grid">
                 <label class="checkbox-item" id="lbl-str_mission">
-                    <input type="checkbox" id="str_mission" onchange="limitCheck(this,'lbl-str_mission','str-grid',3)"><span>Strong mission alignment</span>
+                    <input type="checkbox" id="str_mission" onchange="limitCheck(this,'lbl-str_mission','str-grid',4)"><span>Strong mission alignment</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_volunteers">
-                    <input type="checkbox" id="str_volunteers" onchange="limitCheck(this,'lbl-str_volunteers','str-grid',3)"><span>Strong volunteer base</span>
+                    <input type="checkbox" id="str_volunteers" onchange="limitCheck(this,'lbl-str_volunteers','str-grid',4)"><span>Strong volunteer base</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_legitimacy">
-                    <input type="checkbox" id="str_legitimacy" onchange="limitCheck(this,'lbl-str_legitimacy','str-grid',3)"><span>Strong local legitimacy</span>
+                    <input type="checkbox" id="str_legitimacy" onchange="limitCheck(this,'lbl-str_legitimacy','str-grid',4)"><span>Strong local legitimacy</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_partnerships">
-                    <input type="checkbox" id="str_partnerships" onchange="limitCheck(this,'lbl-str_partnerships','str-grid',3)"><span>Solid partnerships</span>
+                    <input type="checkbox" id="str_partnerships" onchange="limitCheck(this,'lbl-str_partnerships','str-grid',4)"><span>Solid partnerships</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_financial">
-                    <input type="checkbox" id="str_financial" onchange="limitCheck(this,'lbl-str_financial','str-grid',3)"><span>Financial sustainability</span>
+                    <input type="checkbox" id="str_financial" onchange="limitCheck(this,'lbl-str_financial','str-grid',4)"><span>Financial sustainability</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_innovation">
-                    <input type="checkbox" id="str_innovation" onchange="limitCheck(this,'lbl-str_innovation','str-grid',3)"><span>Innovation capacity</span>
+                    <input type="checkbox" id="str_innovation" onchange="limitCheck(this,'lbl-str_innovation','str-grid',4)"><span>Innovation capacity</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_leadership">
-                    <input type="checkbox" id="str_leadership" onchange="limitCheck(this,'lbl-str_leadership','str-grid',3)"><span>Strong leadership</span>
+                    <input type="checkbox" id="str_leadership" onchange="limitCheck(this,'lbl-str_leadership','str-grid',4)"><span>Strong leadership</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_brand">
-                    <input type="checkbox" id="str_brand" onchange="limitCheck(this,'lbl-str_brand','str-grid',3)"><span>Strong brand recognition</span>
+                    <input type="checkbox" id="str_brand" onchange="limitCheck(this,'lbl-str_brand','str-grid',4)"><span>Strong brand recognition</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_government">
-                    <input type="checkbox" id="str_government" onchange="limitCheck(this,'lbl-str_government','str-grid',3)"><span>Government relationships</span>
+                    <input type="checkbox" id="str_government" onchange="limitCheck(this,'lbl-str_government','str-grid',4)"><span>Government relationships</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_scalable">
-                    <input type="checkbox" id="str_scalable" onchange="limitCheck(this,'lbl-str_scalable','str-grid',3)"><span>Scalable model</span>
+                    <input type="checkbox" id="str_scalable" onchange="limitCheck(this,'lbl-str_scalable','str-grid',4)"><span>Scalable model</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_rcrc">
-                    <input type="checkbox" id="str_rcrc" onchange="limitCheck(this,'lbl-str_rcrc','str-grid',3)"><span>Access to RCRC network / partners</span>
+                    <input type="checkbox" id="str_rcrc" onchange="limitCheck(this,'lbl-str_rcrc','str-grid',4)"><span>Access to RCRC network / partners</span>
                 </label>
                 <label class="checkbox-item" id="lbl-str_other">
-                    <input type="checkbox" id="str_other" onchange="limitCheck(this,'lbl-str_other','str-grid',3); toggleConditionalCheck('str_other','str_other_specify_wrap')"><span>Other</span>
+                    <input type="checkbox" id="str_other" onchange="limitCheck(this,'lbl-str_other','str-grid',4); toggleConditionalCheck('str_other','str_other_specify_wrap')"><span>Other</span>
                 </label>
             </div>
             <div class="conditional form-group" id="str_other_specify_wrap" style="margin-top:0.75rem">
                 <label class="field-label">Main Strengths — Other (specify)</label>
                 <input type="text" id="str_other_specify" placeholder="Please specify">
+            </div>
+
+            <div class="sub-section" style="margin-top:2rem">
+                <h4><i class="fa-solid fa-laptop"></i> Level of Digitalization <small style="font-weight:400;color:#888">(select all that apply)</small></h4>
+            </div>
+            <div class="checkbox-grid">
+                <label class="checkbox-item" id="lbl-digit_offline">
+                    <input type="checkbox" id="digit_offline" onchange="syncCheck(this,'lbl-digit_offline')"><span>Fully offline</span>
+                </label>
+                <label class="checkbox-item" id="lbl-digit_basic">
+                    <input type="checkbox" id="digit_basic" onchange="syncCheck(this,'lbl-digit_basic')"><span>Basic digital tools (Excel, email)</span>
+                </label>
+                <label class="checkbox-item" id="lbl-digit_online_presence">
+                    <input type="checkbox" id="digit_online_presence" onchange="syncCheck(this,'lbl-digit_online_presence')"><span>Online presence (website / social media)</span>
+                </label>
+                <label class="checkbox-item" id="lbl-digit_ecommerce">
+                    <input type="checkbox" id="digit_ecommerce" onchange="syncCheck(this,'lbl-digit_ecommerce')"><span>Digital sales channels (e-commerce, platforms)</span>
+                </label>
+                <label class="checkbox-item" id="lbl-digit_integrated">
+                    <input type="checkbox" id="digit_integrated" onchange="syncCheck(this,'lbl-digit_integrated')"><span>Fully integrated digital system</span>
+                </label>
             </div>
 
             <div class="error-msg" id="err-5">Please fill in all required fields before continuing.</div>
@@ -1675,19 +1941,19 @@
                     <input type="text" id="act_name_${idx}" placeholder="e.g. KRCS Blood Bank Services"
                            oninput="updateRowSummary(${idx})">
                 </div>
+                <div class="form-group">
+                    <label class="field-label">Year of Establishment of this Business Activity <span class="req">*</span></label>
+                    <input type="number" id="act_year_${idx}" placeholder="e.g. 2018" min="1900" max="2030">
+                </div>
                 <div class="activity-row-grid">
                     <div class="form-group">
-                        <label class="field-label">Matrix Quadrant <span class="req">*</span></label>
+                        <label class="field-label">Select the Business Activity Zone that best describes your initiative <span class="req">*</span></label>
                         <select id="act_quadrant_${idx}">
                             <option value="">— Select —</option>
                             <option>1. Commercial Zone</option>
                             <option>2. Livelihood Zone</option>
                             <option>3. Social Business Zone</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="field-label">Year of Establishment <span class="req">*</span></label>
-                        <input type="number" id="act_year_${idx}" placeholder="e.g. 2018" min="1900" max="2030">
                     </div>
                     <div class="form-group">
                         <label class="field-label">Level of Operation <span class="req">*</span></label>
@@ -1787,35 +2053,80 @@
     }
 
     function toggleLegalForm() {
-        const val = document.getElementById('legal_status').value;
+        const v = document.getElementById('legal_status').value;
         const wrap = document.getElementById('legal_form_wrap');
-        if (val === 'Registered as a separate legal entity') wrap.classList.add('visible');
+        if (v === 'Registered as a separate legal entity') wrap.classList.add('visible');
         else {
             wrap.classList.remove('visible');
             document.getElementById('legal_form_other_wrap').classList.remove('visible');
         }
     }
 
+    function toggleLegalStatusOther() {
+        const v = document.getElementById('legal_status').value;
+        const wrap = document.getElementById('legal_status_other_wrap');
+        if (v === 'Other') wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
     function toggleLegalFormOther() {
-        const val = document.getElementById('legal_form').value;
+        const v = document.getElementById('legal_form').value;
         const wrap = document.getElementById('legal_form_other_wrap');
-        if (val === 'Other') wrap.classList.add('visible');
+        if (v === 'Other') wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function toggleBroaderProgram() {
+        const v = document.getElementById('broader_program').value;
+        const wrap = document.getElementById('broader_program_name_wrap');
+        if (v === 'Yes') wrap.classList.add('visible');
         else wrap.classList.remove('visible');
     }
 
     function toggleSectorOther() {
-        const val = document.getElementById('main_sector').value;
+        const v = document.getElementById('main_sector').value;
         const wrap = document.getElementById('main_sector_other_wrap');
-        if (val === 'Other') wrap.classList.add('visible');
+        if (v === 'Other') wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function toggleFundingOther() {
+        const v = document.getElementById('funding_type').value;
+        const wrap = document.getElementById('funding_type_other_wrap');
+        if (v === 'Other') wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function toggleFinancialOther() {
+        const v = document.getElementById('financial_situation').value;
+        const wrap = document.getElementById('financial_situation_other_wrap');
+        if (v === 'Other') wrap.classList.add('visible');
         else wrap.classList.remove('visible');
     }
 
     function toggleSurplus() {
-        const val = document.getElementById('financial_situation').value;
+        const v = document.getElementById('financial_situation').value;
         const wrap = document.getElementById('surplus_split_wrap');
         const surplus = ['Generating surplus reinvested into mission', 'Generating surplus redistributed to National Society core costs'];
-        if (surplus.includes(val)) wrap.classList.add('visible');
+        if (surplus.includes(v)) wrap.classList.add('visible');
         else wrap.classList.remove('visible');
+    }
+
+    function toggleCoachingDescribe() {
+        const v = document.getElementById('ns_coaching_support').value;
+        const wrap = document.getElementById('ns_coaching_describe_wrap');
+        if (v === 'Yes') wrap.classList.add('visible');
+        else wrap.classList.remove('visible');
+    }
+
+    function syncBmtHidden() {
+        const anyChecked = document.querySelectorAll('#bmt-grid input[type="checkbox"]:checked').length > 0;
+        document.getElementById('bmt_required_check').value = anyChecked ? '1' : '';
+    }
+
+    function syncPcHidden() {
+        const anyChecked = document.querySelectorAll('#pc-grid input[type="checkbox"]:checked').length > 0;
+        document.getElementById('pc_required_check').value = anyChecked ? '1' : '';
     }
 
     function val(id) {
@@ -1828,7 +2139,7 @@
     const requiredFields = {
         1: ['national_society','broader_program','legal_status','countries_of_operation','key_contact_name','key_contact_title','key_contact_email'],
         2: ['main_business_activity','social_problem_addressed','main_sector'],
-        3: ['business_model_type','paying_customers'],
+        3: ['bmt_required_check','pc_required_check'],
         4: ['funding_type','annual_revenue_range','financial_situation'],
         5: ['development_stage','paid_staff_count','customers_reached_annually'],
         6: ['open_to_sharing']
@@ -1866,6 +2177,224 @@
         goTo(step + 1);
     }
 
+    // ── National Society (single-select country) ────────────────────────────
+    (function() {
+        var allCountries = [];
+        var activeIdx = -1;
+        var searchTimeout = null;
+
+        fetch('/api/resource/Country?fields=["name"]&limit=300&order_by=name asc')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                allCountries = (data.data || []).map(function(c) { return c.name; });
+            });
+
+        var searchInput = document.getElementById('national_society_input');
+        var dropdown    = document.getElementById('national_society_dropdown');
+        var hidden      = document.getElementById('national_society');
+        var clearBtn    = document.getElementById('national_society_clear');
+
+        function selectCountry(country) {
+            hidden.value = country;
+            searchInput.value = country;
+            clearBtn.style.display = 'block';
+            dropdown.classList.remove('open');
+            activeIdx = -1;
+        }
+
+        window.clearNationalSociety = function() {
+            hidden.value = '';
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            dropdown.classList.remove('open');
+        };
+
+        function renderDropdown(query) {
+            var q = (query || '').toLowerCase().trim();
+            var matches = allCountries.filter(function(c) {
+                return c.toLowerCase().includes(q);
+            });
+            dropdown.innerHTML = '';
+            activeIdx = -1;
+            if (!matches.length) { dropdown.classList.remove('open'); return; }
+            matches.forEach(function(country) {
+                var opt = document.createElement('div');
+                opt.className = 'country-option';
+                opt.textContent = country;
+                opt.dataset.value = country;
+                opt.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    selectCountry(country);
+                });
+                dropdown.appendChild(opt);
+            });
+            dropdown.classList.add('open');
+        }
+
+        searchInput.addEventListener('input', function() {
+            hidden.value = '';
+            clearBtn.style.display = 'none';
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() { renderDropdown(searchInput.value); }, 150);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            var opts = dropdown.querySelectorAll('.country-option');
+            if (!opts.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIdx = Math.min(activeIdx + 1, opts.length - 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIdx = Math.max(activeIdx - 1, 0);
+            } else if (e.key === 'Enter' && activeIdx >= 0) {
+                e.preventDefault();
+                selectCountry(opts[activeIdx].dataset.value);
+                return;
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('open');
+                return;
+            }
+            opts.forEach(function(o, i) { o.classList.toggle('active', i === activeIdx); });
+            if (activeIdx >= 0) opts[activeIdx].scrollIntoView({ block: 'nearest' });
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (allCountries.length) renderDropdown(searchInput.value);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('national_society_picker').contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+    })();
+    // ────────────────────────────────────────────────────────────────────────
+
+    // ── Country Picker ──────────────────────────────────────────────────────
+    (function() {
+        var selected = [];   // array of country name strings
+        var allCountries = [];
+        var activeIdx = -1;
+        var searchTimeout = null;
+
+        // Fetch full country list once on load
+        fetch('/api/resource/Country?fields=["name"]&limit=300&order_by=name asc')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                allCountries = (data.data || []).map(function(c) { return c.name; });
+            });
+
+        var searchInput = document.getElementById('country_search_input');
+        var dropdown    = document.getElementById('country_dropdown');
+        var pillsWrap   = document.getElementById('country_pills');
+        var hidden      = document.getElementById('countries_of_operation');
+
+        function syncHidden() {
+            hidden.value = selected.join(', ');
+        }
+
+        function renderPills() {
+            pillsWrap.innerHTML = '';
+            selected.forEach(function(country) {
+                var pill = document.createElement('span');
+                pill.className = 'country-pill';
+                pill.innerHTML =
+                    '<span>' + escapeHtml(country) + '</span>' +
+                    '<button type="button" aria-label="Remove ' + escapeHtml(country) + '">' +
+                    '<i class="fa-solid fa-xmark"></i></button>';
+                pill.querySelector('button').addEventListener('click', function() {
+                    selected = selected.filter(function(c) { return c !== country; });
+                    syncHidden();
+                    renderPills();
+                    renderDropdown(searchInput.value);
+                });
+                pillsWrap.appendChild(pill);
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function renderDropdown(query) {
+            var q = (query || '').toLowerCase().trim();
+            var matches = allCountries.filter(function(c) {
+                return c.toLowerCase().includes(q);
+            });
+            dropdown.innerHTML = '';
+            activeIdx = -1;
+            if (!matches.length) {
+                dropdown.classList.remove('open');
+                return;
+            }
+            matches.forEach(function(country, i) {
+                var opt = document.createElement('div');
+                opt.className = 'country-option' + (selected.includes(country) ? ' selected' : '');
+                opt.textContent = country;
+                opt.dataset.value = country;
+                opt.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    selectCountry(country);
+                });
+                dropdown.appendChild(opt);
+            });
+            dropdown.classList.add('open');
+        }
+
+        function selectCountry(country) {
+            if (!selected.includes(country)) {
+                selected.push(country);
+                syncHidden();
+                renderPills();
+            }
+            searchInput.value = '';
+            dropdown.classList.remove('open');
+            activeIdx = -1;
+        }
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                renderDropdown(searchInput.value);
+            }, 150);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            var opts = dropdown.querySelectorAll('.country-option:not(.selected)');
+            if (!opts.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIdx = Math.min(activeIdx + 1, opts.length - 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIdx = Math.max(activeIdx - 1, 0);
+            } else if (e.key === 'Enter' && activeIdx >= 0) {
+                e.preventDefault();
+                selectCountry(opts[activeIdx].dataset.value);
+                return;
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('open');
+                return;
+            }
+            opts.forEach(function(o, i) {
+                o.classList.toggle('active', i === activeIdx);
+            });
+            if (activeIdx >= 0) opts[activeIdx].scrollIntoView({ block: 'nearest' });
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (allCountries.length) renderDropdown(searchInput.value);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('country_picker').contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+    })();
+    // ────────────────────────────────────────────────────────────────────────
+
     // Seed one blank row on page load
     document.addEventListener('DOMContentLoaded', function() { addActivityRow(); });
 
@@ -1874,7 +2403,9 @@
             national_society:           val('national_society'),
             business_activities:        JSON.stringify(collectActivityRows()),
             broader_program:            val('broader_program'),
+            broader_program_name:       val('broader_program_name'),
             legal_status:               val('legal_status'),
+            legal_status_other:         val('legal_status_other'),
             legal_form:                 val('legal_form'),
             legal_form_other:           val('legal_form_other'),
             countries_of_operation:     val('countries_of_operation'),
@@ -1885,9 +2416,29 @@
             social_problem_addressed:   val('social_problem_addressed'),
             main_sector:                val('main_sector'),
             main_sector_other:          val('main_sector_other'),
-            business_model_type:        val('business_model_type'),
-            paying_customers:           val('paying_customers'),
-            non_paying_customers:       val('non_paying_customers'),
+            bmt_b2c:                    chk('bmt_b2c'),
+            bmt_b2b:                    chk('bmt_b2b'),
+            bmt_b2g:                    chk('bmt_b2g'),
+            bmt_internal:               chk('bmt_internal'),
+            bmt_hybrid:                 chk('bmt_hybrid'),
+            pc_individuals:             chk('pc_individuals'),
+            pc_smes:                    chk('pc_smes'),
+            pc_large_corp:              chk('pc_large_corp'),
+            pc_government:              chk('pc_government'),
+            pc_schools:                 chk('pc_schools'),
+            pc_hospitals:               chk('pc_hospitals'),
+            pc_community:               chk('pc_community'),
+            pc_other:                   chk('pc_other'),
+            pc_other_specify:           val('pc_other_specify'),
+            npc_individuals:            chk('npc_individuals'),
+            npc_smes:                   chk('npc_smes'),
+            npc_large_corp:             chk('npc_large_corp'),
+            npc_government:             chk('npc_government'),
+            npc_schools:                chk('npc_schools'),
+            npc_hospitals:              chk('npc_hospitals'),
+            npc_community:              chk('npc_community'),
+            npc_other:                  chk('npc_other'),
+            npc_other_specify:          val('npc_other_specify'),
             reach_online:               chk('reach_online'),
             reach_events:               chk('reach_events'),
             reach_direct_sales:         chk('reach_direct_sales'),
@@ -1895,6 +2446,7 @@
             reach_other:                chk('reach_other'),
             reach_other_specify:        val('reach_other_specify'),
             funding_type:               val('funding_type'),
+            funding_type_other:         val('funding_type_other'),
             rev_product_sales:          chk('rev_product_sales'),
             rev_service_contracts:      chk('rev_service_contracts'),
             rev_subscription:           chk('rev_subscription'),
@@ -1907,11 +2459,14 @@
             rev_other_specify:          val('rev_other_specify'),
             annual_revenue_range:       val('annual_revenue_range'),
             financial_situation:        val('financial_situation'),
+            financial_situation_other:  val('financial_situation_other'),
             surplus_split:              val('surplus_split'),
             development_stage:          val('development_stage'),
             paid_staff_count:           val('paid_staff_count'),
             customers_reached_annually: val('customers_reached_annually'),
             training_received:          val('training_received'),
+            ns_coaching_support:        val('ns_coaching_support'),
+            ns_coaching_describe:       val('ns_coaching_describe'),
             need_funding:               chk('need_funding'),
             need_biz_dev:               chk('need_biz_dev'),
             need_impact:                chk('need_impact'),
@@ -1936,6 +2491,11 @@
             str_rcrc:                   chk('str_rcrc'),
             str_other:                  chk('str_other'),
             str_other_specify:          val('str_other_specify'),
+            digit_offline:              chk('digit_offline'),
+            digit_basic:                chk('digit_basic'),
+            digit_online_presence:      chk('digit_online_presence'),
+            digit_ecommerce:            chk('digit_ecommerce'),
+            digit_integrated:           chk('digit_integrated'),
             doc_business_plan:          chk('doc_business_plan'),
             doc_annual_reports:         chk('doc_annual_reports'),
             doc_photos_media:           chk('doc_photos_media'),

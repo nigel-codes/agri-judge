@@ -1,0 +1,270 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "R2EVAL-{r2_applicant}-{judge}-.###",
+ "creation": "2026-04-10 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "r2_applicant",
+  "applicant_name",
+  "county",
+  "column_break_1",
+  "judge",
+  "judge_name",
+  "scores_section",
+  "criteria",
+  "tech_section",
+  "tech_score",
+  "tech_bonus_points",
+  "totals_section",
+  "subtotal_score",
+  "leverage_section",
+  "leverage_category",
+  "female_applicant",
+  "leverage_points",
+  "column_break_2",
+  "total_score",
+  "passes_cutoff",
+  "notes_section",
+  "overall_notes",
+  "status",
+  "section_break_amended",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "r2_applicant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Round 2 Applicant",
+   "options": "Round 2 Applicant",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "r2_applicant.applicant_name",
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Applicant Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "r2_applicant.county",
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "County",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "__user",
+   "fieldname": "judge",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Judge",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "judge.full_name",
+   "fieldname": "judge_name",
+   "fieldtype": "Data",
+   "label": "Judge Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scores_section",
+   "fieldtype": "Section Break",
+   "label": "Criteria Scores (0–5 each)"
+  },
+  {
+   "fieldname": "criteria",
+   "fieldtype": "Table",
+   "label": "Criteria",
+   "options": "Round 2 Judge Evaluation Criterion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tech_section",
+   "fieldtype": "Section Break",
+   "label": "Criterion 7 — Tech Enablement (Bonus)"
+  },
+  {
+   "fieldname": "tech_score",
+   "fieldtype": "Select",
+   "label": "Tech Score (0–3)",
+   "options": "0\n1\n2\n3",
+   "default": "0",
+   "description": "0 = No tech | 1 = Basic (SMS, simple app) | 2 = Advanced (IoT, platform) | 3 = Full digital integration"
+  },
+  {
+   "fieldname": "tech_bonus_points",
+   "fieldtype": "Float",
+   "label": "Tech Bonus Points",
+   "read_only": 1,
+   "description": "0→0  |  1→2  |  2→3  |  3→5"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "bold": 1,
+   "fieldname": "subtotal_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Subtotal (Criteria 1–6, max 100)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leverage_section",
+   "fieldtype": "Section Break",
+   "label": "Leverage Points (Extra Credit)"
+  },
+  {
+   "fieldname": "leverage_category",
+   "fieldtype": "Select",
+   "label": "Round 1 Performance Category",
+   "options": "None\nTop Shortlisted\nAbove Threshold\nAt Threshold",
+   "default": "None",
+   "read_only": 1,
+   "description": "Set by coordinator on Round 2 Applicant record. Top Shortlisted +10 | Above Threshold +5 | At Threshold +2"
+  },
+  {
+   "default": "0",
+   "fieldname": "female_applicant",
+   "fieldtype": "Check",
+   "label": "Female Applicant (+5 pts)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leverage_points",
+   "fieldtype": "Float",
+   "label": "Leverage Points Applied",
+   "read_only": 1,
+   "description": "Only applied when subtotal ≥ 40. Female +5, category bonus as above."
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Score (max 110)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "passes_cutoff",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Passes Cut-off (≥60)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Overall Notes"
+  },
+  {
+   "fieldname": "overall_notes",
+   "fieldtype": "Small Text",
+   "label": "Overall Recommendation Notes"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nSubmitted"
+  },
+  {
+   "fieldname": "section_break_amended",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Round 2 Judge Evaluation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-04-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Round 2 Judge Evaluation",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Coordinator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Judge",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "applicant_name",
+ "track_changes": 1
+}

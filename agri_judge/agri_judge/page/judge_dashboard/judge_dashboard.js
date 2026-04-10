@@ -16,6 +16,7 @@ frappe.pages['judge-dashboard'].on_page_load = function(wrapper) {
     wrapper._dashboard = new JudgeDashboard(page);
 };
 
+
 // Fires every time the user navigates back to this page — keeps data fresh
 frappe.pages["judge-dashboard"].on_page_show = function(wrapper) {
     // Guard: skip if this is the initial fire right after on_page_load
@@ -31,6 +32,7 @@ class JudgeDashboard {
         this.wrapper        = $(this.page.body);
         this.assignedCounty = null;
         this.applications   = [];
+        this.r2applications = [];
         this.init();
     }
 
@@ -41,18 +43,35 @@ class JudgeDashboard {
     }
 
     loadData() {
-        frappe.call({
-            method: 'agri_judge.agri_judge.api.judging.get_judge_assignments',
-            callback: (r) => {
-                if (r.message && r.message.success) {
-                    this.applications   = r.message.applications || [];
-                    this.assignedCounty = r.message.county;
-                    this.render();
-                } else {
-                    this.renderNoAssignment(r.message?.error);
-                }
-            },
-            error: () => this.renderError('Network error — could not load applications.')
+        Promise.all([
+            new Promise(resolve => frappe.call({
+                method: 'agri_judge.agri_judge.api.judging.get_judge_assignments',
+                callback: r => resolve(r.message),
+                error: () => resolve(null)
+            })),
+            new Promise(resolve => frappe.call({
+                method: 'agri_judge.agri_judge.api.judging.get_r2_judge_assignments',
+                callback: r => resolve(r.message),
+                error: () => resolve(null)
+            }))
+        ]).then(([r1, r2]) => {
+            // Determine what this judge is authorized for
+            const r1WrongRound = r1 && !r1.success && r1.code === 'WRONG_ROUND';
+            const r2WrongRound = r2 && !r2.success && r2.code === 'WRONG_ROUND';
+            const hasAnyCounty = (r1 && r1.county) || (r2 && r2.county);
+
+            if (!hasAnyCounty) {
+                // Truly no assignment at all
+                this.renderNoAssignment(r1?.error || r2?.error);
+                return;
+            }
+
+            this.assignedCounty  = r1?.county || r2?.county;
+            this.r1Authorized    = r1 && r1.success;
+            this.r2Authorized    = r2 && r2.success;
+            this.applications    = this.r1Authorized ? (r1.applications || []) : [];
+            this.r2applications  = this.r2Authorized ? (r2.applicants || []) : [];
+            this.render();
         });
     }
 
@@ -74,6 +93,10 @@ class JudgeDashboard {
     }
 
     render() {
+        // Ensure flags exist even if loadData skipped setting them
+        if (this.r1Authorized === undefined) this.r1Authorized = true;
+        if (this.r2Authorized === undefined) this.r2Authorized = false;
+
         const total     = this.applications.length;
         const completed = this.applications.filter(a => a.submitted).length;
         const pending   = total - completed;
@@ -112,38 +135,53 @@ class JudgeDashboard {
 
                 <!-- Stats -->
                 <div class="jd-stats">
+                    ${this.r1Authorized ? `
                     <div class="stat-card" style="--accent:#ED1B2E;">
                         <div class="stat-val">${total}</div>
-                        <div class="stat-lbl">Assigned</div>
+                        <div class="stat-lbl">R1 Assigned</div>
                     </div>
                     <div class="stat-card" style="--accent:#2E7D32;">
                         <div class="stat-val">${completed}</div>
-                        <div class="stat-lbl">Completed</div>
+                        <div class="stat-lbl">R1 Scored</div>
                     </div>
                     <div class="stat-card" style="--accent:#E65100;">
                         <div class="stat-val">${pending}</div>
-                        <div class="stat-lbl">Pending</div>
+                        <div class="stat-lbl">R1 Pending</div>
                     </div>
                     <div class="stat-card" style="--accent:#1565C0;">
                         <div class="stat-val">${pct}%</div>
-                        <div class="stat-lbl">Progress</div>
+                        <div class="stat-lbl">R1 Progress</div>
                         <div class="stat-bar-bg">
                             <div class="stat-bar-fill" style="width:${pct}%;background:#1565C0;"></div>
                         </div>
+                    </div>` : ''}
+                    ${this.r2Authorized ? `
+                    <div class="stat-card" style="--accent:#6A1B9A;">
+                        <div class="stat-val">${this.r2applications.length}</div>
+                        <div class="stat-lbl">R2 Assigned</div>
                     </div>
+                    <div class="stat-card" style="--accent:#00796B;">
+                        <div class="stat-val">${this.r2applications.filter(a => a.submitted).length}</div>
+                        <div class="stat-lbl">R2 Scored</div>
+                    </div>` : ''}
                 </div>
 
-                <!-- Application cards -->
+                <!-- Round 1 Application cards -->
+                ${this.r1Authorized ? `
+                <h2 class="jd-section-title">Round 1 Applications</h2>
                 <div class="jd-list">
                     ${total === 0
                         ? `<div class="empty-state">
                                <div style="font-size:48px;margin-bottom:16px;">📭</div>
-                               <strong>No applications found for ${frappe.utils.escape_html(county)} county.</strong>
+                               <strong>No Round 1 applications found for ${frappe.utils.escape_html(county)} county.</strong>
                                <p>Applications will appear here once they have been submitted to the programme.</p>
                            </div>`
                         : this.applications.map(a => this.renderCard(a, cc)).join('')
                     }
-                </div>
+                </div>` : ''}
+
+                <!-- Round 2 Section -->
+                ${this.r2Authorized ? this.renderR2Section(cc) : ''}
 
                 ${this.getFooter()}
             </div>
@@ -177,6 +215,71 @@ class JudgeDashboard {
                     </div>
                 </div>
             </div>`;
+    }
+
+    renderR2Section(cc) {
+        const r2 = this.r2applications;
+        const r2Total     = r2.length;
+        const r2Completed = r2.filter(a => a.submitted).length;
+        const r2Pending   = r2Total - r2Completed;
+
+        return `
+        <div class="jd-r2-section">
+            <h2 class="jd-section-title" style="margin-top:28px;">
+                Round 2 Applications
+                <span class="r2-section-badge">${r2Completed}/${r2Total} scored</span>
+            </h2>
+            ${r2Total === 0
+                ? `<div class="empty-state" style="padding:30px;">
+                       <div style="font-size:36px;margin-bottom:12px;">📋</div>
+                       <strong>No Round 2 applicants for your county yet.</strong>
+                       <p>Applicants will appear here once they have been shortlisted for Round 2.</p>
+                   </div>`
+                : r2.map(a => this.renderR2Card(a, cc)).join('')
+            }
+        </div>`;
+    }
+
+    renderR2Card(app, cc) {
+        const done = app.submitted;
+        const leverageMap = {
+            'Top Shortlisted': { label: 'Top Shortlisted +10', color: '#1565C0' },
+            'Above Threshold': { label: 'Above Threshold +5',  color: '#2E7D32' },
+            'At Threshold':    { label: 'At Threshold +2',     color: '#E65100' },
+            'None':            null
+        };
+        const lev = leverageMap[app.leverage_category || 'None'];
+        const levBadge = lev ? `<span class="r2-lev-badge" style="background:${lev.color}15;color:${lev.color};border:1px solid ${lev.color}40;">${lev.label}</span>` : '';
+
+        const scoreDisplay = done && app.total_score !== undefined
+            ? `<div class="r2-score-pill ${app.total_score >= 60 ? 'pass' : 'fail'}">${Number(app.total_score).toFixed(1)}<span>/110</span></div>`
+            : '';
+
+        return `
+        <div class="app-card r2-card ${done ? 'done' : ''}" style="--border:${done ? '#1565C0' : cc};">
+            <div class="card-body">
+                <div class="card-left">
+                    <h3 class="card-name">${frappe.utils.escape_html(app.applicant_name || app.r2_applicant)}</h3>
+                    <div class="card-meta">
+                        <span>🆔 ${frappe.utils.escape_html(app.r2_applicant)}</span>
+                        <span>📍 ${frappe.utils.escape_html(app.county || '—')}</span>
+                        ${app.gender === 'Female' ? '<span class="female-chip">👑 Female-led</span>' : ''}
+                        ${levBadge}
+                    </div>
+                </div>
+                <div class="card-right">
+                    <span class="status-chip ${done ? 'done' : 'pending'}">
+                        ${done ? '✓ Scored' : 'Pending'}
+                    </span>
+                    ${scoreDisplay}
+                    <button class="btn-review ${done ? 'btn-done' : 'btn-r2'}"
+                        data-r2="${frappe.utils.escape_html(app.r2_applicant)}"
+                        onclick="window._openR2Review(this.dataset.r2)">
+                        ${done ? 'View Score →' : 'Score Now →'}
+                    </button>
+                </div>
+            </div>
+        </div>`;
     }
 
     renderNoAssignment(msg) {
@@ -284,6 +387,20 @@ class JudgeDashboard {
             .empty-state { background:white; border-radius:10px; padding:60px 30px; text-align:center; color:#aaa; font-family:Arial,sans-serif; font-size:15px; }
             .empty-state p { font-size:13px; margin-top:8px; }
 
+            /* ── Section titles ── */
+            .jd-section-title { font-size:15px; font-weight:700; color:#444; margin:0 0 12px; display:flex; align-items:center; gap:10px; font-family:Arial,sans-serif; }
+            .r2-section-badge { font-size:11px; font-weight:600; background:#EDE7F6; color:#6A1B9A; padding:3px 10px; border-radius:12px; }
+
+            /* ── R2 card extras ── */
+            .r2-card { border-left-color:#6A1B9A; }
+            .r2-lev-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+            .r2-score-pill { font-size:22px; font-weight:800; font-family:Arial,sans-serif; }
+            .r2-score-pill span { font-size:13px; opacity:.6; }
+            .r2-score-pill.pass { color:#2E7D32; }
+            .r2-score-pill.fail { color:#C62828; }
+            .btn-r2 { background:#6A1B9A; }
+            .btn-r2:hover { background:#4A148C; }
+
             /* ── Footer ── */
             .krc-footer { margin-top:40px; border-top:2px solid #f0f0f0; padding:18px 0 24px; font-family:Arial,sans-serif; }
             .krc-footer-inner { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
@@ -298,4 +415,8 @@ class JudgeDashboard {
 
 window._openReview = function(name) {
     frappe.set_route('judge-review', name);
+};
+
+window._openR2Review = function(r2name) {
+    frappe.set_route('round-2-judge-review', r2name);
 };

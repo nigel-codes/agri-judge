@@ -12,9 +12,6 @@
  "page_name": "judge-dashboard",
  "roles": [
   {
-   "role": "Coordinator"
-  },
-  {
    "role": "Judge"
   }
  ],

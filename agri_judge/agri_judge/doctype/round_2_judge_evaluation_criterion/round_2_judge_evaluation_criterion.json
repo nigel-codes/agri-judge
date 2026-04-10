@@ -1,0 +1,79 @@
+{
+ "actions": [],
+ "creation": "2026-04-10 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "criterion_id",
+  "criterion_name",
+  "multiplier",
+  "max_points",
+  "score",
+  "points_earned",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "criterion_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Criterion ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "criterion_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Criterion",
+   "read_only": 1
+  },
+  {
+   "fieldname": "multiplier",
+   "fieldtype": "Float",
+   "label": "Multiplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "max_points",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Max Points",
+   "read_only": 1
+  },
+  {
+   "fieldname": "score",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Score (0–5)",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "points_earned",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Points Earned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Judge Notes"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-04-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Round 2 Judge Evaluation Criterion",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

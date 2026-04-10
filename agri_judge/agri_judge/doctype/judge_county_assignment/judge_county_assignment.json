@@ -10,6 +10,7 @@
   "judge_name",
   "column_break_1",
   "assigned_county",
+  "judging_round",
   "section_break_info",
   "assignment_notes"
  ],
@@ -43,6 +44,17 @@
    "in_standard_filter": 1,
    "label": "Assigned County",
    "options": "\nKakamega\nHomabay\nKericho\nMeru\nOther",
+   "reqd": 1
+  },
+  {
+   "default": "Round 1",
+   "description": "Which judging round(s) this judge participates in. Round 1 = original shortlisting; Round 2 = Level 2 selection; Both = participates in both.",
+   "fieldname": "judging_round",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Judging Round",
+   "options": "Round 1\nRound 2\nBoth",
    "reqd": 1
   },
   {

@@ -1,17 +1,3 @@
-"""
-Script to rename Agri Waste Innovation records to: Full Name - County format
-
-Run this ONCE after:
-1. Setting up the naming expression in Customize Form
-2. BEFORE creating new applications
-
-How to run:
-1. Go to Frappe Desk
-2. Search for "Console" in awesome bar
-3. Paste this entire script
-4. Click "Run"
-"""
-
 import frappe
 
 def rename_agri_waste_applications():

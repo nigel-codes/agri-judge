@@ -12,6 +12,7 @@
   "county",
   "avg_score",
   "score_status",
+  "leverage_category",
   "section_break_meta",
   "added_by",
   "added_on",
@@ -67,6 +68,16 @@
    "label": "Status",
    "options": "\nShortlisted\nBorderline\nBelow Threshold",
    "read_only": 1
+  },
+  {
+   "fieldname": "leverage_category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Leverage Category",
+   "options": "None\nTop Shortlisted\nAbove Threshold\nAt Threshold",
+   "default": "None",
+   "description": "Extra credit added to Level 2 score when subtotal ≥ 40. Top Shortlisted +10 | Above Threshold +5 | At Threshold +2"
   },
   {
    "fieldname": "section_break_meta",

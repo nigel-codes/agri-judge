@@ -22,6 +22,28 @@ def _get_judge_county(judge_user):
     )
 
 
+def _get_judge_assignment(judge_user):
+    """Return (county, judging_round) for a judge, or (None, None) if not assigned."""
+    row = frappe.db.get_value(
+        "Judge County Assignment",
+        {"judge": judge_user},
+        ["assigned_county", "judging_round"],
+        as_dict=True,
+    )
+    if not row:
+        return None, None
+    # Existing records may have no judging_round value — treat as "Round 1"
+    return row.assigned_county, (row.judging_round or "Round 1")
+
+
+def _has_r1_access(judging_round):
+    return judging_round in ("Round 1", "Both")
+
+
+def _has_r2_access(judging_round):
+    return judging_round in ("Round 2", "Both")
+
+
 def _get_peer_evaluations(application_name, requesting_judge, county):
     """Return all submitted evaluations for an application by judges in the same county."""
     county_judges = frappe.get_all(
@@ -107,7 +129,7 @@ def get_judge_assignments(judge=None):
         if not judge:
             judge = frappe.session.user
 
-        county = _get_judge_county(judge)
+        county, judging_round = _get_judge_assignment(judge)
         if not county:
             return {
                 "success": False,
@@ -117,6 +139,16 @@ def get_judge_assignments(judge=None):
                 ),
                 "applications": [],
                 "county": None,
+                "code": "NO_ASSIGNMENT",
+            }
+
+        if not _has_r1_access(judging_round):
+            return {
+                "success": False,
+                "error": "You are assigned to Round 2 only. Round 1 applications are not accessible.",
+                "applications": [],
+                "county": county,
+                "code": "WRONG_ROUND",
             }
 
         applications = _get_applications_for_county(county)
@@ -158,10 +190,13 @@ def get_application_for_review(application_name, judge=None):
         if not frappe.db.exists("Agri Waste Innovation", application_name):
             return {"success": False, "error": "Application not found"}
 
-        county = _get_judge_county(judge)
+        county, judging_round = _get_judge_assignment(judge)
         if not county:
             return {"success": False,
                     "error": "You have not been assigned to a county. Contact the coordinator."}
+        if not _has_r1_access(judging_round):
+            return {"success": False,
+                    "error": "You are not authorized for Round 1 judging."}
 
         app        = frappe.get_doc("Agri Waste Innovation", application_name)
         app_county = (app.county_of_residence or "").strip()
@@ -298,11 +333,14 @@ def submit_evaluation(application_name, criteria_scores,
         if not frappe.db.exists("Agri Waste Innovation", application_name):
             return {"success": False, "error": "Application not found"}
 
-        # County access check
-        county = _get_judge_county(judge)
+        # County + round access check
+        county, judging_round = _get_judge_assignment(judge)
         if not county:
             return {"success": False,
                     "error": "You have not been assigned to a county. Contact the coordinator."}
+        if not _has_r1_access(judging_round):
+            return {"success": False,
+                    "error": "You are not authorized for Round 1 judging."}
 
         app        = frappe.get_doc("Agri Waste Innovation", application_name)
         app_county = (app.county_of_residence or "").strip()
@@ -1231,4 +1269,691 @@ def save_round2_score(response_name, score, notes=""):
     except Exception as e:
         frappe.log_error(f"save_round2_score error: {str(e)}", "Judging API")
         frappe.db.rollback()
+        return {"success": False, "error": str(e)}
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Round 2 Multi-Judge Scoring (new rubric — 7 criteria, 110 pts max)
+# ══════════════════════════════════════════════════════════════════════
+
+from agri_judge.agri_judge.doctype.round_2_judge_evaluation.round_2_judge_evaluation import (
+    CRITERIA_META as R2_CRITERIA_META,
+    TECH_BONUS_MAP,
+    LEVERAGE_POINTS,
+    CUTOFF,
+    MIN_SCORE_FOR_LEVERAGE,
+)
+
+
+@frappe.whitelist()
+def get_r2_criteria_definitions():
+    """Return rubric criteria metadata for the judging UI."""
+    criteria = [
+        {
+            "id": "c1", "name": "Novelty & Innovation", "max_points": 25, "multiplier": 5,
+            "desc": "Projects beyond common ideas (BSF, simple briquettes, generic fertiliser). Priority to county-specific value chains: coffee, tea, banana, sugarcane, rice, fish, livestock.",
+            "guiding": "Has the applicant identified a waste stream or transformation method that is rarely used in their county?",
+            "bands": [
+                {"score": 0, "text": "No innovation — copy of existing common solution."},
+                {"score": 1, "text": "Minor variation of a common idea (e.g., another BSF project from food waste)."},
+                {"score": 2, "text": "Some novelty but still resembles many existing projects."},
+                {"score": 3, "text": "Clearly novel within the county context; not commonly seen."},
+                {"score": 4, "text": "Highly novel product or process; potential for intellectual property."},
+                {"score": 5, "text": "Breakthrough innovation — could create a new market or sub-sector."},
+            ],
+        },
+        {
+            "id": "c2", "name": "Alignment with Agri Waste Focus", "max_points": 15, "multiplier": 3,
+            "desc": "Use of agricultural farm waste (not household/market food waste). Preferred: coffee pulp, tea fluff, banana pseudostem, sugarcane bagasse, rice husks, fish offal, livestock manure.",
+            "guiding": "Does the project directly address a waste problem from coffee, tea, banana, sugarcane, rice, fish, or livestock in the applicant's county?",
+            "bands": [
+                {"score": 0, "text": "Waste type is entirely non-agricultural (plastic, general solid waste)."},
+                {"score": 1, "text": "Mostly food waste from markets/homes, with weak agri link."},
+                {"score": 2, "text": "Mix of food and agri waste, but agri component is minor."},
+                {"score": 3, "text": "Clear use of agricultural waste from at least one cash crop."},
+                {"score": 4, "text": "Uses multiple agri waste streams from the county's main value chains."},
+                {"score": 5, "text": "Innovative valorisation of a neglected agri waste stream (e.g., coffee cherry husks, rice straw)."},
+            ],
+        },
+        {
+            "id": "c3", "name": "Developmental Level & Traction", "max_points": 20, "multiplier": 4,
+            "desc": "Projects beyond idea stage. Preference for validation, early traction, or revenue. Applicants >5 months operations must submit financial records.",
+            "guiding": "Can the applicant demonstrate that someone has already paid for or used their solution?",
+            "bands": [
+                {"score": 0, "text": "Idea only — no prototype, no testing, no evidence."},
+                {"score": 1, "text": "Idea with some customer interviews but no prototype."},
+                {"score": 2, "text": "MVP developed, early user tests done, no revenue."},
+                {"score": 3, "text": "MVP tested with at least 10 users; some positive feedback; no or minimal revenue."},
+                {"score": 4, "text": "Initial revenue (KES 10,000–100,000) or 20+ paying customers/users."},
+                {"score": 5, "text": "Revenue >KES 100,000, or 50+ paying customers, or proven repeat purchases, or grant/prize received."},
+            ],
+            "note": "For applicants >5 months without financial records, max score is 2 unless a valid written explanation is provided.",
+        },
+        {
+            "id": "c4", "name": "Market Potential & Scalability", "max_points": 15, "multiplier": 3,
+            "desc": "Clear customer segment, willingness to pay, and potential to grow beyond village or county. Export potential or replication across counties is a plus.",
+            "guiding": "Could this business realistically grow to serve multiple counties or export markets within 3 years?",
+            "bands": [
+                {"score": 0, "text": "No identified customer or market."},
+                {"score": 1, "text": "Vague market (\"all farmers\") — no segmentation."},
+                {"score": 2, "text": "Identified a specific customer type but no evidence of demand."},
+                {"score": 3, "text": "Customer type identified and initial interest shown (e.g., 5 potential buyers)."},
+                {"score": 4, "text": "Clear path to at least 100 customers or regional expansion within 2 years."},
+                {"score": 5, "text": "Demonstrated export potential or partnership with a large off-taker (hotel chain, supermarket, factory)."},
+            ],
+        },
+        {
+            "id": "c5", "name": "Resource & Skill Needs", "max_points": 10, "multiplier": 2,
+            "desc": "Honest, specific, and realistic listing of what the applicant needs to launch or scale. Vague answers score low; detailed answers with cost estimates score high.",
+            "guiding": "If the judge had to connect this applicant with a mentor or investor, would the list be useful?",
+            "bands": [
+                {"score": 0, "text": "No list, or irrelevant items."},
+                {"score": 1, "text": "Very vague (\"we need funding and equipment\")."},
+                {"score": 2, "text": "Some specific items but missing key details."},
+                {"score": 3, "text": "Clear list of 3–5 specific resources with approximate costs or sources."},
+                {"score": 4, "text": "Detailed list with priorities, cost estimates, and potential local providers."},
+                {"score": 5, "text": "Exceptional detail: timeline, cost breakdown, identified partners, and skills gap plan."},
+            ],
+        },
+        {
+            "id": "c6", "name": "Quality of Description", "max_points": 15, "multiplier": 3,
+            "desc": "Clarity, authenticity, and personal voice (not excessive AI use). Max 350 words.",
+            "guiding": "Does this sound like a real person who is deeply involved in the problem?",
+            "bands": [
+                {"score": 0, "text": "Incoherent, heavily AI-generated without substance, or missing."},
+                {"score": 1, "text": "Mostly AI-sounding, little personal insight; hard to follow."},
+                {"score": 2, "text": "Some AI use but applicant's voice partially visible."},
+                {"score": 3, "text": "Clear, authentic, written by the applicant; explains the innovation well."},
+                {"score": 4, "text": "Excellent clarity, compelling story, demonstrates passion and knowledge."},
+                {"score": 5, "text": "Outstanding — judge feels inspired and fully understands the innovation."},
+            ],
+        },
+    ]
+    tech = {
+        "id": "c7", "name": "Tech Enablement (Bonus)", "max_points": 5,
+        "desc": "Use of digital tools, mobile apps, sensors, data platforms, or simple automation. Bonus — not required, but rewarded.",
+        "guiding": "Does the project use technology to improve efficiency, traceability, or customer reach?",
+        "bands": [
+            {"score": 0, "text": "No tech component."},
+            {"score": 1, "text": "Tech mentioned but not integrated (e.g., \"we will use WhatsApp\"). → 2 pts"},
+            {"score": 2, "text": "Basic tech (e.g., simple app, SMS, digital records). → 3 pts"},
+            {"score": 3, "text": "Advanced tech (IoT, platform, machine learning, blockchain). → 5 pts"},
+        ],
+    }
+    leverage_info = {
+        "description": "Extra credit for high Round 1 performers. Applied only when Level 2 subtotal ≥ 40.",
+        "table": [
+            {"category": "Top Shortlisted",  "points": 10},
+            {"category": "Above Threshold",  "points": 5},
+            {"category": "At Threshold",     "points": 2},
+            {"category": "Female Applicant", "points": 5},
+        ],
+        "cutoff": CUTOFF,
+    }
+    return {
+        "success":     True,
+        "criteria":    criteria,
+        "tech":        tech,
+        "leverage":    leverage_info,
+        "total_max":   110,
+        "cutoff":      CUTOFF,
+    }
+
+
+def _get_r2_applicants_for_county(county):
+    """Return Round 2 Applicant records whose application county matches."""
+    if county == "Other":
+        all_r2 = frappe.get_all(
+            "Round 2 Applicant",
+            fields=["name", "application", "applicant_name", "county",
+                    "avg_score", "score_status", "leverage_category"],
+        )
+        return [r for r in all_r2
+                if (r.county or "").strip() not in NAMED_COUNTIES]
+    return frappe.get_all(
+        "Round 2 Applicant",
+        filters={"county": county},
+        fields=["name", "application", "applicant_name", "county",
+                "avg_score", "score_status", "leverage_category"],
+    )
+
+
+def _get_r2_peer_evaluations(r2_applicant, requesting_judge, county):
+    """Return all submitted R2 evaluations for an applicant visible to the requesting judge.
+    Includes county-peer judges + any coordinator evaluations."""
+    # Collect eligible judge IDs: county-assigned R2 judges + coordinators who submitted
+    county_judges = frappe.get_all(
+        "Judge County Assignment",
+        filters={"assigned_county": county, "judging_round": ["in", ["Round 2", "Both"]]},
+        fields=["judge"],
+    )
+    county_judge_ids = set(j.judge for j in county_judges)
+
+    # All submitted evals for this applicant (to also capture coordinator submissions)
+    all_evals = frappe.get_all(
+        "Round 2 Judge Evaluation",
+        filters={"r2_applicant": r2_applicant, "docstatus": 1},
+        fields=["name", "judge"],
+    )
+    # Include if judge is a county peer OR if the submitter is a coordinator
+    eligible_judge_ids = set()
+    for ev in all_evals:
+        if ev.judge in county_judge_ids or _is_system_manager(ev.judge):
+            eligible_judge_ids.add(ev.judge)
+
+    if not eligible_judge_ids:
+        return []
+
+    evals = frappe.get_all(
+        "Round 2 Judge Evaluation",
+        filters={
+            "r2_applicant": r2_applicant,
+            "judge": ["in", list(eligible_judge_ids)],
+            "docstatus": 1,
+        },
+        fields=["name", "judge", "subtotal_score", "tech_bonus_points",
+                "leverage_points", "total_score", "passes_cutoff", "overall_notes"],
+    )
+    result = []
+    for ev in evals:
+        eval_doc   = frappe.get_doc("Round 2 Judge Evaluation", ev.name)
+        judge_name = frappe.db.get_value("User", ev.judge, "full_name") or ev.judge
+        result.append({
+            "judge":           ev.judge,
+            "judge_name":      judge_name,
+            "is_own":          ev.judge == requesting_judge,
+            "subtotal_score":  round(float(ev.subtotal_score or 0), 2),
+            "tech_bonus":      round(float(ev.tech_bonus_points or 0), 2),
+            "leverage_points": round(float(ev.leverage_points or 0), 2),
+            "total_score":     round(float(ev.total_score or 0), 2),
+            "passes_cutoff":   bool(ev.passes_cutoff),
+            "overall_notes":   ev.overall_notes or "",
+            "criteria": [
+                {
+                    "criterion_id": c.criterion_id,
+                    "score":        int(c.score or 0),
+                    "points_earned": float(c.points_earned or 0),
+                    "notes":        c.notes or "",
+                }
+                for c in eval_doc.criteria
+            ],
+        })
+    return result
+
+
+def _build_r2_applicant_row(r, judge):
+    """Build a single applicant row dict for get_r2_judge_assignments."""
+    eval_data = frappe.db.get_value(
+        "Round 2 Judge Evaluation",
+        {"r2_applicant": r.name, "judge": judge},
+        ["docstatus", "total_score"],
+        as_dict=True,
+    )
+    submitted   = bool(eval_data and eval_data.docstatus == 1)
+    total_score = eval_data.total_score if eval_data else 0
+    gender = frappe.db.get_value("Agri Waste Innovation", r.application, "gender") or ""
+    return {
+        "r2_applicant":      r.name,
+        "application":       r.application,
+        "applicant_name":    r.applicant_name or "",
+        "county":            r.county or "",
+        "gender":            gender,
+        "score_status":      r.score_status or "",
+        "leverage_category": r.leverage_category or "None",
+        "submitted":         submitted,
+        "total_score":       round(float(total_score), 2) if total_score else 0,
+    }
+
+
+@frappe.whitelist()
+def get_r2_judge_assignments(judge=None):
+    """Return Round 2 Applicants with scoring status.
+    Coordinators see ALL applicants across all counties.
+    Judges see only their assigned county (and only if Round 2 authorized).
+    """
+    try:
+        if not judge:
+            judge = frappe.session.user
+
+        # Coordinators bypass county/round restrictions — see everything
+        if _is_system_manager(judge):
+            r2_list = frappe.get_all(
+                "Round 2 Applicant",
+                fields=["name", "application", "applicant_name", "county",
+                        "score_status", "leverage_category"],
+            )
+            result = [_build_r2_applicant_row(r, judge) for r in r2_list]
+            completed = sum(1 for r in result if r["submitted"])
+            return {
+                "success":       True,
+                "applicants":    result,
+                "county":        "All",
+                "is_coordinator": True,
+                "completed":     completed,
+                "total":         len(result),
+            }
+
+        county, judging_round = _get_judge_assignment(judge)
+        if not county:
+            return {
+                "success": False,
+                "error": "You have not been assigned to a county. Contact the coordinator.",
+                "applicants": [], "county": None,
+                "code": "NO_ASSIGNMENT",
+            }
+
+        if not _has_r2_access(judging_round):
+            return {
+                "success": False,
+                "error": "You are assigned to Round 1 only. Round 2 applications are not accessible.",
+                "applicants": [],
+                "county": county,
+                "code": "WRONG_ROUND",
+            }
+
+        r2_list  = _get_r2_applicants_for_county(county)
+        result   = [_build_r2_applicant_row(r, judge) for r in r2_list]
+        completed = sum(1 for r in result if r["submitted"])
+        return {
+            "success":    True,
+            "applicants": result,
+            "county":     county,
+            "completed":  completed,
+            "total":      len(result),
+        }
+    except Exception as e:
+        frappe.log_error(f"get_r2_judge_assignments error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e), "applicants": [], "county": None}
+
+
+@frappe.whitelist()
+def get_application_for_r2_review(r2_applicant_name, judge=None):
+    """
+    Return full data for a Round 2 applicant review:
+    - Round 2 Applicant meta (leverage category)
+    - Original Agri Waste Innovation data
+    - Round 2 Response (if submitted, matched by name)
+    - Existing R2 evaluation by this judge (if any)
+    """
+    try:
+        if not judge:
+            judge = frappe.session.user
+
+        if not frappe.db.exists("Round 2 Applicant", r2_applicant_name):
+            return {"success": False, "error": "Round 2 Applicant not found."}
+
+        r2_doc = frappe.get_doc("Round 2 Applicant", r2_applicant_name)
+
+        is_coordinator = _is_system_manager(judge)
+
+        if not is_coordinator:
+            # County + round access check for judges
+            county, judging_round = _get_judge_assignment(judge)
+            if not county:
+                return {"success": False,
+                        "error": "You have not been assigned to a county. Contact the coordinator."}
+            if not _has_r2_access(judging_round):
+                return {"success": False,
+                        "error": "You are not authorized for Round 2 judging. Contact the coordinator."}
+
+            r2_county = (r2_doc.county or "").strip()
+            if county == "Other":
+                if r2_county in NAMED_COUNTIES:
+                    return {"success": False,
+                            "error": f"Access denied. This applicant is from {r2_county}."}
+            else:
+                if r2_county != county:
+                    return {"success": False,
+                            "error": f"Access denied. Applicant is from {r2_county}, "
+                                      f"you are assigned to {county}."}
+        else:
+            county = r2_doc.county or "All"
+
+        # Original application
+        app = frappe.get_doc("Agri Waste Innovation", r2_doc.application)
+
+        # Round 2 Response — match by applicant full name
+        r2_response = None
+        resp_match = frappe.get_all(
+            "Round 2 Response",
+            filters={"applicant_name": app.full_name},
+            fields=["name", "gender", "county", "age", "developmental_level",
+                    "is_tech_enabled", "innovation_description", "resources_needed",
+                    "financial_records"],
+            limit=1,
+        )
+        if resp_match:
+            rd = resp_match[0]
+            r2_response = {
+                "name":                  rd.name,
+                "gender":                rd.gender or "",
+                "county":                rd.county or "",
+                "age":                   rd.age or "",
+                "developmental_level":   rd.developmental_level or "",
+                "is_tech_enabled":       bool(rd.is_tech_enabled),
+                "innovation_description": rd.innovation_description or "",
+                "resources_needed":      rd.resources_needed or "",
+                "financial_records":     rd.financial_records or "",
+            }
+
+        # Existing evaluation by this judge
+        eval_name = frappe.db.get_value(
+            "Round 2 Judge Evaluation",
+            {"r2_applicant": r2_applicant_name, "judge": judge},
+            "name",
+        )
+        evaluation_data = None
+        read_only       = False
+        peer_evals      = []
+
+        if eval_name:
+            eval_doc  = frappe.get_doc("Round 2 Judge Evaluation", eval_name)
+            read_only = eval_doc.docstatus == 1
+            own_eval  = {
+                "name":            eval_doc.name,
+                "subtotal_score":  eval_doc.subtotal_score,
+                "tech_score":      eval_doc.tech_score,
+                "tech_bonus_points": eval_doc.tech_bonus_points,
+                "leverage_category": eval_doc.leverage_category,
+                "female_applicant":  bool(eval_doc.female_applicant),
+                "leverage_points":   eval_doc.leverage_points,
+                "total_score":       eval_doc.total_score,
+                "passes_cutoff":     bool(eval_doc.passes_cutoff),
+                "overall_notes":     eval_doc.overall_notes or "",
+                "criteria": [
+                    {
+                        "criterion_id":  c.criterion_id,
+                        "score":         int(c.score or 0),
+                        "points_earned": float(c.points_earned or 0),
+                        "notes":         c.notes or "",
+                    }
+                    for c in eval_doc.criteria
+                ],
+            }
+            evaluation_data = own_eval
+            if read_only:
+                peer_evals = _get_r2_peer_evaluations(r2_applicant_name, judge, county)
+
+        return {
+            "success":      True,
+            "read_only":    read_only,
+            "r2_applicant": {
+                "name":             r2_doc.name,
+                "applicant_name":   r2_doc.applicant_name or "",
+                "county":           r2_doc.county or "",
+                "avg_score":        round(float(r2_doc.avg_score or 0), 2),
+                "score_status":     r2_doc.score_status or "",
+                "leverage_category": r2_doc.leverage_category or "None",
+            },
+            "application": {
+                "name":                       app.name,
+                "full_name":                  app.full_name or "",
+                "gender":                     app.gender or "",
+                "county_of_residence":        app.county_of_residence or "",
+                "age_group":                  app.age_group or "",
+                "level_of_project":           app.level_of_project or "",
+                "email":                      app.email or "",
+                "describe_your_idea":         app.describe_your_idea or "",
+                "proposed_product":           app.proposed_product or "",
+                "production_process":         app.production_process or "",
+                "enviromental_contributions": app.enviromental_contributions or "",
+                "demonstrate_innovativeness": app.demonstrate_innovativeness or "",
+                "enterprise_benefits":        app.enterprise_benefits or "",
+                "use_of_micro_grant":         app.use_of_micro_grant or "",
+                "prior_experience":           app.prior_experience or "",
+                "next_step_skills":           app.next_step_skills or "",
+                "incubator_programs":         app.incubator_programs or "",
+            },
+            "r2_response":      r2_response,
+            "evaluation":       evaluation_data,
+            "peer_evaluations": peer_evals,
+        }
+    except Exception as e:
+        frappe.log_error(f"get_application_for_r2_review error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def submit_r2_evaluation(r2_applicant_name, criteria_scores,
+                         tech_score=0, overall_notes="", judge=None):
+    """Submit a Round 2 judge evaluation for an applicant."""
+    try:
+        if not judge:
+            judge = frappe.session.user
+
+        if isinstance(criteria_scores, str):
+            criteria_scores = json.loads(criteria_scores)
+
+        if not frappe.db.exists("Round 2 Applicant", r2_applicant_name):
+            return {"success": False, "error": "Round 2 Applicant not found."}
+
+        # Coordinators bypass county/round restrictions
+        if not _is_system_manager(judge):
+            county, judging_round = _get_judge_assignment(judge)
+            if not county:
+                return {"success": False,
+                        "error": "You have not been assigned to a county. Contact the coordinator."}
+            if not _has_r2_access(judging_round):
+                return {"success": False,
+                        "error": "You are not authorized for Round 2 judging."}
+
+            r2_county = frappe.db.get_value(
+                "Round 2 Applicant", r2_applicant_name, "county"
+            ) or ""
+            if county == "Other":
+                if r2_county.strip() in NAMED_COUNTIES:
+                    return {"success": False,
+                            "error": f"Access denied. Applicant is from {r2_county}."}
+            else:
+                if r2_county.strip() != county:
+                    return {"success": False,
+                            "error": f"Access denied. Applicant is from {r2_county}, "
+                                      f"you are assigned to {county}."}
+
+        # Duplicate check
+        existing_status = frappe.db.get_value(
+            "Round 2 Judge Evaluation",
+            {"r2_applicant": r2_applicant_name, "judge": judge},
+            "docstatus",
+        )
+        if existing_status == 1:
+            return {"success": False,
+                    "error": "You have already submitted your evaluation for this applicant."}
+
+        eval_doc = frappe.new_doc("Round 2 Judge Evaluation")
+        eval_doc.r2_applicant  = r2_applicant_name
+        eval_doc.judge         = judge
+        eval_doc.tech_score    = str(int(tech_score or 0))
+        eval_doc.overall_notes = overall_notes
+
+        for criterion_id, score_data in criteria_scores.items():
+            eval_doc.append("criteria", {
+                "criterion_id": criterion_id,
+                "score":        int(score_data.get("score", 0)),
+                "notes":        score_data.get("notes", ""),
+            })
+
+        eval_doc.insert(ignore_permissions=True)
+        eval_doc.submit()
+        frappe.db.commit()
+
+        return {
+            "success":         True,
+            "message":         "Round 2 evaluation submitted successfully.",
+            "evaluation_name": eval_doc.name,
+            "subtotal_score":  eval_doc.subtotal_score,
+            "tech_bonus":      eval_doc.tech_bonus_points,
+            "leverage_points": eval_doc.leverage_points,
+            "total_score":     eval_doc.total_score,
+            "passes_cutoff":   bool(eval_doc.passes_cutoff),
+        }
+    except Exception as e:
+        frappe.log_error(f"submit_r2_evaluation error: {str(e)}", "Judging API")
+        frappe.db.rollback()
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def get_r2_leaderboard():
+    """
+    Round 2 leaderboard with averaged judge scores + leverage points.
+    Coordinator: all counties, full breakdown.
+    Judge: own county, averaged totals only.
+    """
+    try:
+        caller     = frappe.session.user
+        is_manager = _is_system_manager(caller)
+
+        if is_manager:
+            r2_list = frappe.get_all(
+                "Round 2 Applicant",
+                fields=["name", "application", "applicant_name", "county",
+                        "avg_score", "score_status", "leverage_category"],
+            )
+            rows = []
+            for r in r2_list:
+                evals = frappe.get_all(
+                    "Round 2 Judge Evaluation",
+                    filters={"r2_applicant": r.name, "docstatus": 1},
+                    fields=["judge", "subtotal_score", "tech_bonus_points",
+                            "leverage_points", "total_score", "passes_cutoff"],
+                )
+                if not evals:
+                    continue
+
+                scores   = [float(e.total_score or 0) for e in evals]
+                avg_tot  = sum(scores) / len(scores)
+                spread   = max(scores) - min(scores) if len(scores) > 1 else 0
+
+                judge_detail = []
+                for e in evals:
+                    jname = frappe.db.get_value("User", e.judge, "full_name") or e.judge
+                    judge_detail.append({
+                        "judge":           e.judge,
+                        "judge_name":      jname,
+                        "subtotal_score":  round(float(e.subtotal_score or 0), 2),
+                        "tech_bonus":      round(float(e.tech_bonus_points or 0), 2),
+                        "leverage_points": round(float(e.leverage_points or 0), 2),
+                        "total_score":     round(float(e.total_score or 0), 2),
+                        "passes_cutoff":   bool(e.passes_cutoff),
+                    })
+
+                # R2 response submitted?
+                app_full_name = r.applicant_name or ""
+                has_r2_response = bool(frappe.db.exists(
+                    "Round 2 Response", {"applicant_name": app_full_name}
+                ))
+
+                rows.append({
+                    "r2_applicant":    r.name,
+                    "application":     r.application,
+                    "applicant_name":  r.applicant_name or "",
+                    "county":          r.county or "",
+                    "r1_avg_score":    round(float(r.avg_score or 0), 2),
+                    "score_status":    r.score_status or "",
+                    "leverage_category": r.leverage_category or "None",
+                    "avg_total_score": round(avg_tot, 2),
+                    "judge_count":     len(scores),
+                    "variance":        round(spread, 2),
+                    "high_variance":   spread > 20,
+                    "has_r2_response": has_r2_response,
+                    "passes_cutoff":   avg_tot >= CUTOFF,
+                    "judge_detail":    judge_detail,
+                    "is_manager_view": True,
+                })
+
+            rows.sort(key=lambda r: r["avg_total_score"], reverse=True)
+            return {"success": True, "leaderboard": rows, "view": "coordinator",
+                    "cutoff": CUTOFF}
+
+        else:
+            county = _get_judge_county(caller)
+            if not county:
+                return {"success": False,
+                        "error": "You are not assigned to a county.",
+                        "leaderboard": []}
+
+            my_r2 = _get_r2_applicants_for_county(county)
+            rows  = []
+            for r in my_r2:
+                evals = frappe.get_all(
+                    "Round 2 Judge Evaluation",
+                    filters={"r2_applicant": r.name, "docstatus": 1},
+                    fields=["total_score", "passes_cutoff"],
+                )
+                if not evals:
+                    continue
+                scores  = [float(e.total_score or 0) for e in evals]
+                avg_tot = sum(scores) / len(scores)
+                rows.append({
+                    "r2_applicant":    r.name,
+                    "applicant_name":  r.applicant_name or "",
+                    "county":          r.county or "",
+                    "avg_total_score": round(avg_tot, 2),
+                    "judge_count":     len(scores),
+                    "passes_cutoff":   avg_tot >= CUTOFF,
+                    "is_manager_view": False,
+                })
+
+            rows.sort(key=lambda r: r["avg_total_score"], reverse=True)
+            return {"success": True, "leaderboard": rows, "view": "judge",
+                    "county": county, "cutoff": CUTOFF}
+
+    except Exception as e:
+        frappe.log_error(f"get_r2_leaderboard error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e), "leaderboard": []}
+
+
+@frappe.whitelist()
+def get_r2_scoring_progress():
+    """Coordinator: summary of how many R2 applicants have been scored and by how many judges."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    try:
+        r2_list = frappe.get_all(
+            "Round 2 Applicant",
+            fields=["name", "applicant_name", "county", "leverage_category"],
+        )
+        county_judges = {}
+        for a in frappe.get_all(
+            "Judge County Assignment",
+            filters={"judging_round": ["in", ["Round 2", "Both"]]},
+            fields=["judge", "assigned_county"],
+        ):
+            county_judges.setdefault(a.assigned_county, []).append(a.judge)
+
+        result = []
+        for r in r2_list:
+            evals = frappe.get_all(
+                "Round 2 Judge Evaluation",
+                filters={"r2_applicant": r.name, "docstatus": 1},
+                fields=["judge", "total_score"],
+            )
+            eff_county    = r.county if r.county in NAMED_COUNTIES else "Other"
+            expected_cnt  = len(county_judges.get(eff_county, []))
+            scores        = [float(e.total_score or 0) for e in evals]
+            avg_tot       = round(sum(scores) / len(scores), 2) if scores else None
+
+            result.append({
+                "r2_applicant":    r.name,
+                "applicant_name":  r.applicant_name or "",
+                "county":          r.county or "",
+                "leverage_category": r.leverage_category or "None",
+                "judges_completed": len(evals),
+                "judges_expected":  expected_cnt,
+                "complete":         len(evals) >= expected_cnt > 0,
+                "avg_total_score":  avg_tot,
+                "passes_cutoff":    (avg_tot or 0) >= CUTOFF,
+            })
+
+        total_complete = sum(1 for r in result if r["complete"])
+        return {
+            "success":        True,
+            "total":          len(result),
+            "complete":       total_complete,
+            "incomplete":     len(result) - total_complete,
+            "applicants":     result,
+        }
+    except Exception as e:
+        frappe.log_error(f"get_r2_scoring_progress error: {str(e)}", "Judging API")
         return {"success": False, "error": str(e)}

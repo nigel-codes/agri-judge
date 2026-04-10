@@ -15,12 +15,17 @@ def submit_sbm(**kwargs):
         "str_innovation", "str_leadership", "str_brand", "str_government", "str_scalable",
         "str_rcrc", "str_other",
         "doc_business_plan", "doc_annual_reports", "doc_photos_media", "doc_impact_report",
+        "bmt_b2c", "bmt_b2b", "bmt_b2g", "bmt_internal", "bmt_hybrid",
+        "pc_individuals", "pc_smes", "pc_large_corp", "pc_government", "pc_schools",
+        "pc_hospitals", "pc_community", "pc_other",
+        "npc_individuals", "npc_smes", "npc_large_corp", "npc_government", "npc_schools",
+        "npc_hospitals", "npc_community", "npc_other",
+        "digit_offline", "digit_basic", "digit_online_presence", "digit_ecommerce", "digit_integrated",
     }
     required_parent = [
         "national_society", "broader_program", "legal_status",
         "countries_of_operation", "key_contact_name", "key_contact_title", "key_contact_email",
         "main_business_activity", "social_problem_addressed", "main_sector",
-        "business_model_type", "paying_customers",
         "funding_type", "annual_revenue_range", "financial_situation",
         "development_stage", "paid_staff_count", "customers_reached_annually",
         "open_to_sharing",
