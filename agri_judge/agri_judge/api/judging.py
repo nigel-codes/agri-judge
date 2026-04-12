@@ -1400,8 +1400,16 @@ def get_r2_criteria_definitions():
     }
 
 
+def _r2_responded_names():
+    """Return a set of applicant_name values that have submitted a Round 2 Response."""
+    responses = frappe.get_all("Round 2 Response", fields=["applicant_name"])
+    return {r.applicant_name for r in responses if r.applicant_name}
+
+
 def _get_r2_applicants_for_county(county):
-    """Return Round 2 Applicant records whose application county matches."""
+    """Return Round 2 Applicant records whose application county matches
+    AND who have submitted a Round 2 Response."""
+    responded = _r2_responded_names()
     if county == "Other":
         all_r2 = frappe.get_all(
             "Round 2 Applicant",
@@ -1409,13 +1417,15 @@ def _get_r2_applicants_for_county(county):
                     "avg_score", "score_status", "leverage_category"],
         )
         return [r for r in all_r2
-                if (r.county or "").strip() not in NAMED_COUNTIES]
-    return frappe.get_all(
+                if (r.county or "").strip() not in NAMED_COUNTIES
+                and (r.applicant_name or "") in responded]
+    all_r2 = frappe.get_all(
         "Round 2 Applicant",
         filters={"county": county},
         fields=["name", "application", "applicant_name", "county",
                 "avg_score", "score_status", "leverage_category"],
     )
+    return [r for r in all_r2 if (r.applicant_name or "") in responded]
 
 
 def _get_r2_peer_evaluations(r2_applicant, requesting_judge, county):
@@ -1515,13 +1525,14 @@ def get_r2_judge_assignments(judge=None):
         if not judge:
             judge = frappe.session.user
 
-        # Coordinators bypass county/round restrictions — see everything
+        # Coordinators bypass county/round restrictions — see all with responses
         if _is_system_manager(judge):
-            r2_list = frappe.get_all(
+            responded = _r2_responded_names()
+            r2_list = [r for r in frappe.get_all(
                 "Round 2 Applicant",
                 fields=["name", "application", "applicant_name", "county",
                         "score_status", "leverage_category"],
-            )
+            ) if (r.applicant_name or "") in responded]
             result = [_build_r2_applicant_row(r, judge) for r in r2_list]
             completed = sum(1 for r in result if r["submitted"])
             return {
@@ -1805,11 +1816,12 @@ def get_r2_leaderboard():
         is_manager = _is_system_manager(caller)
 
         if is_manager:
-            r2_list = frappe.get_all(
+            responded = _r2_responded_names()
+            r2_list = [r for r in frappe.get_all(
                 "Round 2 Applicant",
                 fields=["name", "application", "applicant_name", "county",
                         "avg_score", "score_status", "leverage_category"],
-            )
+            ) if (r.applicant_name or "") in responded]
             rows = []
             for r in r2_list:
                 evals = frappe.get_all(
@@ -1910,10 +1922,11 @@ def get_r2_scoring_progress():
     if not _is_system_manager(frappe.session.user):
         return {"success": False, "error": "Access denied."}
     try:
-        r2_list = frappe.get_all(
+        responded = _r2_responded_names()
+        r2_list = [r for r in frappe.get_all(
             "Round 2 Applicant",
             fields=["name", "applicant_name", "county", "leverage_category"],
-        )
+        ) if (r.applicant_name or "") in responded]
         county_judges = {}
         for a in frappe.get_all(
             "Judge County Assignment",
