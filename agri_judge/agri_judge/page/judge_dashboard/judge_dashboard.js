@@ -13,6 +13,7 @@ frappe.pages['judge-dashboard'].on_page_load = function(wrapper) {
     page.add_button('Home', () => frappe.set_route('/app'), 'octicon octicon-home');
     page.add_button('Refresh', () => wrapper._dashboard && wrapper._dashboard.loadData(), 'refresh');
     page.add_button('View Leaderboard', () => frappe.set_route('judging-leaderboard'), 'octicon octicon-trophy', 'btn-primary');
+    page.add_button('R2 Leaderboard', () => frappe.set_route('round-2-leaderboard'), 'octicon octicon-list-ordered');
     wrapper._dashboard = new JudgeDashboard(page);
 };
 
