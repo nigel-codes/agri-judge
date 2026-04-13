@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "R2EVAL-{r2_applicant}-{judge}-.###",
+ "autoname": "R2EVAL-.####",
  "creation": "2026-04-10 00:00:00.000000",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -38,8 +38,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Round 2 Applicant",
-   "options": "Round 2 Applicant",
+   "label": "Round 2 Response",
+   "options": "Round 2 Response",
    "reqd": 1
   },
   {

@@ -1,8 +1,7 @@
 /**
  * Round 2 Scoring Dashboard
- * Coordinator-only view of all R2 applicant scoring status.
- * Shows per-applicant: judges completed, avg score, passes cut-off, leverage.
- * Click any applicant to open their judge review page.
+ * Coordinator-only. Shows per-applicant judge scoring status.
+ * Rows are NOT clickable — use the toggle to see individual judge scores.
  */
 
 frappe.pages['round-2-scoring-dashboard'].on_page_load = function(wrapper) {
@@ -11,9 +10,7 @@ frappe.pages['round-2-scoring-dashboard'].on_page_load = function(wrapper) {
         title: 'Round 2 — Scoring Dashboard',
         single_column: true
     });
-    page.add_button('Home', () => frappe.set_route('/app'), 'octicon octicon-home');
-    page.add_button('Round 2 Applicants', () => frappe.set_route('round-2-applicants'), 'octicon octicon-checklist');
-    page.add_button('Leaderboard', () => frappe.set_route('judging-leaderboard'), 'octicon octicon-list-ordered');
+    page.add_button('← Round 2 Judging', () => frappe.set_route('round-2-judging'), 'octicon octicon-arrow-left');
     page.set_primary_action('Refresh', () => wrapper._r2sd && wrapper._r2sd.load(), 'octicon octicon-sync');
     wrapper._r2sd = new R2ScoringDashboard(page, wrapper);
 };
@@ -50,7 +47,6 @@ class R2ScoringDashboard {
         const d = this.data;
         const applicants = d.applicants || [];
 
-        // Group by county
         const byCounty = {};
         applicants.forEach(a => {
             const c = a.county || 'Unknown';
@@ -63,8 +59,8 @@ class R2ScoringDashboard {
             'Kericho': '#E65100',  'Meru': '#6A1B9A', 'Other': '#37474F'
         };
 
-        const passing = applicants.filter(a => a.passes_cutoff && a.avg_total_score !== null).length;
-        const failing = applicants.filter(a => !a.passes_cutoff && a.avg_total_score !== null).length;
+        const passing  = applicants.filter(a => a.passes_cutoff && a.avg_total_score !== null).length;
+        const failing  = applicants.filter(a => !a.passes_cutoff && a.avg_total_score !== null).length;
         const unscored = applicants.filter(a => a.avg_total_score === null).length;
 
         const countySections = Object.keys(byCounty).sort().map(county => {
@@ -85,7 +81,6 @@ class R2ScoringDashboard {
                         <thead>
                             <tr>
                                 <th>Applicant</th>
-                                <th>Leverage</th>
                                 <th>Judges</th>
                                 <th>Avg Score</th>
                                 <th>Status</th>
@@ -93,7 +88,7 @@ class R2ScoringDashboard {
                             </tr>
                         </thead>
                         <tbody>
-                            ${apps.map(a => this.renderRow(a)).join('')}
+                            ${apps.map((a, i) => this.renderRow(a, `${county}-${i}`)).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -115,19 +110,19 @@ class R2ScoringDashboard {
                 </div>
 
                 <div class="sd-stats">
-                    ${this.statCard(d.total,    'Total R2 Applicants', '#1565C0')}
-                    ${this.statCard(d.complete, 'Fully Scored',        '#2E7D32')}
-                    ${this.statCard(d.incomplete,'Pending',            '#E65100')}
-                    ${this.statCard(passing,    'Above Cut-off',       '#2E7D32')}
-                    ${this.statCard(failing,    'Below Cut-off',       '#C62828')}
-                    ${this.statCard(unscored,   'Not Yet Scored',      '#78909C')}
+                    ${this.statCard(d.total,     'Total Applicants', '#1565C0')}
+                    ${this.statCard(d.complete,  'Fully Scored',     '#2E7D32')}
+                    ${this.statCard(d.incomplete,'Pending',          '#E65100')}
+                    ${this.statCard(passing,     'Above Cut-off',    '#2E7D32')}
+                    ${this.statCard(failing,     'Below Cut-off',    '#C62828')}
+                    ${this.statCard(unscored,    'Not Yet Scored',   '#78909C')}
                 </div>
 
                 ${applicants.length === 0
                     ? `<div class="sd-empty">
                            <div style="font-size:52px;margin-bottom:16px;">📭</div>
                            <strong>No Round 2 applicants found.</strong>
-                           <p>Add applicants via the Round 2 Applicants list first.</p>
+                           <p>Responses will appear here once applicants submit their Round 2 forms.</p>
                        </div>`
                     : countySections
                 }
@@ -137,11 +132,21 @@ class R2ScoringDashboard {
                 </div>
             </div>
         `);
+
+        // Toggle handler
+        this.wrapper.on('click', '.btn-toggle', function() {
+            const id = $(this).data('id');
+            const panel = $(`#scores-${id}`);
+            const open = panel.hasClass('open');
+            panel.toggleClass('open', !open);
+            $(this).text(open ? 'View Scores ▼' : 'Hide Scores ▲');
+        });
     }
 
-    renderRow(a) {
+    renderRow(a, id) {
         const scored = a.avg_total_score !== null;
         const passes = a.passes_cutoff;
+
         const scoreDisplay = scored
             ? `<span class="score-num ${passes ? 'pass' : 'fail'}">${a.avg_total_score.toFixed(1)}</span><span class="score-of"> / 110</span>`
             : `<span class="score-dash">—</span>`;
@@ -156,23 +161,36 @@ class R2ScoringDashboard {
             ? `${a.judges_completed}/${a.judges_expected}`
             : `${a.judges_completed} judge${a.judges_completed !== 1 ? 's' : ''}`;
 
-        const leverageMap = {
-            'Top Shortlisted': { label: 'Top +10', color: '#1565C0' },
-            'Above Threshold': { label: 'Above +5', color: '#2E7D32' },
-            'At Threshold':    { label: 'At +2',    color: '#E65100' },
-            'None':            { label: '—',         color: '#aaa'   },
-        };
-        const lev = leverageMap[a.leverage_category] || leverageMap['None'];
-        const leverageBadge = `<span class="lev-badge" style="color:${lev.color};">${lev.label}</span>`;
+        const toggleBtn = a.judges_completed > 0
+            ? `<button class="btn-toggle" data-id="${id}">View Scores ▼</button>`
+            : `<span class="no-scores-yet">—</span>`;
+
+        const judgeRows = (a.judge_scores || []).map(j => `
+            <div class="judge-score-row">
+                <div class="judge-avatar">${(j.judge_name || '?').charAt(0).toUpperCase()}</div>
+                <div class="judge-name">${frappe.utils.escape_html(j.judge_name)}</div>
+                <div class="judge-chips">
+                    <span class="chip chip-sub">Sub: ${j.subtotal}</span>
+                    <span class="chip chip-tech">Tech: +${j.tech_bonus}</span>
+                    <span class="chip chip-lev">Lev: +${j.leverage}</span>
+                    <span class="chip chip-total ${j.passes_cutoff ? 'chip-pass' : ''}">Total: ${j.total}</span>
+                </div>
+            </div>`).join('');
 
         return `
-        <tr class="sd-row" onclick="frappe.set_route('round-2-judge-review', '${frappe.utils.escape_html(a.r2_applicant)}')">
+        <tr class="sd-row">
             <td class="td-name">${frappe.utils.escape_html(a.applicant_name || a.r2_applicant)}</td>
-            <td>${leverageBadge}</td>
             <td class="td-judges">${completeness}</td>
             <td class="td-score">${scoreDisplay}</td>
             <td>${statusBadge}</td>
-            <td class="td-arrow">→</td>
+            <td class="td-toggle">${toggleBtn}</td>
+        </tr>
+        <tr class="score-detail-row">
+            <td colspan="5" style="padding:0;">
+                <div class="score-detail-panel" id="scores-${id}">
+                    ${judgeRows || '<p class="no-judge-text">No submitted scores yet.</p>'}
+                </div>
+            </td>
         </tr>`;
     }
 
@@ -200,58 +218,67 @@ class R2ScoringDashboard {
 
     getStyles() {
         return `<style>
-        .sd-wrap { max-width:1100px; margin:0 auto; padding:20px 16px 60px; font-family:var(--font-stack,Arial,sans-serif); }
+        .sd-wrap { max-width:1000px; margin:0 auto; padding:20px 16px 60px; font-family:var(--font-stack,Arial,sans-serif); }
 
-        /* Header */
         .sd-header { background:linear-gradient(135deg,#1565C0 0%,#0D47A1 100%); padding:24px 28px; border-radius:10px; margin-bottom:20px; }
         .sd-header-inner { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
         .sd-header h1 { margin:0 0 4px; font-size:22px; font-weight:700; color:white; }
         .sd-subtitle { margin:0; color:rgba(255,255,255,.8); font-size:13px; }
         .sd-coordinator-badge { background:rgba(255,255,255,.15); border:1.5px solid rgba(255,255,255,.5); color:white; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:600; }
 
-        /* Stats */
-        .sd-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px; }
+        .sd-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:22px; }
         .sd-stat-card { background:#fff; border:1px solid #e0e0e0; border-top:3px solid #ccc; border-radius:8px; padding:14px 16px; text-align:center; }
         .sd-stat-value { font-size:28px; font-weight:800; line-height:1.2; }
         .sd-stat-label { font-size:11px; color:#666; margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
 
-        /* County card */
         .sd-county-card { background:#fff; border:1px solid #e0e0e0; border-radius:10px; margin-bottom:18px; overflow:hidden; }
         .sd-county-header { display:flex; justify-content:space-between; align-items:center; padding:13px 18px; border-left:4px solid #ccc; background:#fafafa; }
         .sd-county-title { display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px; }
         .sd-dot { width:10px; height:10px; border-radius:50%; display:inline-block; flex-shrink:0; }
         .sd-county-meta { font-size:12px; color:#666; }
 
-        /* Table */
         .sd-table-wrap { overflow-x:auto; }
         .sd-table { width:100%; border-collapse:collapse; }
         .sd-table thead tr { background:#f9f9f9; }
         .sd-table th { padding:9px 14px; font-size:11px; color:#888; text-transform:uppercase; letter-spacing:.4px; font-weight:600; text-align:left; border-bottom:1px solid #eee; white-space:nowrap; }
-        .sd-row { cursor:pointer; transition:background .15s; border-top:1px solid #eee; }
-        .sd-row:hover { background:#f0f4ff; }
+        .sd-row { border-top:1px solid #eee; }
         .sd-table td { padding:11px 14px; font-size:13px; vertical-align:middle; }
         .td-name { font-weight:600; color:#1a1a1a; }
         .td-judges { color:#666; }
         .td-score { white-space:nowrap; }
-        .td-arrow { color:#1565C0; font-weight:700; font-size:15px; text-align:right; padding-right:18px; }
+        .td-toggle { text-align:right; padding-right:16px; white-space:nowrap; }
         .score-num { font-weight:700; font-size:15px; }
         .score-num.pass { color:#2E7D32; }
         .score-num.fail { color:#C62828; }
         .score-of { font-size:11px; color:#aaa; }
         .score-dash { color:#bbb; font-size:14px; }
 
-        /* Badges */
         .badge { display:inline-block; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:600; }
-        .badge-pass    { background:#E8F5E9; color:#2E7D32; }
-        .badge-fail    { background:#FFEBEE; color:#C62828; }
+        .badge-pass     { background:#E8F5E9; color:#2E7D32; }
+        .badge-fail     { background:#FFEBEE; color:#C62828; }
         .badge-unscored { background:#FFF3E0; color:#E65100; }
-        .lev-badge { font-size:12px; font-weight:600; }
 
-        /* Empty */
+        .btn-toggle { background:#f0f4ff; color:#1565C0; border:1px solid #c5d5f5; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:600; cursor:pointer; transition:background .15s; white-space:nowrap; }
+        .btn-toggle:hover { background:#dce8ff; }
+        .no-scores-yet { color:#ccc; font-size:13px; }
+
+        .score-detail-row td { padding:0; }
+        .score-detail-panel { display:none; padding:14px 18px 16px 54px; background:#f8f9fc; border-top:1px solid #eee; }
+        .score-detail-panel.open { display:block; }
+        .judge-score-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
+        .judge-avatar { width:28px; height:28px; border-radius:50%; background:#1565C0; color:white; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+        .judge-name { font-size:13px; color:#333; font-weight:600; min-width:140px; }
+        .judge-chips { display:flex; gap:6px; flex-wrap:wrap; }
+        .chip { padding:3px 8px; border-radius:10px; font-size:12px; font-weight:600; }
+        .chip-sub   { background:#e8eaf6; color:#3949AB; }
+        .chip-tech  { background:#e3f2fd; color:#1565C0; }
+        .chip-lev   { background:#f3e5f5; color:#6A1B9A; }
+        .chip-total { background:#eeeeee; color:#333; font-weight:700; }
+        .chip-pass  { background:#E8F5E9; color:#2E7D32; }
+        .no-judge-text { color:#aaa; font-size:13px; margin:0; }
+
         .sd-empty { background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:60px 20px; text-align:center; color:#555; font-size:15px; }
         .sd-empty p { color:#888; margin-top:8px; }
-
-        /* Footer */
         .sd-footer { text-align:center; color:#bbb; font-size:11px; margin-top:30px; }
         </style>`;
     }

@@ -123,7 +123,7 @@
    "fieldname": "score",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Score (0–10)",
+   "label": "Score (0\u201310)",
    "precision": "1"
   },
   {
@@ -152,7 +152,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-17 15:46:00.713033",
+ "modified": "2026-04-13 05:07:20.639334",
  "modified_by": "Administrator",
  "module": "Agri Judge",
  "name": "Round 2 Response",
@@ -161,7 +161,6 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -177,6 +176,10 @@
    "read": 1,
    "role": "System Manager",
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Judge"
   }
  ],
  "row_format": "Dynamic",

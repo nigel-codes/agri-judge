@@ -188,7 +188,6 @@ class Round2Leaderboard {
                         ${medal_html}
                         <div class="app-info">
                             <div class="app-name">${frappe.utils.escape_html(r.applicant_name)}</div>
-                            <div class="app-sub">${frappe.utils.escape_html(r.leverage_category && r.leverage_category !== 'None' ? 'R1: ' + r.leverage_category : '')}</div>
                         </div>
                         <div class="cell-text">${frappe.utils.escape_html(r.county || '—')}</div>
                         <div>${scoreBar}</div>

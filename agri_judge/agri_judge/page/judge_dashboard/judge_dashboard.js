@@ -12,7 +12,6 @@ frappe.pages['judge-dashboard'].on_page_load = function(wrapper) {
     });
     page.add_button('Home', () => frappe.set_route('/app'), 'octicon octicon-home');
     page.add_button('Refresh', () => wrapper._dashboard && wrapper._dashboard.loadData(), 'refresh');
-    page.add_button('View Leaderboard', () => frappe.set_route('judging-leaderboard'), 'octicon octicon-trophy', 'btn-primary');
     page.add_button('R2 Leaderboard', () => frappe.set_route('round-2-leaderboard'), 'octicon octicon-list-ordered');
     wrapper._dashboard = new JudgeDashboard(page);
 };
@@ -233,8 +232,8 @@ class JudgeDashboard {
             ${r2Total === 0
                 ? `<div class="empty-state" style="padding:30px;">
                        <div style="font-size:36px;margin-bottom:12px;">📋</div>
-                       <strong>No Round 2 applicants for your county yet.</strong>
-                       <p>Applicants will appear here once they have been shortlisted for Round 2.</p>
+                       <strong>No Round 2 responses for your county yet.</strong>
+                       <p>Responses will appear here once applicants have submitted their Round 2 forms.</p>
                    </div>`
                 : r2.map(a => this.renderR2Card(a, cc)).join('')
             }

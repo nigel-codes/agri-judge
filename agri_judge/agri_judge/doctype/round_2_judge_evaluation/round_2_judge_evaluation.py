@@ -39,24 +39,20 @@ class Round2JudgeEvaluation(Document):
         self._compute_scores()
 
     def _pull_leverage_from_r2_applicant(self):
-        """Copy leverage_category from the Round 2 Applicant record."""
-        if not self.r2_applicant:
-            return
-        cat = frappe.db.get_value(
-            "Round 2 Applicant", self.r2_applicant, "leverage_category"
-        )
-        self.leverage_category = cat or "None"
+        """Leverage category is set by the judge manually; default to None if unset."""
+        if not self.leverage_category:
+            self.leverage_category = "None"
 
     def _pull_female_from_application(self):
-        """Auto-set female_applicant from the linked Agri Waste Innovation gender field."""
+        """Default female_applicant from the linked Round 2 Response gender field if not set."""
+        # Only auto-set on new (unsaved) docs; judges can override the value manually
+        if not self.is_new():
+            return
+        if self.female_applicant:
+            return
         if not self.r2_applicant:
             return
-        app_name = frappe.db.get_value(
-            "Round 2 Applicant", self.r2_applicant, "application"
-        )
-        if not app_name:
-            return
-        gender = frappe.db.get_value("Agri Waste Innovation", app_name, "gender") or ""
+        gender = frappe.db.get_value("Round 2 Response", self.r2_applicant, "gender") or ""
         self.female_applicant = 1 if gender.lower() in ("female", "f") else 0
 
     def _compute_scores(self):

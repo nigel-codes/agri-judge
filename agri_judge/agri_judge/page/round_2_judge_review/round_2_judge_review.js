@@ -94,6 +94,15 @@ class R2JudgeReview {
             this.techScore = parseInt(d.evaluation.tech_score || 0);
         }
 
+        // Store leverage context for live recalc
+        // Leverage category is selected manually by the judge
+        this.leverageCategory = (d.evaluation && d.evaluation.leverage_category) || 'None';
+        // Default female bonus to true if gender is Female, but allow judge to override
+        const genderIsFemale = resp && resp.gender && resp.gender.toLowerCase() === 'female';
+        this.isFemale = d.evaluation
+            ? !!d.evaluation.female_applicant
+            : genderIsFemale;
+
         // Expose to inline handlers
         window.R2R = this;
 
@@ -134,12 +143,6 @@ class R2JudgeReview {
         const coordinatorBadge = this.isCoordinator
             ? `<span class="r2r-badge" style="background:#1565C0;color:white;">Coordinator</span>`
             : '';
-        const leverageLabel = r2.leverage_category && r2.leverage_category !== 'None'
-            ? `<span class="r2r-badge badge-leverage">🏅 ${frappe.utils.escape_html(r2.leverage_category)}</span>`
-            : '';
-        const statusBadge = r2.score_status
-            ? `<span class="r2r-badge badge-status">${frappe.utils.escape_html(r2.score_status)}</span>`
-            : '';
         const readOnlyBanner = readOnly
             ? `<div class="r2r-readonly-banner">✅ You have already submitted your evaluation for this applicant. Scores are locked.</div>`
             : '';
@@ -155,11 +158,6 @@ class R2JudgeReview {
                     </div>
                     <div class="r2r-badges">
                         ${coordinatorBadge}
-                        ${statusBadge}
-                        ${leverageLabel}
-                        ${r2.leverage_category && r2.leverage_category !== 'None'
-                            ? `<span class="r2r-badge badge-pts">+${this.leveragePts(r2.leverage_category)} pts (if subtotal ≥ 40)</span>`
-                            : ''}
                     </div>
                 </div>
             </div>
@@ -173,7 +171,7 @@ class R2JudgeReview {
         if (!resp) {
             return `
             <div class="r2r-section r2r-no-response">
-                <p>⚠️ This applicant has not submitted a Round 2 Response form yet. Score based on your knowledge of the original application.</p>
+                <p>⚠️ No Round 2 response data found for this applicant.</p>
             </div>`;
         }
 
@@ -253,12 +251,6 @@ class R2JudgeReview {
                 <span class="r2r-band-text">${frappe.utils.escape_html(b.text)}</span>
             </div>`).join('');
 
-        const leverageRows = (this.rubric.leverage.table || []).map(l => `
-            <tr>
-                <td>${frappe.utils.escape_html(l.category)}</td>
-                <td class="r2r-pts-col">+${l.points} pts</td>
-            </tr>`).join('');
-
         return `
         <div class="r2r-sp-inner">
 
@@ -309,20 +301,27 @@ class R2JudgeReview {
                     </div>
                 </div>
 
-                <!-- Leverage info -->
+
+                <!-- Leverage box -->
                 <div class="r2r-leverage-box">
-                    <h4>🏅 Leverage Points (auto-applied)</h4>
-                    <p style="font-size:11px;color:#666;margin:4px 0 8px;">Only applied when subtotal ≥ 40.</p>
-                    <table class="r2r-leverage-table">
-                        <thead><tr><th>Category</th><th>Bonus</th></tr></thead>
-                        <tbody>${leverageRows}</tbody>
-                    </table>
-                    <div class="r2r-leverage-current">
-                        This applicant: <strong>${frappe.utils.escape_html(r2.leverage_category || 'None')}</strong>
-                        ${r2.leverage_category && r2.leverage_category !== 'None'
-                            ? ` → <span style="color:#2E7D32">+${this.leveragePts(r2.leverage_category)} pts (if subtotal ≥ 40)</span>`
-                            : ''}
+                    <div class="r2r-leverage-title">Leverage Points (Extra Credit)</div>
+                    <div class="r2r-leverage-cat">
+                        <label class="r2r-score-label" style="margin-bottom:4px;display:block;">Round 1 Performance Category:</label>
+                        <select id="leverage-select" class="r2r-leverage-select"
+                            onchange="window.R2R.setLeverage(this.value)">
+                            <option value="None"${this.leverageCategory === 'None' ? ' selected' : ''}>None — +0 pts</option>
+                            <option value="At Threshold"${this.leverageCategory === 'At Threshold' ? ' selected' : ''}>At Threshold — +2 pts</option>
+                            <option value="Above Threshold"${this.leverageCategory === 'Above Threshold' ? ' selected' : ''}>Above Threshold — +5 pts</option>
+                            <option value="Top Shortlisted"${this.leverageCategory === 'Top Shortlisted' ? ' selected' : ''}>Top Shortlisted — +10 pts</option>
+                        </select>
                     </div>
+                    <label class="r2r-leverage-female-label">
+                        <input type="checkbox" id="female-bonus-chk"
+                            ${this.isFemale ? 'checked' : ''}
+                            onchange="window.R2R.toggleFemale(this.checked)">
+                        Female-led applicant bonus (+5 pts)
+                    </label>
+                    <div class="r2r-leverage-note">Leverage applied only when subtotal ≥ 40 pts</div>
                 </div>
 
                 <!-- Overall notes -->
@@ -392,7 +391,7 @@ class R2JudgeReview {
             <div class="r2r-sp-breakdown">
                 <div class="r2r-live-row"><span>Subtotal:</span><span>${evaluation.subtotal_score} / 100</span></div>
                 <div class="r2r-live-row"><span>Tech Bonus:</span><span>+${evaluation.tech_bonus_points}</span></div>
-                <div class="r2r-live-row"><span>Leverage (${frappe.utils.escape_html(evaluation.leverage_category || 'None')}):</span><span>+${evaluation.leverage_points}</span></div>
+                <div class="r2r-live-row"><span>Leverage:</span><span>+${evaluation.leverage_points || 0}</span></div>
             </div>
 
             <div class="r2r-sp-scroll">
@@ -449,6 +448,16 @@ class R2JudgeReview {
         this.recalcLive();
     }
 
+    setLeverage(value) {
+        this.leverageCategory = value;
+        this.recalcLive();
+    }
+
+    toggleFemale(checked) {
+        this.isFemale = checked;
+        this.recalcLive();
+    }
+
     recalcLive() {
         const rubric = this.rubric;
         if (!rubric) return;
@@ -460,11 +469,12 @@ class R2JudgeReview {
         });
 
         const techBonus = this.techBonusPts(this.techScore);
-        const r2data    = this.appData.r2_applicant;
-        const levCat    = r2data.leverage_category || 'None';
-        const leverage  = subtotal >= 40
-            ? ({ 'Top Shortlisted': 10, 'Above Threshold': 5, 'At Threshold': 2, 'None': 0 }[levCat] || 0)
-            : 0;
+
+        let leverage = 0;
+        if (subtotal >= 40) {
+            leverage += this.leveragePts(this.leverageCategory);
+            if (this.isFemale) leverage += 5;
+        }
 
         const total = subtotal + techBonus + leverage;
 
@@ -527,6 +537,8 @@ class R2JudgeReview {
                 criteria_scores:   JSON.stringify(criteriaPayload),
                 tech_score:        this.techScore,
                 overall_notes:     $('#overall-notes').val() || '',
+                leverage_category: this.leverageCategory || 'None',
+                female_applicant:  this.isFemale ? 1 : 0,
             },
             callback: r => {
                 btn.prop('disabled', false).text('Submit Evaluation');
@@ -669,13 +681,20 @@ class R2JudgeReview {
         .r2r-notes { width:100%; border:1px solid #ddd; border-radius:6px; padding:6px 8px; font-size:11px; resize:vertical; font-family:var(--font-stack); box-sizing:border-box; }
         .r2r-notes:focus { outline:none; border-color:#1565C0; }
 
-        /* Leverage */
+        /* Leverage box */
         .r2r-leverage-box { background:#FFFDE7; border:1px solid #FDD835; border-radius:8px; padding:10px 12px; margin-bottom:10px; }
-        .r2r-leverage-box h4 { margin:0 0 4px; font-size:12px; }
-        .r2r-leverage-table { width:100%; border-collapse:collapse; font-size:11px; margin-bottom:6px; }
-        .r2r-leverage-table th, .r2r-leverage-table td { padding:4px 6px; text-align:left; border-bottom:1px solid #F9A825; }
+        .r2r-leverage-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#F57F17; margin-bottom:6px; }
+        .r2r-r1-score { font-size:12px; color:#333; margin-bottom:4px; }
+        .r2r-r1-none { color:#aaa; font-style:italic; }
+        .r2r-leverage-cat { font-size:12px; color:#333; margin-bottom:6px; }
+        .r2r-lev-table { width:100%; border-collapse:collapse; font-size:11px; margin-bottom:6px; }
+        .r2r-lev-table td { padding:3px 6px; border-bottom:1px solid #FFF59D; color:#555; }
+        .r2r-lev-table td:last-child { font-weight:700; color:#2E7D32; text-align:right; }
         .r2r-pts-col { font-weight:700; color:#2E7D32; }
-        .r2r-leverage-current { font-size:11px; }
+        .r2r-leverage-select { width:100%; border:1px solid #ddd; border-radius:6px; padding:5px 8px; font-size:12px; background:#fff; margin-bottom:6px; }
+        .r2r-leverage-female-label { display:flex; align-items:center; gap:6px; font-size:12px; color:#333; margin-bottom:4px; cursor:pointer; }
+        .r2r-leverage-female-label input[type=checkbox] { width:14px; height:14px; cursor:pointer; }
+        .r2r-leverage-note { font-size:10px; color:#aaa; font-style:italic; }
 
         /* Notes section */
         .r2r-notes-section { margin-top:10px; }
