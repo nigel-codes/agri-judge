@@ -1168,6 +1168,42 @@ def get_round2_response_for_review(response_name):
             if f.file_url != doc.financial_records:
                 attachments.append({"file_url": f.file_url, "file_name": f.file_name, "label": None})
 
+        # Look up the linked Round 1 application via the Round 2 Applicant record
+        round1_application = None
+        r2_applicant = frappe.db.get_value(
+            "Round 2 Applicant",
+            {"applicant_name": doc.applicant_name},
+            ["application"],
+            as_dict=True,
+        )
+        if r2_applicant and r2_applicant.get("application"):
+            app_name = r2_applicant["application"]
+            if frappe.db.exists("Agri Waste Innovation", app_name):
+                app = frappe.get_doc("Agri Waste Innovation", app_name)
+                round1_application = {
+                    "name":                      app.name,
+                    "full_name":                 app.full_name or "",
+                    "email":                     app.email or "",
+                    "gender":                    app.gender or "",
+                    "county_of_residence":       app.county_of_residence or "",
+                    "age_group":                 app.age_group or "",
+                    "phone_number":              app.phone_number or "",
+                    "prior_experience":          app.prior_experience or "",
+                    "proposed_product":          app.proposed_product or "",
+                    "describe_your_idea":        app.describe_your_idea or "",
+                    "level_of_project":          app.level_of_project or "",
+                    "production_process":        app.production_process or "",
+                    "enviromental_contributions":app.enviromental_contributions or "",
+                    "monthly_revenue":           app.monthly_revenue or "",
+                    "demonstrate_innovativeness":app.demonstrate_innovativeness or "",
+                    "use_of_micro_grant":        app.use_of_micro_grant or "",
+                    "enterprise_benefits":       app.enterprise_benefits or "",
+                    "youtube_link":              app.youtube_link or "",
+                    "next_step_skills":          app.next_step_skills or "",
+                    "incubator_programs":        app.incubator_programs or "",
+                    "supporting_documents":      app.supporting_documents or "",
+                }
+
         return {
             "success": True,
             "response": {
@@ -1188,6 +1224,7 @@ def get_round2_response_for_review(response_name):
                 "scored_on":            str(doc.scored_on) if doc.scored_on else "",
             },
             "attachments": attachments,
+            "round1_application": round1_application,
         }
     except Exception as e:
         frappe.log_error(f"get_round2_response_for_review error: {str(e)}", "Judging API")

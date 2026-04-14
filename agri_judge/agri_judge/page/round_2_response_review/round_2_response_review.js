@@ -42,8 +42,9 @@ class Round2ResponseReview {
             args: { response_name: name },
             callback: (r) => {
                 if (r.message && r.message.success) {
-                    this.response    = r.message.response;
-                    this.attachments = r.message.attachments || [];
+                    this.response         = r.message.response;
+                    this.attachments      = r.message.attachments || [];
+                    this.round1Application = r.message.round1_application || null;
                     this.render();
                 } else {
                     this._renderError((r.message && r.message.error) || 'Failed to load response.');
@@ -60,6 +61,7 @@ class Round2ResponseReview {
             save:       function() { self._save(); },
             step:       function(dir) { self._step(dir); },
             updateBar:  function() { self._updateBar(); },
+            toggleR1:   function() { self._toggleR1(); },
         };
 
         this.wrapper.html(
@@ -67,7 +69,7 @@ class Round2ResponseReview {
             '<div class="rv-page">' +
             this._header(res) +
             '<div class="rv-body">' +
-            '<div class="app-panel">' + this._appContent(res) + '</div>' +
+            '<div class="app-panel">' + this._appContent(res) + this._round1Section(this.round1Application) + '</div>' +
             '<div class="scoring-panel">' + this._scoringPanel(res) + '</div>' +
             '</div>' +
             this._footer() +
@@ -150,6 +152,70 @@ class Round2ResponseReview {
         }
 
         return html;
+    }
+
+    _round1Section(app) {
+        if (!app) {
+            return '<div class="r1-section">' +
+                '<div class="r1-toggle" onclick="R2R.toggleR1()">' +
+                '<span class="r1-toggle-icon" id="r1-icon">▶</span>' +
+                '<span>Round 1 Application</span>' +
+                '<span class="r1-no-link">No linked Round 1 application found</span>' +
+                '</div>' +
+                '</div>';
+        }
+
+        const field = (label, value) => {
+            if (!value) return '';
+            return '<div class="r1-field"><span class="r1-field-label">' + label + '</span>' +
+                '<p class="r1-field-value">' + frappe.utils.escape_html(value) + '</p></div>';
+        };
+
+        const youtubeBtn = app.youtube_link
+            ? '<div class="r1-field"><span class="r1-field-label">Video</span>' +
+              '<a href="' + frappe.utils.escape_html(app.youtube_link) + '" target="_blank" class="r1-yt-link">▶ Watch Video</a></div>'
+            : '';
+
+        const docsBtn = app.supporting_documents
+            ? '<div class="r1-field"><span class="r1-field-label">Supporting Documents</span>' +
+              '<a href="' + frappe.utils.escape_html(app.supporting_documents) + '" target="_blank" class="attach-link">📎 View Document</a></div>'
+            : '';
+
+        const body =
+            field('Prior Experience',           app.prior_experience) +
+            field('Proposed Product / Waste',   app.proposed_product) +
+            field('Idea / Prototype',           app.describe_your_idea) +
+            field('Project Level',              app.level_of_project) +
+            field('Production Process',         app.production_process) +
+            field('Environmental Contributions',app.enviromental_contributions) +
+            field('Monthly Revenue',            app.monthly_revenue) +
+            field('Innovativeness',             app.demonstrate_innovativeness) +
+            field('Use of Micro-Grant (€1,000)',app.use_of_micro_grant) +
+            field('Enterprise Benefits',        app.enterprise_benefits) +
+            field('Next-Step Skills Needed',    app.next_step_skills) +
+            field('Incubator Programs',         app.incubator_programs) +
+            youtubeBtn +
+            docsBtn;
+
+        return '<div class="r1-section">' +
+            '<div class="r1-toggle" onclick="R2R.toggleR1()">' +
+            '<span class="r1-toggle-icon" id="r1-icon">▶</span>' +
+            '<span>Round 1 Application</span>' +
+            '<span class="r1-ref">' + frappe.utils.escape_html(app.name) + '</span>' +
+            '</div>' +
+            '<div class="r1-body" id="r1-body" style="display:none;">' +
+            body +
+            '</div>' +
+            '</div>';
+    }
+
+    _toggleR1() {
+        const body = document.getElementById('r1-body');
+        const icon = document.getElementById('r1-icon');
+        if (!body) return;
+        const open = body.style.display !== 'none';
+        body.style.display = open ? 'none' : 'block';
+        if (icon) icon.textContent = open ? '▶' : '▼';
     }
 
     _scoringPanel(res) {
@@ -376,6 +442,21 @@ class Round2ResponseReview {
         /* Error / access denied */
         '.access-denied{flex:1;max-width:520px;margin:60px auto;background:white;border-radius:12px;padding:48px 38px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.1);border-top:5px solid #1565C0;}' +
         '.access-denied p{color:#555;line-height:1.7;margin-bottom:26px;font-size:14px;}' +
+
+        /* Round 1 section */
+        '.r1-section{margin-top:24px;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;}' +
+        '.r1-toggle{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f0f4ff;cursor:pointer;font-weight:700;font-size:13px;color:#1565C0;user-select:none;}' +
+        '.r1-toggle:hover{background:#e3ecff;}' +
+        '.r1-toggle-icon{font-size:11px;color:#1565C0;flex-shrink:0;}' +
+        '.r1-ref{margin-left:auto;font-size:11px;font-weight:400;color:#999;font-style:italic;}' +
+        '.r1-no-link{margin-left:auto;font-size:11px;font-weight:400;color:#bbb;font-style:italic;}' +
+        '.r1-body{padding:16px 18px;border-top:1px solid #e8e8e8;background:#fafbff;}' +
+        '.r1-field{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #f0f0f0;}' +
+        '.r1-field:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}' +
+        '.r1-field-label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#1565C0;margin-bottom:5px;}' +
+        '.r1-field-value{margin:0;font-size:13px;color:#333;line-height:1.7;white-space:pre-wrap;}' +
+        '.r1-yt-link{display:inline-block;background:#E53935;color:white;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;}' +
+        '.r1-yt-link:hover{opacity:.85;}' +
 
         /* Footer */
         '.krc-footer{margin-top:32px;border-top:2px solid #e8e8e8;padding:16px 20px 22px;background:white;text-align:center;font-family:Arial,sans-serif;}' +
