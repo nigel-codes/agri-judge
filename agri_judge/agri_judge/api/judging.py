@@ -15,25 +15,57 @@ NAMED_COUNTIES = ["Kakamega", "Homabay", "Kericho", "Meru"]
 # ── Helpers ───────────────────────────────────────────────────
 
 def _get_judge_county(judge_user):
-    return frappe.db.get_value(
+    """Return list of counties assigned to the judge (empty list if none)."""
+    rows = frappe.get_all(
         "Judge County Assignment",
-        {"judge": judge_user},
-        "assigned_county",
+        filters={"judge": judge_user},
+        fields=["assigned_county"],
     )
+    return [r.assigned_county for r in rows]
 
 
 def _get_judge_assignment(judge_user):
-    """Return (county, judging_round) for a judge, or (None, None) if not assigned."""
-    row = frappe.db.get_value(
+    """Return (counties_list, judging_round) for a judge, or ([], None) if not assigned.
+
+    judging_round is a combined value across all assignments:
+      - "Both"    if judge has access to R1 and R2 (any mix)
+      - "Round 1" if only R1 access
+      - "Round 2" if only R2 access
+    """
+    rows = frappe.get_all(
         "Judge County Assignment",
-        {"judge": judge_user},
-        ["assigned_county", "judging_round"],
-        as_dict=True,
+        filters={"judge": judge_user},
+        fields=["assigned_county", "judging_round"],
     )
-    if not row:
-        return None, None
-    # Existing records may have no judging_round value — treat as "Round 1"
-    return row.assigned_county, (row.judging_round or "Round 1")
+    if not rows:
+        return [], None
+
+    counties = [r.assigned_county for r in rows]
+    rounds = {(r.judging_round or "Round 1") for r in rows}
+
+    has_r1 = bool(rounds & {"Round 1", "Both"})
+    has_r2 = bool(rounds & {"Round 2", "Both"})
+    if has_r1 and has_r2:
+        combined_round = "Both"
+    elif has_r2:
+        combined_round = "Round 2"
+    else:
+        combined_round = "Round 1"
+
+    return counties, combined_round
+
+
+def _judge_can_access_county(judge_counties, app_county):
+    """Return True if app_county falls within any of the judge's assigned counties."""
+    app_county = (app_county or "").strip()
+    for jc in judge_counties:
+        if jc == "Other":
+            if app_county not in NAMED_COUNTIES:
+                return True
+        else:
+            if app_county == jc:
+                return True
+    return False
 
 
 def _has_r1_access(judging_round):
@@ -89,23 +121,35 @@ def _get_peer_evaluations(application_name, requesting_judge, county):
     return result
 
 
-def _get_applications_for_county(county):
-    if county == "Other":
-        all_apps = frappe.get_all(
-            "Agri Waste Innovation",
-            fields=["name", "full_name", "county_of_residence", "gender",
-                    "level_of_project", "email"],
-            order_by="creation desc",
-        )
-        return [a for a in all_apps
-                if (a.county_of_residence or "").strip() not in NAMED_COUNTIES]
-    return frappe.get_all(
+def _get_applications_for_county(counties):
+    """Return applications accessible to a judge assigned to the given counties (list or str)."""
+    if isinstance(counties, str):
+        counties = [counties]
+
+    all_apps = frappe.get_all(
         "Agri Waste Innovation",
-        filters={"county_of_residence": county},
         fields=["name", "full_name", "county_of_residence", "gender",
                 "level_of_project", "email"],
         order_by="creation desc",
     )
+
+    # Build set of explicitly named counties the judge covers
+    named_in_assignment = {c for c in counties if c != "Other"}
+    covers_other = "Other" in counties
+
+    result = []
+    seen = set()
+    for app in all_apps:
+        app_county = (app.county_of_residence or "").strip()
+        include = False
+        if app_county in named_in_assignment:
+            include = True
+        elif covers_other and app_county not in NAMED_COUNTIES:
+            include = True
+        if include and app.name not in seen:
+            seen.add(app.name)
+            result.append(app)
+    return result
 
 
 def _is_system_manager(user=None):
@@ -119,8 +163,9 @@ def _is_system_manager(user=None):
 def get_judge_county_info(judge=None):
     if not judge:
         judge = frappe.session.user
-    county = _get_judge_county(judge)
-    return {"success": True, "county": county, "has_assignment": county is not None}
+    counties = _get_judge_county(judge)
+    return {"success": True, "county": counties[0] if counties else None,
+            "counties": counties, "has_assignment": bool(counties)}
 
 
 @frappe.whitelist()
@@ -129,8 +174,8 @@ def get_judge_assignments(judge=None):
         if not judge:
             judge = frappe.session.user
 
-        county, judging_round = _get_judge_assignment(judge)
-        if not county:
+        counties, judging_round = _get_judge_assignment(judge)
+        if not counties:
             return {
                 "success": False,
                 "error": (
@@ -147,11 +192,11 @@ def get_judge_assignments(judge=None):
                 "success": False,
                 "error": "You are assigned to Round 2 only. Round 1 applications are not accessible.",
                 "applications": [],
-                "county": county,
+                "county": ", ".join(counties),
                 "code": "WRONG_ROUND",
             }
 
-        applications = _get_applications_for_county(county)
+        applications = _get_applications_for_county(counties)
         result = []
 
         for app in applications:
@@ -174,7 +219,7 @@ def get_judge_assignments(judge=None):
                 "final_score":    round(float(final_score), 2) if final_score else 0,
             })
 
-        return {"success": True, "applications": result, "county": county}
+        return {"success": True, "applications": result, "county": ", ".join(counties)}
 
     except Exception as e:
         frappe.log_error(f"get_judge_assignments error: {str(e)}", "Judging API")
@@ -190,8 +235,8 @@ def get_application_for_review(application_name, judge=None):
         if not frappe.db.exists("Agri Waste Innovation", application_name):
             return {"success": False, "error": "Application not found"}
 
-        county, judging_round = _get_judge_assignment(judge)
-        if not county:
+        counties, judging_round = _get_judge_assignment(judge)
+        if not counties:
             return {"success": False,
                     "error": "You have not been assigned to a county. Contact the coordinator."}
         if not _has_r1_access(judging_round):
@@ -201,17 +246,11 @@ def get_application_for_review(application_name, judge=None):
         app        = frappe.get_doc("Agri Waste Innovation", application_name)
         app_county = (app.county_of_residence or "").strip()
 
-        if county == "Other":
-            if app_county in NAMED_COUNTIES:
-                return {"success": False,
-                        "error": f"Access denied. This application is from {app_county}, "
-                                  "which is outside your assigned county (Other)."}
-        else:
-            if app_county != county:
-                return {"success": False,
-                        "error": f"Access denied. This application is from "
-                                  f"{app_county or 'an unknown county'}, "
-                                  f"but you are assigned to {county}."}
+        if not _judge_can_access_county(counties, app_county):
+            return {"success": False,
+                    "error": f"Access denied. This application is from "
+                              f"{app_county or 'an unknown county'}, "
+                              f"which is outside your assigned counties ({', '.join(counties)})."}
 
         eval_name = frappe.db.get_value(
             "Judge Evaluation",
@@ -238,7 +277,7 @@ def get_application_for_review(application_name, judge=None):
                         for c in eval_doc.criteria
                     ],
                 }
-                peer_evals = _get_peer_evaluations(application_name, judge, county)
+                peer_evals = _get_peer_evaluations(application_name, judge, app_county)
                 return {
                     "success":          True,
                     "read_only":        True,
@@ -334,8 +373,8 @@ def submit_evaluation(application_name, criteria_scores,
             return {"success": False, "error": "Application not found"}
 
         # County + round access check
-        county, judging_round = _get_judge_assignment(judge)
-        if not county:
+        counties, judging_round = _get_judge_assignment(judge)
+        if not counties:
             return {"success": False,
                     "error": "You have not been assigned to a county. Contact the coordinator."}
         if not _has_r1_access(judging_round):
@@ -345,16 +384,10 @@ def submit_evaluation(application_name, criteria_scores,
         app        = frappe.get_doc("Agri Waste Innovation", application_name)
         app_county = (app.county_of_residence or "").strip()
 
-        if county == "Other":
-            if app_county in NAMED_COUNTIES:
-                return {"success": False,
-                        "error": f"Access denied. Application county ({app_county}) "
-                                  "is not in your assignment (Other)."}
-        else:
-            if app_county != county:
-                return {"success": False,
-                        "error": f"Access denied. Application is from {app_county}, "
-                                  f"you are assigned to {county}."}
+        if not _judge_can_access_county(counties, app_county):
+            return {"success": False,
+                    "error": f"Access denied. Application is from {app_county}, "
+                              f"you are assigned to {', '.join(counties)}."}
 
         # Duplicate check
         existing_status = frappe.db.get_value(
@@ -480,14 +513,14 @@ def get_leaderboard():
 
         else:
             # ── County-filtered leaderboard for judges ────────
-            county = _get_judge_county(caller)
-            if not county:
+            counties = _get_judge_county(caller)
+            if not counties:
                 return {"success": False,
                         "error": "You are not assigned to a county.",
                         "leaderboard": []}
 
-            # Get all apps in judge's county
-            my_apps   = _get_applications_for_county(county)
+            # Get all apps in judge's counties
+            my_apps   = _get_applications_for_county(counties)
             my_app_names = [a.name for a in my_apps]
 
             # Calculate judge's completion status (for display, not gatekeeping)
@@ -1503,15 +1536,32 @@ def _r2_responded_names():
     return {r.applicant_name for r in responses if r.applicant_name}
 
 
-def _get_r2_responses_for_county(county):
-    """Return Round 2 Response records for the given county."""
+def _get_r2_responses_for_county(counties):
+    """Return Round 2 Response records for the given counties (list or str)."""
+    if isinstance(counties, str):
+        counties = [counties]
+
     all_resp = frappe.get_all(
         "Round 2 Response",
         fields=["name", "applicant_name", "county", "gender"],
     )
-    if county == "Other":
-        return [r for r in all_resp if (r.county or "").strip() not in NAMED_COUNTIES]
-    return [r for r in all_resp if (r.county or "").strip() == county]
+
+    named_in_assignment = {c for c in counties if c != "Other"}
+    covers_other = "Other" in counties
+
+    result = []
+    seen = set()
+    for r in all_resp:
+        resp_county = (r.county or "").strip()
+        include = False
+        if resp_county in named_in_assignment:
+            include = True
+        elif covers_other and resp_county not in NAMED_COUNTIES:
+            include = True
+        if include and r.name not in seen:
+            seen.add(r.name)
+            result.append(r)
+    return result
 
 
 def _build_r2_response_row(resp, judge):
@@ -1628,8 +1678,8 @@ def get_r2_judge_assignments(judge=None):
                 "total":         len(result),
             }
 
-        county, judging_round = _get_judge_assignment(judge)
-        if not county:
+        counties, judging_round = _get_judge_assignment(judge)
+        if not counties:
             return {
                 "success": False,
                 "error": "You have not been assigned to a county. Contact the coordinator.",
@@ -1642,17 +1692,17 @@ def get_r2_judge_assignments(judge=None):
                 "success": False,
                 "error": "You are assigned to Round 1 only. Round 2 applications are not accessible.",
                 "applicants": [],
-                "county": county,
+                "county": ", ".join(counties),
                 "code": "WRONG_ROUND",
             }
 
-        r2_list  = _get_r2_responses_for_county(county)
+        r2_list  = _get_r2_responses_for_county(counties)
         result   = [_build_r2_response_row(r, judge) for r in r2_list]
         completed = sum(1 for r in result if r["submitted"])
         return {
             "success":    True,
             "applicants": result,
-            "county":     county,
+            "county":     ", ".join(counties),
             "completed":  completed,
             "total":      len(result),
         }
@@ -1679,8 +1729,8 @@ def get_application_for_r2_review(r2_applicant_name, judge=None):
         county = resp.county or "All"
 
         if not is_coordinator:
-            judge_county, judging_round = _get_judge_assignment(judge)
-            if not judge_county:
+            judge_counties, judging_round = _get_judge_assignment(judge)
+            if not judge_counties:
                 return {"success": False,
                         "error": "You have not been assigned to a county. Contact the coordinator."}
             if not _has_r2_access(judging_round):
@@ -1688,15 +1738,10 @@ def get_application_for_r2_review(r2_applicant_name, judge=None):
                         "error": "You are not authorized for Round 2 judging. Contact the coordinator."}
 
             resp_county = (resp.county or "").strip()
-            if judge_county == "Other":
-                if resp_county in NAMED_COUNTIES:
-                    return {"success": False,
-                            "error": f"Access denied. This applicant is from {resp_county}."}
-            else:
-                if resp_county != judge_county:
-                    return {"success": False,
-                            "error": f"Access denied. Applicant is from {resp_county}, "
-                                      f"you are assigned to {judge_county}."}
+            if not _judge_can_access_county(judge_counties, resp_county):
+                return {"success": False,
+                        "error": f"Access denied. Applicant is from {resp_county}, "
+                                  f"you are assigned to {', '.join(judge_counties)}."}
 
         # Existing evaluation by this judge
         eval_name = frappe.db.get_value(
@@ -1793,8 +1838,8 @@ def submit_r2_evaluation(r2_applicant_name, criteria_scores,
 
         # Coordinators bypass county/round restrictions
         if not _is_system_manager(judge):
-            county, judging_round = _get_judge_assignment(judge)
-            if not county:
+            counties, judging_round = _get_judge_assignment(judge)
+            if not counties:
                 return {"success": False,
                         "error": "You have not been assigned to a county. Contact the coordinator."}
             if not _has_r2_access(judging_round):
@@ -1804,15 +1849,10 @@ def submit_r2_evaluation(r2_applicant_name, criteria_scores,
             r2_county = frappe.db.get_value(
                 "Round 2 Response", r2_applicant_name, "county"
             ) or ""
-            if county == "Other":
-                if r2_county.strip() in NAMED_COUNTIES:
-                    return {"success": False,
-                            "error": f"Access denied. Applicant is from {r2_county}."}
-            else:
-                if r2_county.strip() != county:
-                    return {"success": False,
-                            "error": f"Access denied. Applicant is from {r2_county}, "
-                                      f"you are assigned to {county}."}
+            if not _judge_can_access_county(counties, r2_county.strip()):
+                return {"success": False,
+                        "error": f"Access denied. Applicant is from {r2_county}, "
+                                  f"you are assigned to {', '.join(counties)}."}
 
         # Duplicate check
         existing_status = frappe.db.get_value(
@@ -1927,13 +1967,13 @@ def get_r2_leaderboard():
                     "cutoff": CUTOFF}
 
         else:
-            county = _get_judge_county(caller)
-            if not county:
+            counties = _get_judge_county(caller)
+            if not counties:
                 return {"success": False,
                         "error": "You are not assigned to a county.",
                         "leaderboard": []}
 
-            my_r2 = _get_r2_responses_for_county(county)
+            my_r2 = _get_r2_responses_for_county(counties)
             rows  = []
             for r in my_r2:
                 evals = frappe.get_all(
@@ -1957,7 +1997,7 @@ def get_r2_leaderboard():
 
             rows.sort(key=lambda r: r["avg_total_score"], reverse=True)
             return {"success": True, "leaderboard": rows, "view": "judge",
-                    "county": county, "cutoff": CUTOFF}
+                    "county": ", ".join(counties), "cutoff": CUTOFF}
 
     except Exception as e:
         frappe.log_error(f"get_r2_leaderboard error: {str(e)}", "Judging API")
