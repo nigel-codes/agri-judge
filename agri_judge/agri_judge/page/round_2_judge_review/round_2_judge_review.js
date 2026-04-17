@@ -15,6 +15,7 @@ frappe.pages['round-2-judge-review'].on_page_load = function (wrapper) {
     page.set_secondary_action('← Back', () =>
         frappe.set_route(isCoordinator ? 'round-2-scoring-dashboard' : 'judge-dashboard')
     );
+    page.add_button('Round 1 Applications', () => frappe.set_route('judge-dashboard'));
     wrapper._r2review = new R2JudgeReview(page, isCoordinator);
 };
 
@@ -116,7 +117,7 @@ class R2JudgeReview {
 
                     <!-- Left: R2 content -->
                     <div class="r2r-content">
-                        ${this.renderR2Content(resp)}
+                        ${this.renderR2Content(resp, d.r1_application_name, app.full_name)}
                     </div>
 
                     <!-- Right: sticky scoring panel -->
@@ -167,12 +168,13 @@ class R2JudgeReview {
 
     // ── Left panel: Round 2 response only ───────────────────────────────────
 
-    renderR2Content(resp) {
+    renderR2Content(resp, r1AppName, applicantName) {
         if (!resp) {
             return `
             <div class="r2r-section r2r-no-response">
                 <p>⚠️ No Round 2 response data found for this applicant.</p>
-            </div>`;
+            </div>
+            ${this.renderR1Reference(r1AppName, applicantName)}`;
         }
 
         return `
@@ -193,6 +195,33 @@ class R2JudgeReview {
             ${resp.financial_records
                 ? `<div class="r2r-field"><span class="r2r-field-label">Financial Records</span><a href="${frappe.utils.escape_html(resp.financial_records)}" target="_blank" class="r2r-link">📎 View Financial Records</a></div>`
                 : '<div class="r2r-warning">⚠️ No financial records submitted.</div>'}
+        </div>
+        ${this.renderR1Reference(r1AppName, applicantName)}`;
+    }
+
+    renderR1Reference(r1AppName, applicantName) {
+        if (r1AppName) {
+            return `
+            <div class="r2r-section r2r-r1-ref">
+                <h3 class="r2r-section-title">📁 Round 1 Application</h3>
+                <p class="r2r-r1-note">This applicant has a Round 1 application on record.</p>
+                <button class="r2r-r1-btn" onclick="frappe.set_route('judge-review', '${frappe.utils.escape_html(r1AppName)}')">
+                    View Round 1 Application →
+                </button>
+            </div>`;
+        }
+        const name = frappe.utils.escape_html(applicantName || 'this applicant');
+        return `
+        <div class="r2r-section r2r-r1-ref r2r-r1-missing">
+            <h3 class="r2r-section-title">📁 Round 1 Application</h3>
+            <p class="r2r-r1-note">No Round 1 application is directly linked to this applicant.</p>
+            <div class="r2r-r1-search-hint">
+                💡 To view this applicant's Round 1 score, go to <strong>Round 1 Applications</strong>
+                and search for <strong>"${name}"</strong>.
+            </div>
+            <button class="r2r-r1-btn r2r-r1-btn-secondary" onclick="frappe.set_route('judge-dashboard')">
+                Go to Round 1 Applications →
+            </button>
         </div>`;
     }
 
@@ -719,6 +748,16 @@ class R2JudgeReview {
         .r2r-peer-scores { font-size:11px; color:#444; }
         .color-pass { color:#2E7D32; }
         .color-fail { color:#C62828; }
+
+        /* R1 reference section */
+        .r2r-r1-ref { border-left:4px solid #E65100; }
+        .r2r-r1-missing { border-left-color:#9E9E9E; background:#FAFAFA; }
+        .r2r-r1-note { margin:0 0 10px; font-size:13px; color:#555; }
+        .r2r-r1-search-hint { background:#FFF8E1; border:1px solid #FFD54F; border-radius:6px; padding:10px 14px; font-size:13px; color:#555; margin-bottom:10px; line-height:1.6; }
+        .r2r-r1-btn { background:#E65100; color:#fff; border:none; padding:9px 18px; border-radius:7px; font-size:13px; font-weight:700; cursor:pointer; transition:background .15s; }
+        .r2r-r1-btn:hover { background:#BF360C; }
+        .r2r-r1-btn-secondary { background:#546E7A; }
+        .r2r-r1-btn-secondary:hover { background:#37474F; }
 
         /* Responsive */
         @media (max-width: 900px) {

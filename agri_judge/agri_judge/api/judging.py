@@ -1793,6 +1793,15 @@ def get_application_for_r2_review(r2_applicant_name, judge=None):
             "financial_records":     resp.financial_records or "",
         }
 
+        # Look up linked Round 1 application via the Round 2 Applicant record
+        _r2_applicant_rec = frappe.db.get_value(
+            "Round 2 Applicant",
+            {"applicant_name": resp.applicant_name},
+            ["application"],
+            as_dict=True,
+        )
+        r1_application_name = _r2_applicant_rec.get("application") if _r2_applicant_rec else None
+
         return {
             "success":      True,
             "read_only":    read_only,
@@ -1812,9 +1821,10 @@ def get_application_for_r2_review(r2_applicant_name, judge=None):
                 "age_group":          str(resp.age) if resp.age else "",
                 "level_of_project":   resp.developmental_level or "",
             },
-            "r2_response":      r2_response,
-            "evaluation":       evaluation_data,
-            "peer_evaluations": peer_evals,
+            "r2_response":          r2_response,
+            "evaluation":           evaluation_data,
+            "peer_evaluations":     peer_evals,
+            "r1_application_name":  r1_application_name,
         }
     except Exception as e:
         frappe.log_error(f"get_application_for_r2_review error: {str(e)}", "Judging API")
