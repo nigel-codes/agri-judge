@@ -227,6 +227,132 @@ def get_judge_assignments(judge=None):
 
 
 @frappe.whitelist()
+def get_r1_applications_view(judge=None):
+    """
+    Return all Round 1 applications for the judge's county with average scores.
+    Accessible to both R1 and R2 judges (read-only for R2).
+    """
+    try:
+        if not judge:
+            judge = frappe.session.user
+
+        counties, judging_round = _get_judge_assignment(judge)
+        if not counties:
+            return {
+                "success": False,
+                "error": "You have not been assigned to a county. Contact the coordinator.",
+                "applications": [],
+            }
+
+        applications = _get_applications_for_county(counties)
+        result = []
+        for app in applications:
+            evals = frappe.get_all(
+                "Judge Evaluation",
+                filters={"application": app.name, "docstatus": 1},
+                fields=["final_score"],
+            )
+            eval_count = len(evals)
+            avg_score  = round(
+                sum(float(e.final_score or 0) for e in evals) / eval_count, 2
+            ) if eval_count else 0
+
+            result.append({
+                "name":           app.name,
+                "applicant_name": app.full_name or app.name,
+                "county":         app.county_of_residence or "",
+                "gender":         app.gender or "",
+                "category":       app.level_of_project or "",
+                "eval_count":     eval_count,
+                "avg_score":      avg_score,
+            })
+
+        return {
+            "success":      True,
+            "applications": result,
+            "county":       ", ".join(counties),
+        }
+    except Exception as e:
+        frappe.log_error(f"get_r1_applications_view error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e), "applications": []}
+
+
+@frappe.whitelist()
+def get_r1_application_read_only(application_name, judge=None):
+    """
+    Return application details + all submitted judge evaluations (read-only).
+    Accessible to both R1 and R2 judges. No scoring is possible through this endpoint.
+    """
+    try:
+        if not judge:
+            judge = frappe.session.user
+
+        if not frappe.db.exists("Agri Waste Innovation", application_name):
+            return {"success": False, "error": "Application not found."}
+
+        counties, judging_round = _get_judge_assignment(judge)
+        if not counties:
+            return {"success": False, "error": "No county assignment found."}
+
+        app        = frappe.get_doc("Agri Waste Innovation", application_name)
+        app_county = (app.county_of_residence or "").strip()
+
+        if not _judge_can_access_county(counties, app_county):
+            return {"success": False,
+                    "error": f"Access denied. This application is from {app_county}."}
+
+        evals = frappe.get_all(
+            "Judge Evaluation",
+            filters={"application": application_name, "docstatus": 1},
+            fields=["name", "final_score", "female_led_bonus"],
+        )
+
+        evaluations = []
+        for ev in evals:
+            eval_doc = frappe.get_doc("Judge Evaluation", ev.name)
+            evaluations.append({
+                "final_score":      round(float(ev.final_score or 0), 2),
+                "female_led_bonus": bool(ev.female_led_bonus),
+                "criteria": [
+                    {"criterion_id": c.criterion_id, "score": float(c.score or 0)}
+                    for c in eval_doc.criteria
+                ],
+            })
+
+        avg_score = round(
+            sum(e["final_score"] for e in evaluations) / len(evaluations), 2
+        ) if evaluations else 0
+
+        return {
+            "success": True,
+            "application": {
+                "name":                       app.name,
+                "full_name":                  app.full_name or "",
+                "gender":                     app.gender or "",
+                "county_of_residence":        app.county_of_residence or "",
+                "age_group":                  app.age_group or "",
+                "level_of_project":           app.level_of_project or "",
+                "prior_experience":           app.prior_experience or "",
+                "proposed_product":           app.proposed_product or "",
+                "describe_your_idea":         app.describe_your_idea or "",
+                "production_process":         app.production_process or "",
+                "enviromental_contributions": app.enviromental_contributions or "",
+                "demonstrate_innovativeness": app.demonstrate_innovativeness or "",
+                "enterprise_benefits":        app.enterprise_benefits or "",
+                "use_of_micro_grant":         app.use_of_micro_grant or "",
+                "next_step_skills":           app.next_step_skills or "",
+                "youtube_link":               app.youtube_link or "",
+            },
+            "evaluations": evaluations,
+            "avg_score":   avg_score,
+            "eval_count":  len(evaluations),
+        }
+    except Exception as e:
+        frappe.log_error(f"get_r1_application_read_only error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
 def get_application_for_review(application_name, judge=None):
     try:
         if not judge:

@@ -15,7 +15,7 @@ frappe.pages['round-2-judge-review'].on_page_load = function (wrapper) {
     page.set_secondary_action('← Back', () =>
         frappe.set_route(isCoordinator ? 'round-2-scoring-dashboard' : 'judge-dashboard')
     );
-    page.add_button('Round 1 Applications', () => frappe.set_route('judge-dashboard'));
+    page.add_button('Round 1 Applications', () => frappe.set_route('round-1-view'));
     wrapper._r2review = new R2JudgeReview(page, isCoordinator);
 };
 
@@ -204,9 +204,9 @@ class R2JudgeReview {
             return `
             <div class="r2r-section r2r-r1-ref">
                 <h3 class="r2r-section-title">📁 Round 1 Application</h3>
-                <p class="r2r-r1-note">This applicant has a Round 1 application on record.</p>
-                <button class="r2r-r1-btn" onclick="frappe.set_route('judge-review', '${frappe.utils.escape_html(r1AppName)}')">
-                    View Round 1 Application →
+                <p class="r2r-r1-note">This applicant has a Round 1 application on record. Click below to view their scores.</p>
+                <button class="r2r-r1-btn" onclick="frappe.set_route('round-1-view', '${frappe.utils.escape_html(r1AppName)}')">
+                    View Round 1 Scores →
                 </button>
             </div>`;
         }
@@ -219,8 +219,8 @@ class R2JudgeReview {
                 💡 To view this applicant's Round 1 score, go to <strong>Round 1 Applications</strong>
                 and search for <strong>"${name}"</strong>.
             </div>
-            <button class="r2r-r1-btn r2r-r1-btn-secondary" onclick="frappe.set_route('judge-dashboard')">
-                Go to Round 1 Applications →
+            <button class="r2r-r1-btn r2r-r1-btn-secondary" onclick="frappe.set_route('round-1-view')">
+                Search in Round 1 Applications →
             </button>
         </div>`;
     }
