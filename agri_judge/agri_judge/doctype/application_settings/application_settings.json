@@ -16,7 +16,13 @@
   "r2_other_emails_sent",
   "r2_other_emails_sent_on",
   "r2_regret_emails_sent",
-  "r2_regret_emails_sent_on"
+  "r2_regret_emails_sent_on",
+  "section_finalist_emails",
+  "r2_finalist_emails_sent",
+  "r2_finalist_emails_sent_on",
+  "column_break_finalist",
+  "r2_finalist_regret_emails_sent",
+  "r2_finalist_regret_emails_sent_on"
  ],
  "fields": [
   {
@@ -87,6 +93,41 @@
    "fieldname": "r2_regret_emails_sent_on",
    "fieldtype": "Datetime",
    "label": "Regret Emails Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_finalist_emails",
+   "fieldtype": "Section Break",
+   "label": "Round 2 Finalist Email Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "r2_finalist_emails_sent",
+   "fieldtype": "Check",
+   "label": "Finalist Emails Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r2_finalist_emails_sent_on",
+   "fieldtype": "Datetime",
+   "label": "Finalist Emails Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_finalist",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "r2_finalist_regret_emails_sent",
+   "fieldtype": "Check",
+   "label": "Finalist Regret Emails Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "r2_finalist_regret_emails_sent_on",
+   "fieldtype": "Datetime",
+   "label": "Finalist Regret Emails Sent On",
    "read_only": 1
   }
  ],

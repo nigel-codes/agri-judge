@@ -15,6 +15,7 @@ frappe.pages['round-2-leaderboard'].on_page_load = function(wrapper) {
     page.add_button('Back to Dashboard', () => frappe.set_route('judge-dashboard'), 'octicon octicon-arrow-left');
     if (frappe.user_roles.includes('Coordinator')) {
         page.add_button('R2 Scoring Dashboard', () => frappe.set_route('round-2-scoring-dashboard'), 'octicon octicon-dashboard');
+        page.add_button('Round 2 Finalists', () => frappe.set_route('round-2-finalists'), 'octicon octicon-trophy');
     }
     page.set_primary_action('Refresh', () => wrapper._r2lb && wrapper._r2lb.load(), 'octicon octicon-sync');
     wrapper._r2lb = new Round2Leaderboard(page, wrapper);

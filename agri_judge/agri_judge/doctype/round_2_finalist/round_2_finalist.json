@@ -1,0 +1,155 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "R2FIN-.####",
+ "creation": "2026-04-20 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "r2_response",
+  "applicant_name",
+  "column_break_1",
+  "county",
+  "avg_score",
+  "section_r1",
+  "r1_application",
+  "email",
+  "section_meta",
+  "added_by",
+  "added_on",
+  "section_email",
+  "finalist_email_sent",
+  "finalist_email_sent_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "r2_response",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Round 2 Response",
+   "options": "Round 2 Response",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Applicant Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "County",
+   "read_only": 1
+  },
+  {
+   "fieldname": "avg_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Avg Score (R2 Judges)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_r1",
+   "fieldtype": "Section Break",
+   "label": "Round 1 Application (for Email)"
+  },
+  {
+   "fieldname": "r1_application",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Round 1 Application",
+   "options": "Agri Waste Innovation"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email (from Round 1)",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_meta",
+   "fieldtype": "Section Break",
+   "label": "Metadata"
+  },
+  {
+   "fieldname": "added_by",
+   "fieldtype": "Link",
+   "label": "Added By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "added_on",
+   "fieldtype": "Datetime",
+   "label": "Added On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_email",
+   "fieldtype": "Section Break",
+   "label": "Email Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "finalist_email_sent",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Finalist Email Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "finalist_email_sent_on",
+   "fieldtype": "Datetime",
+   "label": "Email Sent On",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-20 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Agri Judge",
+ "name": "Round 2 Finalist",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Coordinator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "applicant_name"
+}

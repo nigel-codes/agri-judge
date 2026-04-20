@@ -18,6 +18,7 @@ frappe.pages['round-2-applicants'].on_page_load = function(wrapper) {
     page.add_button('Advanced Metrics', () => frappe.set_route('judging-advanced-metrics'), 'octicon octicon-graph');
     page.add_button('Leaderboard', () => frappe.set_route('judging-leaderboard'), 'octicon octicon-list-ordered');
     page.add_button('Round 2 Judging', () => frappe.set_route('round-2-judging'), 'octicon octicon-law');
+    page.add_button('Round 2 Finalists', () => frappe.set_route('round-2-finalists'), 'octicon octicon-trophy');
     page.set_primary_action('Refresh', () => wrapper._r2 && wrapper._r2.load(), 'octicon octicon-sync');
     page.add_button('✉ Send Emails', () => wrapper._r2 && wrapper._r2.openEmailPanel(), 'octicon octicon-mail');
     wrapper._r2 = new Round2Page(page, wrapper);

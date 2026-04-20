@@ -1363,6 +1363,27 @@ def get_round2_response_for_review(response_name):
                     "supporting_documents":      app.supporting_documents or "",
                 }
 
+        # Judge evaluations for this response
+        judge_evals = frappe.get_all(
+            "Round 2 Judge Evaluation",
+            filters={"r2_applicant": response_name, "docstatus": 1},
+            fields=["judge", "subtotal_score", "tech_bonus_points", "leverage_points", "total_score", "passes_cutoff"],
+        )
+        judge_scores = []
+        for e in judge_evals:
+            jname = frappe.db.get_value("User", e.judge, "full_name") or e.judge
+            judge_scores.append({
+                "judge_name":    jname,
+                "subtotal":      round(float(e.subtotal_score or 0), 1),
+                "tech_bonus":    round(float(e.tech_bonus_points or 0), 1),
+                "leverage":      round(float(e.leverage_points or 0), 1),
+                "total":         round(float(e.total_score or 0), 1),
+                "passes_cutoff": bool(e.passes_cutoff),
+            })
+        avg_score = None
+        if judge_scores:
+            avg_score = round(sum(j["total"] for j in judge_scores) / len(judge_scores), 1)
+
         return {
             "success": True,
             "response": {
@@ -1384,9 +1405,40 @@ def get_round2_response_for_review(response_name):
             },
             "attachments": attachments,
             "round1_application": round1_application,
+            "judge_scores": judge_scores,
+            "avg_score": avg_score,
         }
     except Exception as e:
         frappe.log_error(f"get_round2_response_for_review error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def get_r2_applicants_with_email():
+    """Return all Round 2 Applicants with their R1 email. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    try:
+        rows = frappe.get_all(
+            "Round 2 Applicant",
+            fields=["name", "applicant_name", "county", "application"],
+            order_by="county, applicant_name",
+        )
+        result = []
+        for r in rows:
+            email = ""
+            if r.application and frappe.db.exists("Agri Waste Innovation", r.application):
+                email = frappe.db.get_value("Agri Waste Innovation", r.application, "email") or ""
+            result.append({
+                "name":           r.name,
+                "applicant_name": r.applicant_name or "",
+                "county":         r.county or "",
+                "r1_application": r.application or "",
+                "email":          email,
+            })
+        return {"success": True, "applicants": result}
+    except Exception as e:
+        frappe.log_error(f"get_r2_applicants_with_email error: {str(e)}", "Judging API")
         return {"success": False, "error": str(e)}
 
 
@@ -2205,4 +2257,423 @@ def get_r2_scoring_progress():
         }
     except Exception as e:
         frappe.log_error(f"get_r2_scoring_progress error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+# ── Round 2 Finalists ─────────────────────────────────────────
+
+_FINALIST_SUBJECT = "Congratulations! You\u2019re a Finalist \u2013 Agri Waste Innovations Project"
+_FINALIST_BODY = """\
+<p>Dear {applicant_name},</p>
+
+<p>We are thrilled to inform you that you have been selected as a <strong>Finalist</strong>
+in the <strong>Agri Waste Innovations Project</strong>, funded by <strong>Airbus</strong>
+and implemented by <strong>KRCS \u2013 IOMe 254 Social Innovation Centre</strong>.</p>
+
+<p>Following a thorough evaluation of your Round 2 submission by our expert judging panel,
+your innovation has been identified as one of the top solutions in this challenge.</p>
+
+<p>Further details regarding the next steps, including dates, venues, and any requirements,
+will be communicated to you shortly. Please ensure your contact information is up to date.</p>
+
+<p>Congratulations on this outstanding achievement, and thank you for your dedication to
+transforming Kenya\u2019s agri-waste sector.</p>
+
+<p>Warm regards,<br>
+<strong>The Agri Waste Innovations Team</strong><br>
+Airbus Foundation \u00d7 KRCS-IOMe 254 Social Innovation Centre</p>
+"""
+
+_FINALIST_REGRET_SUBJECT = "Update on Your Round 2 Application \u2013 Agri Waste Innovations Project"
+_FINALIST_REGRET_BODY = """\
+<p>Dear {applicant_name},</p>
+
+<p>Thank you for your participation in Round 2 of the <strong>Agri Waste Innovations Project</strong>,
+funded by <strong>Airbus</strong> and implemented by
+<strong>KRCS \u2013 IOMe 254 Social Innovation Centre</strong>.</p>
+
+<p>We received many high-quality submissions in Round 2, and the selection process was
+highly competitive. After careful review by our judging panel, we regret to inform you
+that your application was not selected to proceed to the finalist stage.</p>
+
+<p>We commend you for your innovation and effort, and we encourage you to continue
+developing your solution. We hope to see your work grow and evolve in future programs.</p>
+
+<p>We invite you to follow our future programs and opportunities via <strong>IOMe 254</strong> platforms.</p>
+
+<p>Thank you once again for your commitment to transforming Kenya\u2019s agri-waste sector.</p>
+
+<p>Warm regards,<br>
+<strong>The Agri Waste Innovations Team</strong><br>
+Airbus \u00d7 KRCS \u2013 IOMe 254</p>
+"""
+
+
+def _get_r1_email_for_r2_response(applicant_name):
+    """Try to find an email for a Round 2 Response by matching via Round 2 Applicant name."""
+    r2_applicant = frappe.db.get_value(
+        "Round 2 Applicant",
+        {"applicant_name": applicant_name},
+        ["application", "applicant_name"],
+        as_dict=True,
+    )
+    if r2_applicant and r2_applicant.get("application"):
+        app = r2_applicant["application"]
+        if frappe.db.exists("Agri Waste Innovation", app):
+            email     = frappe.db.get_value("Agri Waste Innovation", app, "email") or ""
+            full_name = frappe.db.get_value("Agri Waste Innovation", app, "full_name") or ""
+            return app, email, full_name
+    return None, "", ""
+
+
+@frappe.whitelist()
+def get_r2_finalists():
+    """Return all Round 2 Finalists with live R2 judge scores. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        rows = frappe.get_all(
+            "Round 2 Finalist",
+            fields=[
+                "name", "r2_response", "applicant_name", "county", "avg_score",
+                "r1_application", "email", "added_by", "added_on",
+                "finalist_email_sent", "finalist_email_sent_on",
+            ],
+            order_by="county, applicant_name",
+        )
+        result = []
+        for r in rows:
+            # Compute live avg score from judge evaluations
+            evals = frappe.get_all(
+                "Round 2 Judge Evaluation",
+                filters={"r2_applicant": r.r2_response, "docstatus": 1},
+                fields=["total_score"],
+            )
+            live_avg = None
+            if evals:
+                scores   = [float(e.total_score or 0) for e in evals]
+                live_avg = round(sum(scores) / len(scores), 2)
+
+            added_by_name = (
+                frappe.db.get_value("User", r.added_by, "full_name") or r.added_by
+                if r.added_by else ""
+            )
+            result.append({
+                "name":                   r.name,
+                "r2_response":            r.r2_response or "",
+                "applicant_name":         r.applicant_name or "",
+                "county":                 r.county or "",
+                "avg_score":              live_avg if live_avg is not None else (float(r.avg_score or 0)),
+                "r1_application":         r.r1_application or "",
+                "email":                  r.email or "",
+                "added_by":               r.added_by or "",
+                "added_by_name":          added_by_name,
+                "added_on":               str(r.added_on) if r.added_on else "",
+                "finalist_email_sent":    bool(r.finalist_email_sent),
+                "finalist_email_sent_on": str(r.finalist_email_sent_on) if r.finalist_email_sent_on else "",
+            })
+        return {"success": True, "finalists": result}
+    except Exception as e:
+        frappe.log_error(f"get_r2_finalists error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def add_to_r2_finalists(response_name, avg_score=None):
+    """Add a Round 2 Response to the finalist list. Auto-links R1 application if found."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        if frappe.db.exists("Round 2 Finalist", {"r2_response": response_name}):
+            return {"success": False, "error": "Already in the finalist list."}
+
+        if not frappe.db.exists("Round 2 Response", response_name):
+            return {"success": False, "error": "Round 2 Response not found."}
+
+        resp = frappe.get_doc("Round 2 Response", response_name)
+
+        # Auto-find R1 application via Round 2 Applicant name match
+        r1_app, email, _ = _get_r1_email_for_r2_response(resp.applicant_name)
+
+        doc = frappe.get_doc({
+            "doctype":        "Round 2 Finalist",
+            "r2_response":    response_name,
+            "applicant_name": resp.applicant_name or "",
+            "county":         resp.county or "",
+            "avg_score":      float(avg_score) if avg_score is not None else 0,
+            "r1_application": r1_app,
+            "email":          email,
+            "added_by":       frappe.session.user,
+            "added_on":       frappe.utils.now(),
+        })
+        doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {
+            "success":     True,
+            "finalist":    doc.name,
+            "auto_linked": bool(r1_app),
+            "email":       email,
+        }
+    except Exception as e:
+        frappe.log_error(f"add_to_r2_finalists error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def remove_from_r2_finalists(response_name):
+    """Remove a Round 2 Response from the finalist list. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        existing = frappe.db.get_value(
+            "Round 2 Finalist", {"r2_response": response_name}, "name"
+        )
+        if not existing:
+            return {"success": False, "error": "Not found in finalist list."}
+        frappe.delete_doc("Round 2 Finalist", existing, ignore_permissions=True)
+        frappe.db.commit()
+        return {"success": True}
+    except Exception as e:
+        frappe.log_error(f"remove_from_r2_finalists error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def search_r1_applicants(query):
+    """Search Round 1 applicants by name or email for manual linking. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    try:
+        q = (query or "").strip()
+        if not q:
+            return {"success": True, "results": []}
+        results = frappe.db.sql(
+            """
+            SELECT name, full_name, email, county_of_residence
+            FROM `tabAgri Waste Innovation`
+            WHERE full_name LIKE %(q)s OR email LIKE %(q)s
+            ORDER BY full_name
+            LIMIT 20
+            """,
+            {"q": f"%{q}%"},
+            as_dict=True,
+        )
+        return {"success": True, "results": results}
+    except Exception as e:
+        frappe.log_error(f"search_r1_applicants error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def link_r1_to_finalist(finalist_name, r1_application_name):
+    """Manually link a Round 1 application to a finalist record. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        if not frappe.db.exists("Round 2 Finalist", finalist_name):
+            return {"success": False, "error": "Finalist record not found."}
+        if not frappe.db.exists("Agri Waste Innovation", r1_application_name):
+            return {"success": False, "error": "Round 1 application not found."}
+
+        email = frappe.db.get_value("Agri Waste Innovation", r1_application_name, "email") or ""
+        frappe.db.set_value("Round 2 Finalist", finalist_name, {
+            "r1_application": r1_application_name,
+            "email":          email,
+        }, update_modified=False)
+        frappe.db.commit()
+        return {"success": True, "email": email}
+    except Exception as e:
+        frappe.log_error(f"link_r1_to_finalist error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def get_r2_finalist_email_preview():
+    """Preview finalist and regret email recipients. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        settings = frappe.get_single("Application Settings")
+
+        # Finalists with and without email
+        finalists = frappe.get_all(
+            "Round 2 Finalist",
+            fields=["name", "applicant_name", "county", "email", "finalist_email_sent"],
+            order_by="county, applicant_name",
+        )
+        with_email    = [f for f in finalists if f.email]
+        without_email = [f for f in finalists if not f.email]
+
+        # Non-finalist R2 responses → try to find email via R2 Applicant → R1
+        finalist_resp_names = set(
+            frappe.db.get_value("Round 2 Finalist", f.name, "r2_response") or ""
+            for f in finalists
+        )
+        all_r2 = frappe.get_all(
+            "Round 2 Response",
+            fields=["name", "applicant_name", "county"],
+            order_by="county, applicant_name",
+        )
+        regret_list = []
+        for r in all_r2:
+            if r.name in finalist_resp_names:
+                continue
+            _, email, _ = _get_r1_email_for_r2_response(r.applicant_name)
+            regret_list.append({
+                "name":           r.applicant_name or "",
+                "r2_response":    r.name,
+                "county":         r.county or "",
+                "email":          email,
+                "has_email":      bool(email),
+            })
+
+        return {
+            "success":                     True,
+            "with_email":                  [
+                {
+                    "name":                f.applicant_name or "",
+                    "county":              f.county or "",
+                    "email":               f.email or "",
+                    "finalist_email_sent": bool(f.finalist_email_sent),
+                }
+                for f in with_email
+            ],
+            "without_email":               [
+                {"name": f.applicant_name or "", "county": f.county or ""}
+                for f in without_email
+            ],
+            "regret":                      regret_list,
+            "finalist_emails_sent":        bool(settings.r2_finalist_emails_sent),
+            "finalist_regret_emails_sent": bool(settings.r2_finalist_regret_emails_sent),
+        }
+    except Exception as e:
+        frappe.log_error(f"get_r2_finalist_email_preview error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def send_r2_finalist_emails():
+    """Send finalist notification emails to all finalists who have an email. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    try:
+        finalists = frappe.get_all(
+            "Round 2 Finalist",
+            filters={"finalist_email_sent": 0},
+            fields=["name", "applicant_name", "email"],
+        )
+        targets = [f for f in finalists if f.email]
+
+        sent, errors = 0, []
+        for f in targets:
+            try:
+                frappe.sendmail(
+                    recipients=[f.email],
+                    subject=_FINALIST_SUBJECT,
+                    message=_FINALIST_BODY.format(applicant_name=f.applicant_name or "Applicant"),
+                    now=True,
+                )
+                frappe.db.set_value("Round 2 Finalist", f.name, {
+                    "finalist_email_sent":    1,
+                    "finalist_email_sent_on": frappe.utils.now(),
+                }, update_modified=False)
+                sent += 1
+            except Exception as e:
+                errors.append(f"{f.applicant_name}: {str(e)}")
+                frappe.log_error(
+                    f"Finalist email error for {f.name}: {str(e)}", "Round 2 Finalist Emails"
+                )
+
+        settings = frappe.get_single("Application Settings")
+        settings.r2_finalist_emails_sent    = 1
+        settings.r2_finalist_emails_sent_on = frappe.utils.now()
+        settings.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        result = {"success": True, "sent": sent, "total": len(targets), "errors": errors}
+        if errors:
+            result["warning"] = f"Sent {sent}/{len(targets)} emails. {len(errors)} failed."
+        else:
+            result["message"] = f"Sent {sent} finalist email(s) successfully."
+        return result
+    except Exception as e:
+        frappe.log_error(f"send_r2_finalist_emails error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def send_r2_finalist_regret_emails(force=0):
+    """
+    Send regret emails to Round 2 respondents who are NOT in the finalist list.
+    Looks up emails via Round 2 Applicant → Round 1 application. Coordinator only.
+    """
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied."}
+    try:
+        settings = frappe.get_single("Application Settings")
+        if settings.r2_finalist_regret_emails_sent and not int(force):
+            return {
+                "success": False,
+                "error": "Regret emails already sent. Use force=1 to resend.",
+            }
+
+        finalist_resp_names = set(
+            r.r2_response for r in frappe.get_all(
+                "Round 2 Finalist", fields=["r2_response"]
+            )
+        )
+        all_r2 = frappe.get_all(
+            "Round 2 Response",
+            fields=["name", "applicant_name"],
+        )
+        targets = [r for r in all_r2 if r.name not in finalist_resp_names]
+
+        sent, skipped, errors = 0, 0, []
+        for r in targets:
+            _, email, full_name = _get_r1_email_for_r2_response(r.applicant_name)
+            if not email:
+                skipped += 1
+                errors.append(f"{r.applicant_name}: no email found in Round 1 records")
+                continue
+            try:
+                frappe.sendmail(
+                    recipients=[email],
+                    subject=_FINALIST_REGRET_SUBJECT,
+                    message=_FINALIST_REGRET_BODY.format(
+                        applicant_name=full_name or r.applicant_name or "Applicant"
+                    ),
+                    now=True,
+                )
+                sent += 1
+            except Exception as e:
+                errors.append(f"{r.applicant_name}: {str(e)}")
+                frappe.log_error(
+                    f"Finalist regret email error for {r.name}: {str(e)}",
+                    "Round 2 Finalist Emails"
+                )
+
+        settings.r2_finalist_regret_emails_sent    = 1
+        settings.r2_finalist_regret_emails_sent_on = frappe.utils.now()
+        settings.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        result = {
+            "success": True,
+            "sent": sent,
+            "skipped": skipped,
+            "total": len(targets),
+            "errors": errors,
+        }
+        if skipped or errors:
+            result["warning"] = (
+                f"Sent {sent}/{len(targets)} emails. "
+                f"{skipped} skipped (no email found). "
+                f"{len(errors) - skipped} failed."
+            )
+        else:
+            result["message"] = f"Sent {sent} regret email(s) successfully."
+        return result
+    except Exception as e:
+        frappe.log_error(f"send_r2_finalist_regret_emails error: {str(e)}", "Judging API")
         return {"success": False, "error": str(e)}
