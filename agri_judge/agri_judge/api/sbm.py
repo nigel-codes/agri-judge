@@ -4,6 +4,12 @@ from frappe import _
 
 
 @frappe.whitelist(allow_guest=True)
+def get_countries():
+    countries = frappe.get_all("Country", fields=["name"], order_by="name asc", limit=300)
+    return [c["name"] for c in countries]
+
+
+@frappe.whitelist(allow_guest=True)
 def submit_sbm(**kwargs):
     check_fields = {
         "reach_online", "reach_events", "reach_direct_sales", "reach_partnerships", "reach_other",

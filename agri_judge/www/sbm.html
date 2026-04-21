@@ -2200,10 +2200,10 @@
         var activeIdx = -1;
         var searchTimeout = null;
 
-        fetch('/api/resource/Country?fields=["name"]&limit=300&order_by=name asc')
+        fetch('/api/method/agri_judge.agri_judge.api.sbm.get_countries')
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                allCountries = (data.data || []).map(function(c) { return c.name; });
+                allCountries = data.message || [];
             });
 
         var searchInput = document.getElementById('national_society_input');
@@ -2316,10 +2316,10 @@
         var searchTimeout = null;
 
         // Fetch full country list once on load
-        fetch('/api/resource/Country?fields=["name"]&limit=300&order_by=name asc')
+        fetch('/api/method/agri_judge.agri_judge.api.sbm.get_countries')
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                allCountries = (data.data || []).map(function(c) { return c.name; });
+                allCountries = data.message || [];
             });
 
         var searchInput = document.getElementById('country_search_input');
