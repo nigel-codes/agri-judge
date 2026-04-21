@@ -2262,26 +2262,55 @@ def get_r2_scoring_progress():
 
 # ── Round 2 Finalists ─────────────────────────────────────────
 
-_FINALIST_SUBJECT = "Congratulations! You\u2019re a Finalist \u2013 Agri Waste Innovations Project"
+_FINALIST_SUBJECT = "Congratulations \u2013 You\u2019re Selected for the Airbus Agri-Waste Innovation & Entrepreneurship Project"
 _FINALIST_BODY = """\
-<p>Dear {applicant_name},</p>
+<p>Dear Innovator,</p>
 
-<p>We are thrilled to inform you that you have been selected as a <strong>Finalist</strong>
-in the <strong>Agri Waste Innovations Project</strong>, funded by <strong>Airbus</strong>
-and implemented by <strong>KRCS \u2013 IOMe 254 Social Innovation Centre</strong>.</p>
+<p>Congratulations! On behalf of the Airbus Agri-Waste Innovation &amp; Entrepreneurship Project team at
+Kenya Red Cross Society IOMe 254, I am pleased to inform you that you have been selected to participate
+in this program. Your innovative approach to addressing agri-waste challenges stood out, and we are
+excited to have you on board.</p>
 
-<p>Following a thorough evaluation of your Round 2 submission by our expert judging panel,
-your innovation has been identified as one of the top solutions in this challenge.</p>
+<p>We are pleased to invite you to our first onboarding session, scheduled as follows:</p>
 
-<p>Further details regarding the next steps, including dates, venues, and any requirements,
-will be communicated to you shortly. Please ensure your contact information is up to date.</p>
+<p>
+<strong>Date:</strong> Thursday, 23rd April 2026<br>
+<strong>Time:</strong> 11:00 AM \u2013 1:00 PM (EAT)<br>
+<strong>Platform:</strong> Microsoft Teams (Virtual) \u2013 Please download before hand.
+</p>
 
-<p>Congratulations on this outstanding achievement, and thank you for your dedication to
-transforming Kenya\u2019s agri-waste sector.</p>
+<p><strong>Important Next Steps for You:</strong></p>
+
+<ol>
+  <li>
+    <strong>Sign the Commitment Form</strong><br>
+    To be shared after an onboarding session is an email with a commitment form that we require all
+    selected innovators to complete. Kindly sign the form and email a scanned copy or clear photo back
+    to <a href="mailto:jama.nadhifa@icha.net">jama.nadhifa@icha.net</a> by Monday, 24th April 2026.
+  </li>
+  <li>
+    <strong>Join the WhatsApp Group</strong><br>
+    Please use the link below to join our official project WhatsApp group. We strongly encourage you to
+    join before the onboarding session, as the Microsoft Teams meeting link will be shared exclusively
+    in this group.<br><br>
+    <a href="https://chat.whatsapp.com/ILy8XPcW2HxEZD9OPE2EOa?mode=gi_t">Join WhatsApp Group</a>
+  </li>
+  <li>
+    <strong>Attend the Onboarding Session</strong><br>
+    Once you have joined the WhatsApp group, look out for the Teams meeting link. Please mark your
+    calendar for Thursday, 23rd April, and join promptly at 10:00 AM.
+  </li>
+</ol>
+
+<p>Should you have any questions before the session, feel free to reply to Nadhifa\u2019s email or
+reach out via the WhatsApp group.</p>
+
+<p>Once again, congratulations \u2013 we look forward to working with you to turn agri-waste
+innovations into lasting impact.</p>
 
 <p>Warm regards,<br>
 <strong>The Agri Waste Innovations Team</strong><br>
-Airbus Foundation \u00d7 KRCS-IOMe 254 Social Innovation Centre</p>
+Airbus Agri-Waste Innovation &amp; Entrepreneurship Project \u2013 Kenya Red Cross Society IOMe 254</p>
 """
 
 _FINALIST_REGRET_SUBJECT = "Update on Your Round 2 Application \u2013 Agri Waste Innovations Project"
@@ -2553,7 +2582,7 @@ def get_r2_finalist_email_preview():
 
 
 @frappe.whitelist()
-def send_r2_finalist_emails():
+def send_r2_finalist_emails(cc=None):
     """Send finalist notification emails to all finalists who have an email. Coordinator only."""
     if not _is_system_manager(frappe.session.user):
         return {"success": False, "error": "Access denied."}
@@ -2564,14 +2593,16 @@ def send_r2_finalist_emails():
             fields=["name", "applicant_name", "email"],
         )
         targets = [f for f in finalists if f.email]
+        cc_list = [e.strip() for e in cc.split(",") if e.strip()] if cc else []
 
         sent, errors = 0, []
         for f in targets:
             try:
                 frappe.sendmail(
                     recipients=[f.email],
+                    cc=cc_list,
                     subject=_FINALIST_SUBJECT,
-                    message=_FINALIST_BODY.format(applicant_name=f.applicant_name or "Applicant"),
+                    message=_FINALIST_BODY,
                     now=True,
                 )
                 frappe.db.set_value("Round 2 Finalist", f.name, {
@@ -2603,7 +2634,7 @@ def send_r2_finalist_emails():
 
 
 @frappe.whitelist()
-def send_r2_finalist_regret_emails(force=0):
+def send_r2_finalist_regret_emails(force=0, cc=None):
     """
     Send regret emails to Round 2 respondents who are NOT in the finalist list.
     Looks up emails via Round 2 Applicant → Round 1 application. Coordinator only.
@@ -2628,6 +2659,7 @@ def send_r2_finalist_regret_emails(force=0):
             fields=["name", "applicant_name"],
         )
         targets = [r for r in all_r2 if r.name not in finalist_resp_names]
+        cc_list = [e.strip() for e in cc.split(",") if e.strip()] if cc else []
 
         sent, skipped, errors = 0, 0, []
         for r in targets:
@@ -2639,6 +2671,7 @@ def send_r2_finalist_regret_emails(force=0):
             try:
                 frappe.sendmail(
                     recipients=[email],
+                    cc=cc_list,
                     subject=_FINALIST_REGRET_SUBJECT,
                     message=_FINALIST_REGRET_BODY.format(
                         applicant_name=full_name or r.applicant_name or "Applicant"

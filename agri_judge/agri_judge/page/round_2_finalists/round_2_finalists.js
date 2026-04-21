@@ -580,6 +580,13 @@ class R2FinalistsPage {
         ${this.emailPanelStyles()}
         ${noEmailWarn}
 
+        <div class="ep-cc-row" style="margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+            <label style="font-size:13px;font-weight:600;color:#555;white-space:nowrap;">CC (optional):</label>
+            <input id="epCcInput" type="text" placeholder="email1@example.com, email2@example.com"
+                style="flex:1;padding:6px 10px;border:1px solid #d1d5db;border-radius:5px;font-size:13px;" />
+            <span style="font-size:11px;color:#aaa;">Separate multiple addresses with commas</span>
+        </div>
+
         <div class="ep-section">
             <div class="ep-section-header">
                 <div>
@@ -622,11 +629,13 @@ class R2FinalistsPage {
     }
 
     wireEmailButtons(dial, m) {
+        const getCC = () => (dial.body.querySelector('#epCcInput')?.value || '').trim();
+
         const doSend = (method, label, args, confirmMsg) => {
             frappe.confirm(confirmMsg, () => {
                 frappe.call({
                     method,
-                    args: args || {},
+                    args: { ...args, cc: getCC() },
                     freeze: true,
                     freeze_message: `Sending ${label}…`,
                     callback: (r) => {
@@ -668,7 +677,7 @@ class R2FinalistsPage {
                     () => {
                         frappe.call({
                             method: 'agri_judge.agri_judge.api.judging.send_r2_finalist_regret_emails',
-                            args: { force: 1 },
+                            args: { force: 1, cc: getCC() },
                             freeze: true,
                             freeze_message: 'Sending Regret Emails…',
                             callback: (r) => {

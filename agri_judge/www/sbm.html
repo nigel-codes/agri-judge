@@ -1250,12 +1250,13 @@
                 <div class="country-picker" id="national_society_picker">
                     <div class="country-search-wrap" onclick="document.getElementById('national_society_input').focus()">
                         <i class="fa-solid fa-magnifying-glass" style="color:var(--text-light);font-size:0.85rem"></i>
-                        <input type="text" id="national_society_input" placeholder="Search for a country…" autocomplete="off">
+                        <input type="text" id="national_society_input" placeholder="Type a country name and select from the list…" autocomplete="off">
                         <i class="fa-solid fa-xmark" id="national_society_clear" style="color:var(--text-light);font-size:0.85rem;cursor:pointer;display:none" onclick="clearNationalSociety()"></i>
                     </div>
                     <div class="country-dropdown" id="national_society_dropdown"></div>
                 </div>
                 <input type="hidden" id="national_society">
+                <p class="hint" style="margin-top:0.4rem">Select the country of your National Society — search by country name and choose from the list.</p>
             </div>
 
             <!-- ── Business Activities child table ── -->
@@ -1348,7 +1349,7 @@
                 <label class="field-label">Email Address <span class="req">*</span></label>
                 <input type="text" id="key_contact_email" placeholder="e.g. jane@redcross.or.ke">
             </div>
-            <div class="error-msg" id="err-1">Please fill in all required fields and add at least one business activity.</div>
+            <div class="error-msg" id="err-1">Please fill in all required fields before continuing.</div>
             <div class="nav-row">
                 <button class="btn btn-outline" onclick="goTo(0)"><i class="fa-solid fa-arrow-left"></i> Back</button>
                 <button class="btn btn-primary" onclick="next(1)">Next <i class="fa-solid fa-arrow-right"></i></button>
@@ -2149,27 +2150,43 @@
         const reqs = requiredFields[step] || [];
         const errEl = document.getElementById('err-' + step);
         let missing = false;
+        let missingMsg = 'Please fill in all required fields before continuing.';
         reqs.forEach(function(id) {
             const el = document.getElementById(id);
             if (!el) return;
-            if (!el.value || el.value.trim() === '') missing = true;
+            if (!el.value || el.value.trim() === '') {
+                missing = true;
+                if (id === 'national_society') {
+                    missingMsg = 'Please select your National Society country from the dropdown list — do not type the full society name, just search by country.';
+                }
+            }
         });
 
         // Validate activity rows for step 1
         if (step === 1) {
             const rows = collectActivityRows();
-            if (rows.length === 0) { missing = true; }
-            else {
+            if (rows.length === 0) {
+                missing = true;
+                if (!document.getElementById('national_society').value) {
+                    missingMsg = 'Please select your National Society country from the dropdown list — do not type the full society name, just search by country.';
+                } else {
+                    missingMsg = 'Please add at least one business activity before continuing.';
+                }
+            } else {
                 rows.forEach(function(r) {
                     if (!r.business_activity_name || !r.matrix_quadrant ||
                         !r.year_of_establishment || !r.level_of_operation || !r.hosting_unit) {
                         missing = true;
+                        if (!missingMsg.includes('National Society')) {
+                            missingMsg = 'Please complete all required fields in each business activity row.';
+                        }
                     }
                 });
             }
         }
 
         if (missing) {
+            errEl.textContent = missingMsg;
             errEl.classList.add('visible');
             return;
         }
@@ -2216,7 +2233,19 @@
             });
             dropdown.innerHTML = '';
             activeIdx = -1;
-            if (!matches.length) { dropdown.classList.remove('open'); return; }
+            if (!matches.length) {
+                if (q) {
+                    var noMatch = document.createElement('div');
+                    noMatch.className = 'country-option';
+                    noMatch.style.cssText = 'color:var(--text-light);pointer-events:none;font-style:italic';
+                    noMatch.textContent = 'No matching country found — please select from the list';
+                    dropdown.appendChild(noMatch);
+                    dropdown.classList.add('open');
+                } else {
+                    dropdown.classList.remove('open');
+                }
+                return;
+            }
             matches.forEach(function(country) {
                 var opt = document.createElement('div');
                 opt.className = 'country-option';
@@ -2236,6 +2265,14 @@
             clearBtn.style.display = 'none';
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(function() { renderDropdown(searchInput.value); }, 150);
+        });
+
+        searchInput.addEventListener('blur', function() {
+            // If user typed something but never selected from the dropdown, clear it
+            if (!hidden.value && searchInput.value.trim()) {
+                searchInput.value = '';
+                dropdown.classList.remove('open');
+            }
         });
 
         searchInput.addEventListener('keydown', function(e) {
