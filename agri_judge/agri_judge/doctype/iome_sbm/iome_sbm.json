@@ -5,7 +5,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_miib",
   "part_1_section",
   "national_society",
   "business_activities",
@@ -24,7 +23,6 @@
   "social_problem_addressed",
   "main_sector",
   "main_sector_other",
-  "part_3_section",
   "bmt_section_break",
   "bmt_b2c",
   "bmt_b2b",
@@ -120,25 +118,22 @@
   "doc_annual_reports",
   "doc_photos_media",
   "doc_impact_report",
+  "supporting_documents",
   "open_to_sharing"
  ],
  "fields": [
   {
-   "fieldname": "section_break_miib",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "part_1_section",
    "fieldtype": "Section Break",
-   "label": "Part 1 — Identity & Structure"
+   "label": "Part 1 \u2014 Identity & Structure"
   },
   {
    "fieldname": "national_society",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "National Society",
-   "reqd": 1,
-   "options": "Country"
+   "options": "Country",
+   "reqd": 1
   },
   {
    "fieldname": "business_activities",
@@ -178,13 +173,13 @@
    "depends_on": "eval:doc.legal_form == 'Other'",
    "fieldname": "legal_form_other",
    "fieldtype": "Data",
-   "label": "Legal Form — Other (specify)"
+   "label": "Legal Form \u2014 Other (specify)"
   },
   {
    "depends_on": "eval:doc.legal_status == 'Other'",
    "fieldname": "legal_status_other",
    "fieldtype": "Data",
-   "label": "Legal Status — Other (specify)"
+   "label": "Legal Status \u2014 Other (specify)"
   },
   {
    "fieldname": "countries_of_operation",
@@ -213,7 +208,7 @@
   {
    "fieldname": "part_2_section",
    "fieldtype": "Section Break",
-   "label": "Part 2 — Value Proposition & Impact"
+   "label": "Part 2 \u2014 Value Proposition & Impact"
   },
   {
    "fieldname": "main_business_activity",
@@ -238,12 +233,7 @@
    "depends_on": "eval:doc.main_sector == 'Other'",
    "fieldname": "main_sector_other",
    "fieldtype": "Data",
-   "label": "Main Sector — Other (specify)"
-  },
-  {
-   "fieldname": "part_3_section",
-   "fieldtype": "Section Break",
-   "label": "Part 3 — Users & Beneficiaries"
+   "label": "Main Sector \u2014 Other (specify)"
   },
   {
    "fieldname": "bmt_section_break",
@@ -337,7 +327,7 @@
    "depends_on": "eval:doc.pc_other == 1",
    "fieldname": "pc_other_specify",
    "fieldtype": "Data",
-   "label": "Paying Customers — Other (specify)"
+   "label": "Paying Customers \u2014 Other (specify)"
   },
   {
    "fieldname": "non_paying_section_break",
@@ -396,7 +386,7 @@
    "depends_on": "eval:doc.npc_other == 1",
    "fieldname": "npc_other_specify",
    "fieldtype": "Data",
-   "label": "Non-Paying Customers — Other (specify)"
+   "label": "Non-Paying Customers \u2014 Other (specify)"
   },
   {
    "fieldname": "reach_section_break",
@@ -437,12 +427,12 @@
    "depends_on": "eval:doc.reach_other == 1",
    "fieldname": "reach_other_specify",
    "fieldtype": "Data",
-   "label": "Customer Reach — Other (specify)"
+   "label": "Customer Reach \u2014 Other (specify)"
   },
   {
    "fieldname": "part_4_section",
    "fieldtype": "Section Break",
-   "label": "Part 4 — Revenue Streams & Business Model"
+   "label": "Part 4 \u2014 Revenue Streams & Business Model"
   },
   {
    "fieldname": "funding_type",
@@ -455,7 +445,7 @@
    "depends_on": "eval:doc.funding_type == 'Other'",
    "fieldname": "funding_type_other",
    "fieldtype": "Data",
-   "label": "Funding Type — Other (specify)"
+   "label": "Funding Type \u2014 Other (specify)"
   },
   {
    "fieldname": "revenue_sources_section",
@@ -520,13 +510,13 @@
    "depends_on": "eval:doc.rev_other == 1",
    "fieldname": "rev_other_specify",
    "fieldtype": "Data",
-   "label": "Revenue Sources — Other (specify)"
+   "label": "Revenue Sources \u2014 Other (specify)"
   },
   {
    "fieldname": "annual_revenue_range",
    "fieldtype": "Select",
    "label": "Annual Revenue Range",
-   "options": "\n$0 – $10,000\n$10,001 – $50,000\n$50,001 – $250,000\n$250,001 – $1,000,000\nMore than $1,000,000\nPrefer not to say",
+   "options": "\n$0 \u2013 $10,000\n$10,001 \u2013 $50,000\n$50,001 \u2013 $250,000\n$250,001 \u2013 $1,000,000\nMore than $1,000,000\nPrefer not to say",
    "reqd": 1
   },
   {
@@ -540,7 +530,7 @@
    "depends_on": "eval:doc.financial_situation == 'Other'",
    "fieldname": "financial_situation_other",
    "fieldtype": "Data",
-   "label": "Financial Situation — Other (specify)"
+   "label": "Financial Situation \u2014 Other (specify)"
   },
   {
    "depends_on": "eval:['Generating surplus reinvested into mission','Generating surplus redistributed to National Society core costs'].includes(doc.financial_situation)",
@@ -551,7 +541,7 @@
   {
    "fieldname": "part_5_section",
    "fieldtype": "Section Break",
-   "label": "Part 5 — Maturity & Capacity"
+   "label": "Part 5 \u2014 Maturity & Capacity"
   },
   {
    "fieldname": "development_stage",
@@ -564,7 +554,7 @@
    "fieldname": "paid_staff_count",
    "fieldtype": "Select",
    "label": "Number of Paid Staff",
-   "options": "\n0–2\n3–10\n11–25\n25+",
+   "options": "\n0\u20132\n3\u201310\n11\u201325\n25+",
    "reqd": 1
   },
   {
@@ -659,7 +649,7 @@
    "depends_on": "eval:doc.need_other == 1",
    "fieldname": "need_other_specify",
    "fieldtype": "Data",
-   "label": "Main Needs — Other (specify)"
+   "label": "Main Needs \u2014 Other (specify)"
   },
   {
    "fieldname": "strengths_section_break",
@@ -742,7 +732,7 @@
    "depends_on": "eval:doc.str_other == 1",
    "fieldname": "str_other_specify",
    "fieldtype": "Data",
-   "label": "Main Strengths — Other (specify)"
+   "label": "Main Strengths \u2014 Other (specify)"
   },
   {
    "fieldname": "digitalization_section_break",
@@ -814,12 +804,18 @@
    "label": "Open to Sharing Content with the RCRC Network?",
    "options": "\nYes\nNo",
    "reqd": 1
+  },
+  {
+   "description": "Attach a zip file with all supporting documents included.",
+   "fieldname": "supporting_documents",
+   "fieldtype": "Attach",
+   "label": "Supporting Documents"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-09 00:00:00.000000",
+ "modified": "2026-04-27 13:22:02.625119",
  "modified_by": "Administrator",
  "module": "Agri Judge",
  "name": "IOMe SBM",

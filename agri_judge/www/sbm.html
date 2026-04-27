@@ -757,7 +757,24 @@
             box-shadow: 0 0 0 3px rgba(237,28,36,.1);
         }
         textarea { resize: vertical; min-height: 84px; }
-        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-color: #fafafa; padding-right: 2.5rem; }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2020/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-color: #fafafa; padding-right: 2.5rem; }
+        input[type="file"] {
+            width: 100%;
+            padding: 0.55rem 0.9rem;
+            border: 1.5px solid var(--rc-border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            color: var(--text-mid);
+            background: #fafafa;
+            cursor: pointer;
+        }
+        input[type="file"]:focus {
+            outline: none;
+            border-color: var(--rc-red);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(237,28,36,.1);
+        }
 
         /* Checkboxes */
         .checkbox-grid {
@@ -1834,6 +1851,12 @@
             </div>
 
             <div class="form-group" style="margin-top:1.75rem">
+                <label class="field-label" for="supporting_documents"><i class="fa-solid fa-paperclip"></i> Supporting Documents</label>
+                <input type="file" id="supporting_documents" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.jpg,.jpeg,.png">
+                <p class="hint">Attach a zip file with all supporting documents included (Business Plan, Annual Reports, Photos, Impact Report, etc.).</p>
+            </div>
+
+            <div class="form-group" style="margin-top:1.75rem">
                 <label class="field-label">Open to Sharing Content with the RCRC Network? <span class="req">*</span></label>
                 <select id="open_to_sharing">
                     <option value="">— Select —</option>
@@ -2557,14 +2580,20 @@
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting…';
 
         const data = collectData();
+        const formData = new FormData();
+        Object.keys(data).forEach(function(key) { formData.append(key, data[key]); });
+
+        const fileInput = document.getElementById('supporting_documents');
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append('supporting_documents_file', fileInput.files[0]);
+        }
 
         fetch('/api/method/agri_judge.agri_judge.api.sbm.submit_sbm', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-Frappe-CSRF-Token': _csrf,
             },
-            body: new URLSearchParams(data),
+            body: formData,
         })
         .then(function(res) { return res.json(); })
         .then(function(resp) {

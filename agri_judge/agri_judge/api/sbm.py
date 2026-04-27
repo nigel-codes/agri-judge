@@ -76,5 +76,19 @@ def submit_sbm(**kwargs):
 
     doc = frappe.get_doc(values)
     doc.insert(ignore_permissions=True)
+
+    # Handle optional file attachment
+    uploaded_file = frappe.request.files.get('supporting_documents_file') if frappe.request.files else None
+    if uploaded_file and uploaded_file.filename:
+        from frappe.utils.file_manager import save_file
+        file_doc = save_file(
+            uploaded_file.filename,
+            uploaded_file.read(),
+            "IOMe SBM",
+            doc.name,
+            is_private=0
+        )
+        frappe.db.set_value("IOMe SBM", doc.name, "supporting_documents", file_doc.file_url)
+
     frappe.db.commit()
     return {"name": doc.name}
