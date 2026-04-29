@@ -937,6 +937,25 @@
         }
         footer span { color: #fff; font-weight: 600; }
 
+        /* ── Translate button ── */
+        .topbar-right { display: flex; align-items: center; }
+        .translate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.4rem 0.9rem;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .translate-btn:hover { background: rgba(255,255,255,0.28); }
+
         /* ── Responsive ── */
         @media (max-width: 640px) {
             .card-header, .card-body, .landing-body, .landing-header { padding-left: 1.25rem; padding-right: 1.25rem; }
@@ -1051,6 +1070,7 @@
             align-items: center;
         }
         .country-pill button:hover { color: var(--rc-red-dark); }
+        .topbar-right { display: flex; align-items: center; }
         .translate-btn {
             display: inline-flex;
             align-items: center;
@@ -1063,41 +1083,15 @@
             padding: 0.45rem 1rem;
             border-radius: 99px;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+            transition: background 0.2s, transform 0.15s;
             white-space: nowrap;
-            letter-spacing: 0.02em;
             font-family: inherit;
         }
-        .translate-btn:hover {
-            background: rgba(255,255,255,0.24);
-            border-color: rgba(255,255,255,0.6);
-            transform: translateY(-1px);
-        }
-        .translate-btn .flag { font-size: 1rem; line-height: 1; }
-
-        /* Hide Google's injected toolbar UI (Chrome only) */
-        #google_translate_element { display: none !important; }
-        .goog-te-banner-frame { display: none !important; }
-        body { top: 0 !important; }
-        .skiptranslate { display: none !important; }
+        .translate-btn:hover { background: rgba(255,255,255,0.24); transform: translateY(-1px); }
     </style>
-
-<!-- Google Translate (used on Chrome) -->
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: 'fr',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false
-        }, 'google_translate_element');
-    }
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script src="/translations.js"></script>
 </head>
 <body>
-
-<div id="google_translate_element"></div>
 
 <!-- Top bar -->
 <div class="topbar">
@@ -1111,7 +1105,7 @@
     </div>
     <div class="topbar-right">
         <button class="translate-btn" onclick="triggerTranslate()">
-            <span class="flag">🇫🇷</span>
+            <span>🇫🇷</span>
             <i class="fa-solid fa-language"></i>
             Translate to French
         </button>
@@ -2667,78 +2661,46 @@
 
     const _csrf = (typeof frappe !== 'undefined' && frappe.csrf_token) || '';
 
-    var isTranslated = false;
-    var originalTexts = [];
+var isTranslated = false;
+var originalTexts = [];
 
-    function isChrome() {
-        return !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
-    }
-
-    function triggerGoogleTranslate() {
-        function doTranslate(sel) {
-            sel.value = isTranslated ? '' : 'fr';
-            sel.dispatchEvent(new Event('change'));
-            isTranslated = !isTranslated;
-            var btn = document.querySelector('.translate-btn');
-            btn.innerHTML = isTranslated
-                ? '<span class="flag">🇬🇧</span> <i class="fa-solid fa-language"></i> Show Original'
-                : '<span class="flag">🇫🇷</span> <i class="fa-solid fa-language"></i> Translate to French';
+function triggerTranslate() {
+    var btn = document.querySelector('.translate-btn');
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(node) {
+            var tag = node.parentElement.tagName;
+            if (['SCRIPT','STYLE','NOSCRIPT'].includes(tag)) return NodeFilter.FILTER_REJECT;
+            if (node.textContent.trim() === '') return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
         }
-        var select = document.querySelector('.goog-te-combo');
-        if (select) { doTranslate(select); return; }
-        var attempts = 0;
-        var interval = setInterval(function() {
-            var sel = document.querySelector('.goog-te-combo');
-            if (sel) { clearInterval(interval); doTranslate(sel); }
-            if (++attempts > 20) clearInterval(interval);
-        }, 100);
-    }
+    });
 
-    async function triggerApiTranslate() {
-        var btn = document.querySelector('.translate-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating…';
+    if (!isTranslated) {
+        originalTexts = [];
+        var nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
 
-        if (!isTranslated) {
-            var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-                acceptNode: function(node) {
-                    var tag = node.parentElement.tagName;
-                    if (['SCRIPT','STYLE','NOSCRIPT'].includes(tag)) return NodeFilter.FILTER_REJECT;
-                    if (node.textContent.trim() === '') return NodeFilter.FILTER_REJECT;
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            });
-            var nodes = [];
-            while (walker.nextNode()) nodes.push(walker.currentNode);
-            originalTexts = nodes.map(function(n) { return { node: n, text: n.textContent }; });
-
-            for (var i = 0; i < originalTexts.length; i++) {
-                var item = originalTexts[i];
-                try {
-                    var res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(item.text) + '&langpair=en|fr');
-                    var data = await res.json();
-                    if (data.responseStatus === 200) item.node.textContent = data.responseData.translatedText;
-                } catch(e) {}
+        nodes.forEach(function(node) {
+            var original = node.textContent;
+            var trimmed = original.trim();
+            originalTexts.push({ node: node, original: original });
+            if (translations[original]) {
+                node.textContent = translations[original];
+            } else if (translations[trimmed]) {
+                node.textContent = original.replace(trimmed, translations[trimmed]);
             }
+        });
 
-            isTranslated = true;
-            btn.disabled = false;
-            btn.innerHTML = '<span class="flag">🇬🇧</span> <i class="fa-solid fa-language"></i> Show Original';
-        } else {
-            originalTexts.forEach(function(item) { item.node.textContent = item.text; });
-            isTranslated = false;
-            btn.disabled = false;
-            btn.innerHTML = '<span class="flag">🇫🇷</span> <i class="fa-solid fa-language"></i> Translate to French';
-        }
+        isTranslated = true;
+        btn.innerHTML = '<span>🇬🇧</span> <i class="fa-solid fa-language"></i> ' + (translations['Show Original'] || 'Show Original');
+    } else {
+        originalTexts.forEach(function(item) {
+            item.node.textContent = item.original;
+        });
+        isTranslated = false;
+        btn.innerHTML = '<span>🇫🇷</span> <i class="fa-solid fa-language"></i> ' + (translations['Translate to French'] || 'Translate to French');
     }
-
-    function triggerTranslate() {
-        if (isChrome()) {
-            triggerGoogleTranslate();
-        } else {
-            triggerApiTranslate();
-        }
-    }
+}
 </script>
 </body>
 </html>
