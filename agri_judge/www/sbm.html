@@ -1051,9 +1051,53 @@
             align-items: center;
         }
         .country-pill button:hover { color: var(--rc-red-dark); }
+        .translate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.13);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.45rem 1rem;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+            font-family: inherit;
+        }
+        .translate-btn:hover {
+            background: rgba(255,255,255,0.24);
+            border-color: rgba(255,255,255,0.6);
+            transform: translateY(-1px);
+        }
+        .translate-btn .flag { font-size: 1rem; line-height: 1; }
+
+        /* Hide Google's injected toolbar UI (Chrome only) */
+        #google_translate_element { display: none !important; }
+        .goog-te-banner-frame { display: none !important; }
+        body { top: 0 !important; }
+        .skiptranslate { display: none !important; }
     </style>
+
+<!-- Google Translate (used on Chrome) -->
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'fr',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
+
+<div id="google_translate_element"></div>
 
 <!-- Top bar -->
 <div class="topbar">
@@ -1064,6 +1108,13 @@
             <strong>Social Business Mapping</strong>
             IFRC / RCRC Network
         </div>
+    </div>
+    <div class="topbar-right">
+        <button class="translate-btn" onclick="triggerTranslate()">
+            <span class="flag">🇫🇷</span>
+            <i class="fa-solid fa-language"></i>
+            Translate to French
+        </button>
     </div>
 </div>
 
@@ -2615,6 +2666,79 @@
     }
 
     const _csrf = (typeof frappe !== 'undefined' && frappe.csrf_token) || '';
+
+    var isTranslated = false;
+    var originalTexts = [];
+
+    function isChrome() {
+        return !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+    }
+
+    function triggerGoogleTranslate() {
+        function doTranslate(sel) {
+            sel.value = isTranslated ? '' : 'fr';
+            sel.dispatchEvent(new Event('change'));
+            isTranslated = !isTranslated;
+            var btn = document.querySelector('.translate-btn');
+            btn.innerHTML = isTranslated
+                ? '<span class="flag">🇬🇧</span> <i class="fa-solid fa-language"></i> Show Original'
+                : '<span class="flag">🇫🇷</span> <i class="fa-solid fa-language"></i> Translate to French';
+        }
+        var select = document.querySelector('.goog-te-combo');
+        if (select) { doTranslate(select); return; }
+        var attempts = 0;
+        var interval = setInterval(function() {
+            var sel = document.querySelector('.goog-te-combo');
+            if (sel) { clearInterval(interval); doTranslate(sel); }
+            if (++attempts > 20) clearInterval(interval);
+        }, 100);
+    }
+
+    async function triggerApiTranslate() {
+        var btn = document.querySelector('.translate-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating…';
+
+        if (!isTranslated) {
+            var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+                acceptNode: function(node) {
+                    var tag = node.parentElement.tagName;
+                    if (['SCRIPT','STYLE','NOSCRIPT'].includes(tag)) return NodeFilter.FILTER_REJECT;
+                    if (node.textContent.trim() === '') return NodeFilter.FILTER_REJECT;
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            });
+            var nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            originalTexts = nodes.map(function(n) { return { node: n, text: n.textContent }; });
+
+            for (var i = 0; i < originalTexts.length; i++) {
+                var item = originalTexts[i];
+                try {
+                    var res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(item.text) + '&langpair=en|fr');
+                    var data = await res.json();
+                    if (data.responseStatus === 200) item.node.textContent = data.responseData.translatedText;
+                } catch(e) {}
+            }
+
+            isTranslated = true;
+            btn.disabled = false;
+            btn.innerHTML = '<span class="flag">🇬🇧</span> <i class="fa-solid fa-language"></i> Show Original';
+        } else {
+            originalTexts.forEach(function(item) { item.node.textContent = item.text; });
+            isTranslated = false;
+            btn.disabled = false;
+            btn.innerHTML = '<span class="flag">🇫🇷</span> <i class="fa-solid fa-language"></i> Translate to French';
+        }
+    }
+
+    function triggerTranslate() {
+        if (isChrome()) {
+            triggerGoogleTranslate();
+        } else {
+            triggerApiTranslate();
+        }
+    }
 </script>
 </body>
 </html>
