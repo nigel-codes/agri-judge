@@ -175,6 +175,7 @@ var translations = {
     "Other": "Autre",
     "Paying Customers — Other (specify)": "Clients Payants — Autre (précisez)",
     "Non-Paying Customers / Beneficiaries": "Clients Non-Payants / Bénéficiaires",
+    "Non-Paying Customers — Other (specify)": "Clients Non-Payants — Autre (précisez)",
     "(select all that apply, if any)": "(sélectionnez tout ce qui s'applique, le cas échéant)",
     "How do you reach your paying customers?": "Comment atteignez-vous vos clients payants ?",
     "Online channels (social media, website, platforms)": "Canaux en ligne (réseaux sociaux, site web, plateformes)",
@@ -301,6 +302,7 @@ var translations = {
     "Please add at least one business activity before continuing.": "Veuillez ajouter au moins une activité commerciale avant de continuer.",
     "Please complete all required fields in each business activity row.": "Veuillez remplir tous les champs obligatoires dans chaque ligne d'activité commerciale.",
     "Submission failed: ": "Échec de la soumission : ",
+    "Please try again or contact support.": "Veuillez réessayer ou contacter le support.",
 
     // Misc
     "No matching country found — please select from the list": "Aucun pays correspondant trouvé — veuillez sélectionner dans la liste",
