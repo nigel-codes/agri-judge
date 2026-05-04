@@ -2007,12 +2007,12 @@
             <div class="activity-row-body">
                 <div class="form-group">
                     <label class="field-label">Name of Business Activity <span class="req">*</span></label>
-                    <input type="text" id="act_name_${idx}" placeholder="e.g. KRCS Blood Bank Services"
+                    <input type="text" id="act_name_${idx}" placeholder="${t('e.g. KRCS Blood Bank Services')}"
                            oninput="updateRowSummary(${idx})">
                 </div>
                 <div class="form-group">
                     <label class="field-label">Year of Establishment of this Business Activity <span class="req">*</span></label>
-                    <input type="number" id="act_year_${idx}" placeholder="e.g. 2018" min="1900" max="2030">
+                    <input type="number" id="act_year_${idx}" placeholder="${t('e.g. 2018')}" min="1900" max="2030">
                 </div>
                 <div class="activity-row-grid">
                     <div class="form-group">
@@ -2035,7 +2035,7 @@
                     </div>
                     <div class="form-group">
                         <label class="field-label">Hosting Unit <span class="req">*</span></label>
-                        <input type="text" id="act_unit_${idx}" placeholder="e.g. Health Services Dept">
+                        <input type="text" id="act_unit_${idx}" placeholder="${t('e.g. Health Services Dept')}">
                     </div>
                 </div>
             </div>
@@ -2698,12 +2698,27 @@ function triggerTranslate() {
             }
         });
 
+        document.querySelectorAll('[placeholder]').forEach(function(el) {
+            var orig = el.getAttribute('placeholder');
+            var fr = translations[orig] || translations[orig.trim()] || translations[orig.trim().replace(/\s+/g, ' ')];
+            if (fr) {
+                el.dataset.origPlaceholder = orig;
+                el.setAttribute('placeholder', fr);
+            }
+        });
+
         isTranslated = true;
         btn.innerHTML = '<span>🇬🇧</span> <i class="fa-solid fa-language"></i> ' + (translations['Show Original'] || 'Show Original');
     } else {
         originalTexts.forEach(function(item) {
             item.node.textContent = item.original;
         });
+
+        document.querySelectorAll('[data-orig-placeholder]').forEach(function(el) {
+            el.setAttribute('placeholder', el.dataset.origPlaceholder);
+            delete el.dataset.origPlaceholder;
+        });
+
         isTranslated = false;
         btn.innerHTML = '<span>🇫🇷</span> <i class="fa-solid fa-language"></i> ' + (translations['Translate to French'] || 'Translate to French');
     }
