@@ -11,6 +11,7 @@ frappe.pages['round-2-scoring-dashboard'].on_page_load = function(wrapper) {
         single_column: true
     });
     page.add_button('← Round 2 Judging', () => frappe.set_route('round-2-judging'), 'octicon octicon-arrow-left');
+    page.add_button('Response Queue', () => frappe.set_route('round-2-response-queue'), 'octicon octicon-list-ordered');
     page.set_primary_action('Refresh', () => wrapper._r2sd && wrapper._r2sd.load(), 'octicon octicon-sync');
     wrapper._r2sd = new R2ScoringDashboard(page, wrapper);
 };

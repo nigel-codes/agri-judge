@@ -2710,3 +2710,45 @@ def send_r2_finalist_regret_emails(force=0, cc=None):
     except Exception as e:
         frappe.log_error(f"send_r2_finalist_regret_emails error: {str(e)}", "Judging API")
         return {"success": False, "error": str(e)}
+
+
+@frappe.whitelist()
+def get_r2_response_queue():
+    """Return all Round 2 Responses ordered newest-first with judge evaluation counts. Coordinator only."""
+    if not _is_system_manager(frappe.session.user):
+        return {"success": False, "error": "Access denied. Coordinator role required."}
+    try:
+        rows = frappe.get_all(
+            "Round 2 Response",
+            fields=["name", "applicant_name", "county", "gender", "creation", "score", "scored_by"],
+            order_by="creation desc",
+        )
+
+        # Fetch judge evaluation counts in one query
+        eval_counts = {}
+        if rows:
+            names = [r.name for r in rows]
+            evals = frappe.get_all(
+                "Round 2 Judge Evaluation",
+                filters={"r2_applicant": ["in", names]},
+                fields=["r2_applicant"],
+            )
+            for ev in evals:
+                eval_counts[ev.r2_applicant] = eval_counts.get(ev.r2_applicant, 0) + 1
+
+        result = []
+        for r in rows:
+            result.append({
+                "name":           r.name,
+                "applicant_name": r.applicant_name or "",
+                "county":         r.county or "",
+                "gender":         r.gender or "",
+                "received_on":    str(r.creation) if r.creation else "",
+                "coord_score":    round(float(r.score), 1) if r.score else None,
+                "judge_count":    eval_counts.get(r.name, 0),
+            })
+
+        return {"success": True, "responses": result, "total": len(result)}
+    except Exception as e:
+        frappe.log_error(f"get_r2_response_queue error: {str(e)}", "Judging API")
+        return {"success": False, "error": str(e)}
