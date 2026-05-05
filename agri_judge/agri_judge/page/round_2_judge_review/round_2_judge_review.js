@@ -20,11 +20,24 @@ frappe.pages['round-2-judge-review'].on_page_load = function (wrapper) {
 };
 
 frappe.pages['round-2-judge-review'].on_page_show = function (wrapper) {
-    if (wrapper._r2review) {
-        const r2id = frappe.get_route()[1];
-        if (r2id) wrapper._r2review.load(r2id);
-        else frappe.set_route(frappe.user.has_role('Coordinator') ? 'round-2-scoring-dashboard' : 'judge-dashboard');
+    if (!wrapper._r2review) return;
+
+    const isCoordinator = frappe.user.has_role('Coordinator');
+    const fromQueue = frappe.route_options && frappe.route_options.source === 'queue';
+
+    if (fromQueue) {
+        wrapper._r2review.page.set_secondary_action('← Back to Response Queue', () =>
+            frappe.set_route('round-2-response-queue')
+        );
+    } else {
+        wrapper._r2review.page.set_secondary_action('← Back', () =>
+            frappe.set_route(isCoordinator ? 'round-2-scoring-dashboard' : 'judge-dashboard')
+        );
     }
+
+    const r2id = frappe.get_route()[1];
+    if (r2id) wrapper._r2review.load(r2id);
+    else frappe.set_route(fromQueue ? 'round-2-response-queue' : (isCoordinator ? 'round-2-scoring-dashboard' : 'judge-dashboard'));
 };
 
 class R2JudgeReview {

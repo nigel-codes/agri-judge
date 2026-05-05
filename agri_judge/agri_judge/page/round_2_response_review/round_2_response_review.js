@@ -14,18 +14,28 @@ frappe.pages['round-2-response-review'].on_page_load = function(wrapper) {
         title: 'Review Round 2 Response',
         single_column: true,
     });
-    page.set_secondary_action('← Back to Judging List', () =>
-        frappe.set_route('round-2-judging')
-    );
+    page.set_secondary_action('← Back', () => frappe.set_route('round-2-judging'));
     wrapper._r2rr = new Round2ResponseReview(page);
 };
 
 frappe.pages['round-2-response-review'].on_page_show = function(wrapper) {
-    if (wrapper._r2rr) {
-        const name = frappe.get_route()[1];
-        if (name) wrapper._r2rr.load(name);
-        else frappe.set_route('round-2-judging');
+    if (!wrapper._r2rr) return;
+    const name = frappe.get_route()[1];
+
+    // Detect navigation source so the back button returns to the right list
+    const fromQueue = frappe.route_options && frappe.route_options.source === 'queue';
+    if (fromQueue) {
+        wrapper._r2rr.page.set_secondary_action('← Back to Response Queue', () =>
+            frappe.set_route('round-2-response-queue')
+        );
+    } else {
+        wrapper._r2rr.page.set_secondary_action('← Back to Judging List', () =>
+            frappe.set_route('round-2-judging')
+        );
     }
+
+    if (name) wrapper._r2rr.load(name);
+    else frappe.set_route(fromQueue ? 'round-2-response-queue' : 'round-2-judging');
 };
 
 class Round2ResponseReview {

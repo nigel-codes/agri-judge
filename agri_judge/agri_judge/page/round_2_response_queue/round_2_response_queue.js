@@ -128,10 +128,13 @@ class R2ResponseQueue {
             </div>
         `);
 
-        // Row click → open response review
+        // Row click → open full criteria judging form, flagging source so back button returns here
         this.wrapper.on('click', '.rq-row', function() {
             const name = $(this).data('name');
-            if (name) frappe.set_route('round-2-response-review', name);
+            if (name) {
+                frappe.route_options = { source: 'queue' };
+                frappe.set_route('round-2-judge-review', name);
+            }
         });
 
         // Filter buttons
